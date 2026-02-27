@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Determinar origin para URLs de redirect
-    const origin = request.headers.get("origin") || request.headers.get("referer")?.replace(/\/[^/]*$/, "") || "http://localhost:3000";
+    const origin = request.headers.get("origin") || request.headers.get("referer")?.replace(/\/[^/]*$/, "") || "https://www.geraproposta.com";
 
     // Criar cobranca
     const billingRes = await abacate.billing.create({
