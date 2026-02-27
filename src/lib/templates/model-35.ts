@@ -1,0 +1,163 @@
+import { ProposalConfig } from "@/types/proposal";
+
+/* ── PRO V2: Rose Gold Elegance ── Premium com marquee, counter, timeline */
+export const templateConfig: ProposalConfig = {
+  version: 2,
+  templateId: "rose-gold-elegance",
+  meta: {
+    title: "Rose Gold Elegance",
+    description:
+      "Template sofisticado rose gold para clinicas de estetica, saloes premium e servicos de beleza.",
+  },
+  theme: {
+    colors: {
+      gold: "#F4A8B5",
+      goldLight: "#F9C4CD",
+      goldDark: "#E8899A",
+      background: "#FFF5F7",
+      foreground: "#3D1F28",
+      beige: "#FFF0F3",
+      nude: "#FFE4EA",
+      cream: "#FFF8FA",
+    },
+    fonts: {
+      heading: "Cormorant Garamond",
+      body: "Nunito",
+    },
+  },
+  sections: [],
+  blocks: [
+    {
+      id: "hero-1",
+      type: "hero",
+      visible: true,
+      data: {
+        badge: "Proposta de Servicos",
+        titleLine1: "Estetica &",
+        titleHighlight: "Beleza Premium",
+        subtitle:
+          "Protocolos personalizados com tecnologia de ponta para realcar sua beleza natural. Resultados visiveis desde a primeira sessao.",
+        clientName: "Nome da Cliente",
+        ctaPrimary: { label: "Ver Tratamentos", scrollTo: "counter-1" },
+        ctaSecondary: { label: "Agendar Avaliacao", url: "https://wa.me/5500000000000" },
+      },
+    },
+    {
+      id: "marquee-1",
+      type: "marquee",
+      visible: true,
+      data: {
+        items: ["Harmonizacao", "Botox", "Skincare", "Peeling", "Laser", "Microagulhamento", "Preenchimento", "Limpeza de Pele"],
+        speed: "slow",
+        direction: "left",
+        variant: "gradient",
+        separator: "star",
+        size: "md",
+        repeat: 3,
+        pauseOnHover: true,
+      },
+    },
+    {
+      id: "counter-1",
+      type: "counter",
+      visible: true,
+      data: {
+        sectionLabel: "Resultados",
+        title: "Nossa Historia em Numeros",
+        subtitle: "",
+        items: [
+          { value: 5000, prefix: "+", suffix: "", label: "Procedimentos Realizados" },
+          { value: 8, prefix: "", suffix: " anos", label: "De Experiencia" },
+          { value: 99, prefix: "", suffix: "%", label: "Satisfacao" },
+          { value: 15, prefix: "+", suffix: "", label: "Especialidades" },
+        ],
+        columns: 4,
+        duration: 2500,
+        style: "card",
+      },
+    },
+    {
+      id: "diag-1",
+      type: "diagnostico",
+      visible: true,
+      data: {
+        sectionLabel: "Avaliacao",
+        title: "Entendendo Suas Necessidades",
+        subtitle: "Cada pele e unica. Nosso protocolo comeca com uma avaliacao personalizada.",
+        showImages: false,
+        imagesLabel: "",
+        images: [],
+        cards: [
+          { icon: "Scan", title: "Analise Facial", description: "Avaliacao completa da estrutura facial, qualidade da pele, manchas e sinais de envelhecimento.", severity: "alto" },
+          { icon: "Palette", title: "Tom e Textura", description: "Analise do tom de pele, poros, oleosidade e textura para definir os protocolos ideais.", severity: "medio" },
+          { icon: "Star", title: "Potencial de Resultado", description: "Sua pele tem excelente potencial de resposta aos tratamentos. Resultados visiveis ja na primeira sessao.", severity: "positivo" },
+        ],
+      },
+    },
+    {
+      id: "timeline-1",
+      type: "timeline",
+      visible: true,
+      data: {
+        sectionLabel: "Protocolo",
+        title: "Seu Plano de Tratamento",
+        subtitle: "Protocolo personalizado em fases para resultados progressivos e duradouros.",
+        items: [
+          { icon: "Search", title: "Avaliacao Completa", description: "Consulta presencial com analise facial, historico e definicao dos objetivos do tratamento.", period: "Sessao 1" },
+          { icon: "Sparkles", title: "Preparo da Pele", description: "Limpeza profunda, hidratacao e preparo para os procedimentos mais avancados.", period: "Sessao 2-3" },
+          { icon: "Zap", title: "Tratamento Intensivo", description: "Aplicacao dos protocolos principais: laser, peeling e bioestimuladores conforme seu plano.", period: "Sessao 4-8" },
+          { icon: "Heart", title: "Manutencao", description: "Protocolo de manutencao mensal para manter e potencializar os resultados.", period: "Mensal" },
+        ],
+        layout: "vertical",
+        connectorStyle: "dots",
+      },
+    },
+    {
+      id: "investimento-1",
+      type: "investimento",
+      visible: true,
+      data: {
+        sectionLabel: "Investimento",
+        title: "Investimento em Voce",
+        subtitle: "Beleza e autocuidado sao investimentos que refletem em todas as areas da vida.",
+        badge: "Protocolo Completo",
+        priceOriginal: "R$ 4.800",
+        priceCurrent: "R$ 3.490",
+        priceCurrency: "R$",
+        pricePeriod: "",
+        description: "Pacote completo com 8 sessoes incluindo avaliacao, preparo, tratamento intensivo e primeira manutencao.",
+        includedItems: [
+          "Avaliacao facial completa",
+          "2 sessoes de preparo de pele",
+          "4 sessoes de tratamento intensivo",
+          "1 sessao de manutencao",
+          "Skincare domiciliar incluso",
+          "Acompanhamento via WhatsApp",
+        ],
+        ctaLabel: "Agendar Avaliacao",
+        ctaUrl: "https://wa.me/5500000000000",
+        guarantee: "Satisfacao garantida. Se nao perceber resultados em 30 dias, ajustamos o protocolo sem custo.",
+      },
+    },
+    {
+      id: "visao-1",
+      type: "visao",
+      visible: true,
+      data: {
+        sectionLabel: "Transformacao",
+        title: "A Melhor Versao de Voce",
+        subtitle: "Imagine se olhar no espelho e amar o que ve. Esse e o nosso objetivo.",
+        items: [
+          { icon: "Sparkles", label: "Pele luminosa e rejuvenescida" },
+          { icon: "Heart", label: "Autoestima elevada e confianca renovada" },
+          { icon: "Star", label: "Resultados naturais que todos notam" },
+          { icon: "Shield", label: "Procedimentos seguros com profissionais certificados" },
+        ],
+        quote: "Beleza nao e sobre parecer outra pessoa. E sobre se sentir incrivel sendo voce mesma.",
+        quoteHighlight: "se sentir incrivel sendo voce mesma",
+        footerClientName: "Nome da Cliente",
+        footerNote: "Proposta valida por 15 dias. Vagas limitadas.",
+      },
+    },
+  ],
+};

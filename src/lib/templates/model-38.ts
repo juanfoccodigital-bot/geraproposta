@@ -1,0 +1,206 @@
+import { ProposalConfig } from "@/types/proposal";
+
+/* ── PRO V2: Amber Infoprodutor ── Premium com marquee, counter, pricing-table */
+export const templateConfig: ProposalConfig = {
+  version: 2,
+  templateId: "amber-infoprodutor",
+  meta: {
+    title: "Amber Infoprodutor",
+    description:
+      "Template dark com amber dourado para infoprodutores, lancamentos digitais e mentorias premium.",
+  },
+  theme: {
+    colors: {
+      gold: "#F59E0B",
+      goldLight: "#FBBF24",
+      goldDark: "#D97706",
+      background: "#0A0703",
+      foreground: "#FEF3C7",
+      beige: "#1A1208",
+      nude: "#261D0E",
+      cream: "#0D0A05",
+    },
+    fonts: {
+      heading: "Poppins",
+      body: "Nunito Sans",
+    },
+  },
+  sections: [],
+  blocks: [
+    {
+      id: "hero-1",
+      type: "hero",
+      visible: true,
+      data: {
+        badge: "Lancamento Digital",
+        titleLine1: "Mentoria",
+        titleHighlight: "Expert Digital",
+        subtitle:
+          "O programa completo para voce estruturar, lancar e escalar seu infoproduto. Do zero ao faturamento de 6 digitos.",
+        clientName: "Nome do Mentorado",
+        ctaPrimary: { label: "Ver Programa", scrollTo: "counter-1" },
+        ctaSecondary: { label: "Aplicar Agora", url: "https://wa.me/5500000000000" },
+      },
+    },
+    {
+      id: "marquee-1",
+      type: "marquee",
+      visible: true,
+      data: {
+        items: ["Lancamento", "Mentoria", "Infoproduto", "Funil", "Copy", "Webinar", "Trafego", "Escala"],
+        speed: "normal",
+        direction: "left",
+        variant: "gradient",
+        separator: "star",
+        size: "md",
+        repeat: 3,
+        pauseOnHover: true,
+      },
+    },
+    {
+      id: "counter-1",
+      type: "counter",
+      visible: true,
+      data: {
+        sectionLabel: "Resultados",
+        title: "O Que Ja Entregamos",
+        subtitle: "",
+        items: [
+          { value: 2, prefix: "R$", suffix: "M+", label: "Faturamento dos Alunos" },
+          { value: 300, prefix: "+", suffix: "", label: "Mentorados" },
+          { value: 47, prefix: "", suffix: "%", label: "Bateram 6 Digitos" },
+          { value: 12, prefix: "", suffix: "", label: "Lancamentos Guiados" },
+        ],
+        columns: 4,
+        duration: 2200,
+        style: "card",
+      },
+    },
+    {
+      id: "estrategia-1",
+      type: "estrategia",
+      visible: true,
+      data: {
+        sectionLabel: "Modulos",
+        title: "O Que Voce Vai Aprender",
+        subtitle: "Programa estruturado em 3 pilares para construir seu negocio digital do zero.",
+        cards: [
+          {
+            icon: "Lightbulb",
+            title: "Produto & Posicionamento",
+            description: "Crie um infoproduto irresistivel e posicione-se como autoridade no seu nicho.",
+            items: ["Validacao de nicho e oferta", "Estruturacao do produto digital", "Precificacao estrategica", "Posicionamento de autoridade"],
+          },
+          {
+            icon: "Rocket",
+            title: "Lancamento & Funil",
+            description: "Monte a maquina de vendas completa para lancar com resultado previsivel.",
+            items: ["Funil de lancamento semente/interno", "Sequencia de emails que converte", "Copy para paginas de vendas", "Estrategia de lives e webinars"],
+          },
+          {
+            icon: "TrendingUp",
+            title: "Trafego & Escala",
+            description: "Atraia o publico certo e escale seu faturamento de forma sustentavel.",
+            items: ["Trafego pago para lancamentos", "Organico estrategico no Instagram", "Remarketing e recuperacao", "Perpétuo e recorrencia"],
+          },
+        ],
+      },
+    },
+    {
+      id: "depoimentos-1",
+      type: "depoimentos",
+      visible: true,
+      data: {
+        sectionLabel: "Prova Social",
+        title: "O Que Nossos Alunos Dizem",
+        items: [
+          { name: "Maria Silva", role: "Nutricionista", avatar: "", text: "Faturei R$87k no meu primeiro lancamento seguindo a metodologia. Mudou minha vida." },
+          { name: "Carlos Santos", role: "Coach Financeiro", avatar: "", text: "Em 6 meses sai do zero para 6 digitos mensais. A mentoria e transformadora." },
+          { name: "Ana Costa", role: "Personal Trainer", avatar: "", text: "Antes vendia hora por hora. Hoje tenho um curso online que vende enquanto eu treino." },
+        ],
+      },
+    },
+    {
+      id: "pricing-1",
+      type: "pricing-table",
+      visible: true,
+      data: {
+        sectionLabel: "Investimento",
+        title: "Escolha Sua Modalidade",
+        subtitle: "Invista no programa que vai transformar sua carreira digital.",
+        plans: [
+          {
+            name: "Curso Online",
+            badge: "",
+            price: "12x R$ 97",
+            currency: "",
+            period: "",
+            features: [
+              "Acesso a todos os modulos",
+              "Material de apoio",
+              "Templates e planilhas",
+              "Comunidade de alunos",
+              "Acesso por 1 ano",
+            ],
+            ctaLabel: "Garantir Vaga", ctaUrl: "https://wa.me/5500000000000", description: "",
+            highlighted: false,
+          },
+          {
+            name: "Mentoria em Grupo",
+            badge: "Mais Popular",
+            price: "12x R$ 297",
+            currency: "",
+            period: "",
+            features: [
+              "Tudo do Curso Online +",
+              "Mentorias ao vivo semanais",
+              "Grupo exclusivo de WhatsApp",
+              "Review de funil e copy",
+              "Acesso vitalicio",
+              "Bonus: Kit de criativos",
+            ],
+            ctaLabel: "Aplicar Agora", ctaUrl: "https://wa.me/5500000000000", description: "",
+            highlighted: true,
+          },
+          {
+            name: "VIP Individual",
+            badge: "",
+            price: "R$ 9.997",
+            currency: "",
+            period: " a vista",
+            features: [
+              "Tudo da Mentoria em Grupo +",
+              "6 sessoes individuais de 1h",
+              "Construcao de funil done-for-you",
+              "Review ilimitado por 6 meses",
+              "Acesso vitalicio",
+              "Suporte direto no WhatsApp",
+            ],
+            ctaLabel: "Falar Comigo", ctaUrl: "https://wa.me/5500000000000", description: "",
+            highlighted: false,
+          },
+        ],
+      },
+    },
+    {
+      id: "visao-1",
+      type: "visao",
+      visible: true,
+      data: {
+        sectionLabel: "Visao",
+        title: "Seu Negocio Digital",
+        subtitle: "Imagine ter um negocio que gera receita enquanto voce dorme, viaja ou passa tempo com quem ama.",
+        items: [
+          { icon: "DollarSign", label: "Faturamento previsivel com lancamentos e perpetuo" },
+          { icon: "Globe", label: "Liberdade para trabalhar de qualquer lugar" },
+          { icon: "Users", label: "Comunidade de milhares de alunos transformados" },
+          { icon: "Star", label: "Reconhecimento como referencia no seu nicho" },
+        ],
+        quote: "O melhor momento para comecar seu negocio digital era ontem. O segundo melhor e agora.",
+        quoteHighlight: "O segundo melhor e agora",
+        footerClientName: "Nome do Mentorado",
+        footerNote: "Vagas limitadas. Proximo grupo inicia em breve.",
+      },
+    },
+  ],
+};
