@@ -47,39 +47,16 @@ export async function POST(request: NextRequest) {
 
     const abacate = getAbacateClient();
 
-    // Criar ou reutilizar customer no AbacatePay
-    let customerId = profile.abacate_customer_id;
-
-    if (!customerId) {
-      const customerRes = await abacate.customer.create({
-        email: profile.email || user.email || "",
-        name: profile.full_name || "Cliente",
-      });
-
-      console.log("AbacatePay customer response:", JSON.stringify(customerRes));
-
-      if (customerRes.error || !customerRes.data) {
-        console.error("AbacatePay customer error:", JSON.stringify(customerRes));
-        return NextResponse.json(
-          { error: `Erro ao criar cliente no AbacatePay: ${JSON.stringify(customerRes.error || "sem dados")}` },
-          { status: 500 },
-        );
-      }
-
-      customerId = customerRes.data.id;
-
-      // Salvar customer ID no perfil
-      await admin
-        .from("profiles")
-        .update({ abacate_customer_id: customerId })
-        .eq("id", user.id);
-    }
-
     // Determinar origin para URLs de redirect
     const origin = request.headers.get("origin") || request.headers.get("referer")?.replace(/\/[^/]*$/, "") || "https://www.geraproposta.com";
 
-    // Criar cobranca
-    const billingRes = await abacate.billing.create({
+    // Montar dados do billing
+    const customerEmail = profile.email || user.email || "";
+    const customerName = profile.full_name || "Cliente";
+    const customerId = profile.abacate_customer_id;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const billingData: any = {
       frequency: "ONE_TIME",
       methods: ["PIX"],
       products: [
@@ -92,9 +69,20 @@ export async function POST(request: NextRequest) {
       ],
       returnUrl: `${origin}/pricing`,
       completionUrl: `${origin}/dashboard?payment=success&plan=${plan}`,
-      customerId,
-    });
+    };
 
+    // Se ja tem customerId salvo, usa ele. Senao, passa dados inline.
+    if (customerId) {
+      billingData.customerId = customerId;
+    } else {
+      billingData.customer = {
+        name: customerName,
+        email: customerEmail,
+      };
+    }
+
+    console.log("AbacatePay billing request:", JSON.stringify(billingData));
+    const billingRes = await abacate.billing.create(billingData);
     console.log("AbacatePay billing response:", JSON.stringify(billingRes));
 
     if (billingRes.error || !billingRes.data) {
@@ -103,6 +91,15 @@ export async function POST(request: NextRequest) {
         { error: `Erro ao criar cobranca: ${JSON.stringify(billingRes.error || "sem dados")}` },
         { status: 500 },
       );
+    }
+
+    // Salvar customer ID se veio na resposta
+    const billingCustomerId = (billingRes.data as any)?.customer?.id;
+    if (billingCustomerId && !customerId) {
+      await admin
+        .from("profiles")
+        .update({ abacate_customer_id: billingCustomerId })
+        .eq("id", user.id);
     }
 
     const billing = billingRes.data;
