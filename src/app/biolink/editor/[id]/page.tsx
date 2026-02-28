@@ -72,7 +72,7 @@ function EditorContent() {
     data: state.config,
     onSave: doSave,
     delay: 3000,
-    enabled: !!state.biolinkId,
+    enabled: false,
   });
 
   const save = useCallback(async () => {

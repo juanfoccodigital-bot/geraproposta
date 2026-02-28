@@ -53,12 +53,15 @@ export async function POST(request: NextRequest) {
     if (!customerId) {
       const customerRes = await abacate.customer.create({
         email: profile.email || user.email || "",
-        name: profile.full_name || "",
+        name: profile.full_name || "Cliente",
       });
 
+      console.log("AbacatePay customer response:", JSON.stringify(customerRes));
+
       if (customerRes.error || !customerRes.data) {
+        console.error("AbacatePay customer error:", JSON.stringify(customerRes));
         return NextResponse.json(
-          { error: "Erro ao criar cliente no AbacatePay" },
+          { error: `Erro ao criar cliente no AbacatePay: ${JSON.stringify(customerRes.error || "sem dados")}` },
           { status: 500 },
         );
       }
@@ -92,9 +95,12 @@ export async function POST(request: NextRequest) {
       customerId,
     });
 
+    console.log("AbacatePay billing response:", JSON.stringify(billingRes));
+
     if (billingRes.error || !billingRes.data) {
+      console.error("AbacatePay billing error:", JSON.stringify(billingRes));
       return NextResponse.json(
-        { error: "Erro ao criar cobranca" },
+        { error: `Erro ao criar cobranca: ${JSON.stringify(billingRes.error || "sem dados")}` },
         { status: 500 },
       );
     }

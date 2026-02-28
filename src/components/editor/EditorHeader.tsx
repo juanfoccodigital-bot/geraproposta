@@ -76,7 +76,7 @@ export default function EditorHeader() {
     data: state.config,
     onSave: doSave,
     delay: 3000,
-    enabled: !!state.proposalId && !editLimitReached,
+    enabled: false,
   });
 
   const handleSave = async () => {
