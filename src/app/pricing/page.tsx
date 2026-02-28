@@ -102,11 +102,8 @@ export default function PricingPage() {
     <main style={{ background: "#0A0A0A" }}>
       <Navbar />
 
-      {/* Spacer for fixed navbar */}
-      <div className="h-16" />
-
-      {/* Header — no gap between navbar and gradient */}
-      <div className="pt-4 pb-4 px-6 text-center relative overflow-hidden">
+      {/* Header */}
+      <div className="pt-6 pb-4 px-6 text-center relative overflow-hidden">
         {/* Subtle glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
