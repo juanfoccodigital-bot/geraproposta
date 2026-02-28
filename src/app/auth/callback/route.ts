@@ -37,7 +37,13 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return response;
     }
+    console.error("OAuth callback error:", error.message, error);
+    return NextResponse.redirect(new URL(`/login?error=callback&message=${encodeURIComponent(error.message)}`, request.url));
   }
 
-  return NextResponse.redirect(new URL("/login?error=callback", request.url));
+  // No code parameter — check for error from provider
+  const errorParam = searchParams.get("error");
+  const errorDesc = searchParams.get("error_description");
+  console.error("OAuth callback - no code. error:", errorParam, "desc:", errorDesc);
+  return NextResponse.redirect(new URL(`/login?error=callback&message=${encodeURIComponent(errorDesc || errorParam || "no_code")}`, request.url));
 }

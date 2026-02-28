@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import Logo from "@/components/ui/Logo";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -31,6 +31,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const callbackError = searchParams.get("error");
+    const message = searchParams.get("message");
+    if (callbackError === "callback") {
+      setError(message || "Erro ao autenticar com Google. Tente novamente.");
+    }
+  }, [searchParams]);
 
   const handleGoogleLogin = async () => {
     setError("");
