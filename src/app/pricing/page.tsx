@@ -103,7 +103,7 @@ export default function PricingPage() {
       <Navbar />
 
       {/* Header */}
-      <div className="pt-6 pb-4 px-6 text-center relative overflow-hidden">
+      <div className="pt-2 pb-4 px-6 text-center relative overflow-hidden">
         {/* Subtle glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
