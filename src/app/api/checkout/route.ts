@@ -1,19 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
-import { getAbacateClient, PLAN_PRICES, PLAN_LABELS } from "@/lib/abacatepay";
+import { PLAN_PRICES, PLAN_LABELS } from "@/lib/abacatepay";
 
 /* ============================================
    POST /api/checkout
    Cria uma cobranca no AbacatePay e retorna
    a URL de pagamento para redirect.
+   Usa fetch direto em vez do SDK para melhor
+   controle de erros.
    ============================================ */
+
+const ABACATE_BASE = "https://api.abacatepay.com/v1";
 
 function getAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
+}
+
+async function abacateRequest(path: string, data: unknown) {
+  const apiKey = process.env.ABACATEPAY_API_KEY;
+  if (!apiKey) throw new Error("ABACATEPAY_API_KEY not configured");
+
+  const res = await fetch(`${ABACATE_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const text = await res.text();
+  console.log(`AbacatePay ${path} status:${res.status} response:`, text);
+
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error(`AbacatePay returned non-JSON: ${text}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(`AbacatePay error (${res.status}): ${JSON.stringify(json)}`);
+  }
+
+  return json;
 }
 
 export async function POST(request: NextRequest) {
@@ -44,8 +78,6 @@ export async function POST(request: NextRequest) {
     if (!profile) {
       return NextResponse.json({ error: "Perfil nao encontrado" }, { status: 404 });
     }
-
-    const abacate = getAbacateClient();
 
     // Determinar origin para URLs de redirect
     const origin = request.headers.get("origin") || request.headers.get("referer")?.replace(/\/[^/]*$/, "") || "https://www.geraproposta.com";
@@ -82,27 +114,25 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("AbacatePay billing request:", JSON.stringify(billingData));
-    const billingRes = await abacate.billing.create(billingData);
-    console.log("AbacatePay billing response:", JSON.stringify(billingRes));
+    const billingJson = await abacateRequest("/billing/create", billingData);
 
-    if (billingRes.error || !billingRes.data) {
-      console.error("AbacatePay billing error:", JSON.stringify(billingRes));
+    const billing = billingJson.data || billingJson;
+
+    if (!billing || !billing.id) {
       return NextResponse.json(
-        { error: `Erro ao criar cobranca: ${JSON.stringify(billingRes.error || "sem dados")}` },
+        { error: `Resposta inesperada do AbacatePay: ${JSON.stringify(billingJson)}` },
         { status: 500 },
       );
     }
 
     // Salvar customer ID se veio na resposta
-    const billingCustomerId = (billingRes.data as any)?.customer?.id;
+    const billingCustomerId = billing.customer?.id;
     if (billingCustomerId && !customerId) {
       await admin
         .from("profiles")
         .update({ abacate_customer_id: billingCustomerId })
         .eq("id", user.id);
     }
-
-    const billing = billingRes.data;
 
     // Salvar billing ID no perfil para rastrear no webhook
     await admin
@@ -116,6 +146,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: billing.url });
   } catch (err) {
     console.error("Checkout error:", err);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Erro interno";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
