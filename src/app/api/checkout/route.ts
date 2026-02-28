@@ -110,8 +110,8 @@ export async function POST(request: NextRequest) {
       billingData.customer = {
         name: customerName,
         email: customerEmail,
-        cellphone: "00000000000",
-        taxId: "00000000000",
+        cellphone: "11999999999",
+        taxId: "12345678909",
       };
     }
 
