@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Buscar perfil do usuario
     const { data: profile } = await admin
       .from("profiles")
-      .select("email, full_name, abacate_customer_id")
+      .select("email, full_name, phone, tax_id, abacate_customer_id")
       .eq("id", user.id)
       .single();
 
@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
     const customerInline = {
       name: customerName,
       email: customerEmail,
-      cellphone: "11999999999",
-      taxId: "52998224725",
+      cellphone: profile.phone || "11999999999",
+      taxId: profile.tax_id || "52998224725",
     };
 
     if (customerId) {

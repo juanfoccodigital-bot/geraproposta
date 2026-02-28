@@ -27,6 +27,8 @@ export default function SignupPage() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [taxId, setTaxId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -51,7 +53,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { full_name: fullName, phone, tax_id: taxId },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -190,6 +192,37 @@ export default function SignupPage() {
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A3A3A3" }}>
+                Telefone
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                placeholder="41999999999"
+                required
+                className="w-full px-4 py-3 rounded-xl border text-sm text-white placeholder:opacity-40 focus:outline-none focus:border-[#F97316]/50 focus:ring-2 focus:ring-[#F97316]/10 transition-all"
+                style={{ background: "#111111", borderColor: "#262626" }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A3A3A3" }}>
+                CPF ou CNPJ
+              </label>
+              <input
+                type="text"
+                value={taxId}
+                onChange={(e) => setTaxId(e.target.value.replace(/\D/g, "").slice(0, 14))}
+                placeholder="00000000000"
+                required
+                className="w-full px-4 py-3 rounded-xl border text-sm text-white placeholder:opacity-40 focus:outline-none focus:border-[#F97316]/50 focus:ring-2 focus:ring-[#F97316]/10 transition-all"
+                style={{ background: "#111111", borderColor: "#262626" }}
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: "#A3A3A3" }}>
               Senha
@@ -233,7 +266,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || !email || !password || !fullName}
+            disabled={loading || !email || !password || !fullName || !phone || !taxId}
             className="w-full py-3 rounded-xl text-white text-sm font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             style={{ background: "#F97316" }}
           >

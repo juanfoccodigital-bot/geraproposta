@@ -11,6 +11,8 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string;
+  phone: string;
+  tax_id: string;
   plan: PlanTier;
   proposals_today: number;
   proposals_month: number;

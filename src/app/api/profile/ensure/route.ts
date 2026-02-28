@@ -46,6 +46,8 @@ export async function POST() {
         id: user.id,
         email: user.email || "",
         full_name: user.user_metadata?.full_name || user.user_metadata?.name || "",
+        phone: user.user_metadata?.phone || "",
+        tax_id: user.user_metadata?.tax_id || "",
         plan: "free",
         onboarding_complete: false,
         proposals_today: 0,
