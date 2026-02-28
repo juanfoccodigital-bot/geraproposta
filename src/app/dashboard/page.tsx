@@ -3,8 +3,8 @@
 import { ProposalRecord, ProposalStatus, statusLabels, statusColors, CategoryRecord } from "@/types/proposal";
 import { PlanTier } from "@/types/user";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { Plus, Search, Eye, Edit3, Copy, Trash2, ExternalLink, LayoutGrid, Clock, MessageCircle, Zap, ArrowUpRight, Sparkles, Tag } from "lucide-react";
 import CategoriesManager from "@/components/dashboard/CategoriesManager";
 import ConversionCards from "@/components/dashboard/ConversionCards";
@@ -70,9 +70,25 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
 // ============================================
 // MAIN DASHBOARD COMPONENT
 // ============================================
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user: userProfile, loading: authLoading, refreshProfile } = useAuth();
+
+  // Detectar retorno do pagamento e atualizar perfil
+  useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      // Dar tempo pro webhook processar, depois atualizar perfil
+      const timer = setTimeout(() => {
+        refreshProfile();
+      }, 2000);
+      // Segundo refresh apos 5s caso o webhook demore
+      const timer2 = setTimeout(() => {
+        refreshProfile();
+      }, 5000);
+      return () => { clearTimeout(timer); clearTimeout(timer2); };
+    }
+  }, [searchParams, refreshProfile]);
 
   // -- State --
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
@@ -672,5 +688,13 @@ export default function DashboardPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
   );
 }
