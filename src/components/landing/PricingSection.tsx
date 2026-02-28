@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { Check, X, Sparkles, Zap, Crown, Rocket, ArrowRight, Loader2 } from "lucide-react";
 import { PlanTier } from "@/types/user";
@@ -14,7 +13,7 @@ import { PlanTier } from "@/types/user";
 interface Feature {
   text: string;
   included: boolean;
-  highlight?: boolean; // destaque visual
+  highlight?: boolean;
 }
 
 interface Plan {
@@ -167,17 +166,11 @@ function ComparisonCell({ value }: { value: string | boolean }) {
 }
 
 interface PricingSectionProps {
-  /** Show title + subtitle header above cards */
   showHeader?: boolean;
-  /** Show the full comparison table below cards */
   showComparisonTable?: boolean;
-  /** Show "Compare os planos" CTA linking to /pricing */
   showCompareCta?: boolean;
-  /** Current user plan (if logged in) */
   userPlan?: PlanTier | null;
-  /** Callback when user clicks checkout on a paid plan */
   onCheckout?: (plan: string) => void;
-  /** Plan currently being checked out */
   checkingOutPlan?: string | null;
 }
 
@@ -190,16 +183,11 @@ export default function PricingSection({
   checkingOutPlan,
 }: PricingSectionProps) {
   return (
-    <section id="precos" className="py-20 px-6" style={{ background: "#0A0A0A" }}>
+    <section id="precos" className="py-12 px-6" style={{ background: "#0A0A0A" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         {showHeader && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-14"
-          >
+          <div className="text-center mb-14">
             <span
               className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
               style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
@@ -212,18 +200,14 @@ export default function PricingSection({
             <p style={{ color: "#A3A3A3" }}>
               Comece gratis. Faca upgrade quando precisar.
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {plans.map((plan, i) => (
-            <motion.div
+          {plans.map((plan) => (
+            <div
               key={plan.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
               className={`relative rounded-2xl border flex flex-col ${plan.popular ? "border-2 lg:-mt-4 lg:mb-4" : ""}`}
               style={{
                 background: plan.popular
@@ -355,18 +339,13 @@ export default function PricingSection({
                   ))}
                 </ul>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Compare CTA — links to /pricing */}
+        {/* Compare CTA */}
         {showCompareCta && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-12 text-center"
-          >
+          <div className="mt-12 text-center">
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.97]"
@@ -375,64 +354,60 @@ export default function PricingSection({
               Compare todos os planos em detalhe
               <ArrowRight className="w-4 h-4" />
             </Link>
-          </motion.div>
+          </div>
         )}
 
         {/* Comparison Table */}
-        {showComparisonTable && <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-20"
-        >
-          <h3 className="text-xl font-bold text-white text-center mb-8">
-            Compare os planos em detalhe
-          </h3>
+        {showComparisonTable && (
+          <div className="mt-16">
+            <h3 className="text-xl font-bold text-white text-center mb-8">
+              Compare os planos em detalhe
+            </h3>
 
-          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "#1F1F1F", background: "#111111" }}>
-            {/* Table header */}
-            <div className="grid grid-cols-5 gap-0 py-4 px-4 border-b" style={{ borderColor: "#1F1F1F" }}>
-              <div className="text-sm font-medium" style={{ color: "#737373" }}>Recurso</div>
-              {["Free", "Lite", "Pro", "Plus"].map((name) => (
-                <div key={name} className="text-sm font-bold text-white text-center">{name}</div>
-              ))}
-            </div>
+            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "#1F1F1F", background: "#111111" }}>
+              {/* Table header */}
+              <div className="grid grid-cols-5 gap-0 py-4 px-4 border-b" style={{ borderColor: "#1F1F1F" }}>
+                <div className="text-sm font-medium" style={{ color: "#737373" }}>Recurso</div>
+                {["Free", "Lite", "Pro", "Plus"].map((name) => (
+                  <div key={name} className="text-sm font-bold text-white text-center">{name}</div>
+                ))}
+              </div>
 
-            {/* Table body */}
-            {comparisonRows.map((row, idx) => {
-              const prevRow = comparisonRows[idx - 1];
-              const showCategory = !prevRow || prevRow.category !== row.category;
+              {/* Table body */}
+              {comparisonRows.map((row, idx) => {
+                const prevRow = comparisonRows[idx - 1];
+                const showCategory = !prevRow || prevRow.category !== row.category;
 
-              return (
-                <div key={row.label}>
-                  {showCategory && (
-                    <div className="px-4 py-2.5 border-b" style={{ borderColor: "#1F1F1F", background: "#0D0D0D" }}>
-                      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#F97316" }}>
-                        {row.category}
-                      </span>
-                    </div>
-                  )}
-                  <div
-                    className={`grid grid-cols-5 gap-0 py-3 px-4 border-b items-center ${row.highlight ? "bg-[#F9731608]" : ""}`}
-                    style={{ borderColor: "#1A1A1A" }}
-                  >
+                return (
+                  <div key={row.label}>
+                    {showCategory && (
+                      <div className="px-4 py-2.5 border-b" style={{ borderColor: "#1F1F1F", background: "#0D0D0D" }}>
+                        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#F97316" }}>
+                          {row.category}
+                        </span>
+                      </div>
+                    )}
                     <div
-                      className={`text-sm ${row.highlight ? "font-semibold" : ""}`}
-                      style={{ color: row.highlight ? "#F97316" : "#A3A3A3" }}
+                      className={`grid grid-cols-5 gap-0 py-3 px-4 border-b items-center ${row.highlight ? "bg-[#F9731608]" : ""}`}
+                      style={{ borderColor: "#1A1A1A" }}
                     >
-                      {row.label}
+                      <div
+                        className={`text-sm ${row.highlight ? "font-semibold" : ""}`}
+                        style={{ color: row.highlight ? "#F97316" : "#A3A3A3" }}
+                      >
+                        {row.label}
+                      </div>
+                      <div className="text-center"><ComparisonCell value={row.free} /></div>
+                      <div className="text-center"><ComparisonCell value={row.lite} /></div>
+                      <div className="text-center"><ComparisonCell value={row.pro} /></div>
+                      <div className="text-center"><ComparisonCell value={row.plus} /></div>
                     </div>
-                    <div className="text-center"><ComparisonCell value={row.free} /></div>
-                    <div className="text-center"><ComparisonCell value={row.lite} /></div>
-                    <div className="text-center"><ComparisonCell value={row.pro} /></div>
-                    <div className="text-center"><ComparisonCell value={row.plus} /></div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </motion.div>}
+        )}
       </div>
     </section>
   );

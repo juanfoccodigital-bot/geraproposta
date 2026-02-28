@@ -7,7 +7,6 @@ import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronDown, Shield } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 /* ============================================
    PRICING PAGE
@@ -45,41 +44,27 @@ const faqs = [
   },
 ];
 
-function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
-      className="border-b"
-      style={{ borderColor: "#1F1F1F" }}
-    >
+    <div className="border-b" style={{ borderColor: "#1F1F1F" }}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between py-5 text-left cursor-pointer group"
       >
         <span className="text-sm font-medium text-white group-hover:text-[#F97316] transition-colors">{q}</span>
         <ChevronDown
-          className={`w-4 h-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 flex-shrink-0 ml-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           style={{ color: "#737373" }}
         />
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <p className="pb-5 text-sm leading-relaxed" style={{ color: "#A3A3A3" }}>{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      <div
+        className="overflow-hidden transition-all duration-200"
+        style={{ maxHeight: open ? "200px" : "0", opacity: open ? 1 : 0 }}
+      >
+        <p className="pb-5 text-sm leading-relaxed" style={{ color: "#A3A3A3" }}>{a}</p>
+      </div>
+    </div>
   );
 }
 
@@ -120,20 +105,15 @@ export default function PricingPage() {
       {/* Spacer for fixed navbar */}
       <div className="h-16" />
 
-      {/* Header */}
-      <div className="py-20 px-6 text-center relative overflow-hidden">
+      {/* Header — no gap between navbar and gradient */}
+      <div className="pt-12 pb-6 px-6 text-center relative overflow-hidden">
         {/* Subtle glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
           style={{ background: "#F97316" }}
         />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative z-10"
-        >
+        <div className="relative z-10">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
             style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
@@ -146,7 +126,7 @@ export default function PricingPage() {
           <p className="max-w-xl mx-auto text-base" style={{ color: "#A3A3A3" }}>
             Comece gratis. Crie propostas profissionais, edite quantas vezes precisar e faca upgrade quando quiser.
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Pricing Cards + Comparison Table */}
@@ -158,7 +138,7 @@ export default function PricingPage() {
       />
 
       {/* Trust badges */}
-      <section className="py-10 px-6" style={{ background: "#0A0A0A" }}>
+      <section className="py-10 px-6">
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-6">
           {[
             { icon: <Shield className="w-4 h-4" />, text: "Cancele quando quiser" },
@@ -174,24 +154,19 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-6" style={{ background: "#0A0A0A" }}>
+      <section className="py-16 px-6">
         <div className="max-w-2xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
               Perguntas frequentes
             </h2>
             <p className="text-sm" style={{ color: "#737373" }}>
               Tire suas duvidas sobre os planos
             </p>
-          </motion.div>
+          </div>
           <div>
             {faqs.map((faq, i) => (
-              <FaqItem key={i} {...faq} index={i} />
+              <FaqItem key={i} {...faq} />
             ))}
           </div>
         </div>

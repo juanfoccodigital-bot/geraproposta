@@ -4,7 +4,6 @@ import { useState } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { MessageCircle, ChevronDown, Mail, Clock, Zap } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 /* ============================================
    PAGINA DE SUPORTE
@@ -46,17 +45,10 @@ const faqs = [
   },
 ];
 
-function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
-      className="border-b"
-      style={{ borderColor: "#1F1F1F" }}
-    >
+    <div className="border-b" style={{ borderColor: "#1F1F1F" }}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between py-5 text-left cursor-pointer group"
@@ -69,22 +61,15 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
           style={{ color: "#737373" }}
         />
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <p className="pb-5 text-sm leading-relaxed" style={{ color: "#A3A3A3" }}>
-              {a}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      <div
+        className="overflow-hidden transition-all duration-200"
+        style={{ maxHeight: open ? "200px" : "0", opacity: open ? 1 : 0 }}
+      >
+        <p className="pb-5 text-sm leading-relaxed" style={{ color: "#A3A3A3" }}>
+          {a}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -95,17 +80,12 @@ export default function SuportePage() {
       <div className="h-16" />
 
       {/* Hero */}
-      <div className="py-16 px-6 text-center relative overflow-hidden">
+      <div className="pt-12 pb-6 px-6 text-center relative overflow-hidden">
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
           style={{ background: "#22C55E" }}
         />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative z-10"
-        >
+        <div className="relative z-10">
           <span
             className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
             style={{ background: "#22C55E15", color: "#22C55E", border: "1px solid #22C55E30" }}
@@ -118,21 +98,17 @@ export default function SuportePage() {
           <p className="max-w-lg mx-auto text-base" style={{ color: "#A3A3A3" }}>
             Estamos aqui para ajudar. Confira as perguntas frequentes ou fale diretamente conosco.
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Contact cards */}
-      <section className="px-6 pb-16">
+      <section className="px-6 pb-12">
         <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* WhatsApp */}
-          <motion.a
+          <a
             href="https://wa.me/5541997038671"
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
             className="rounded-2xl border p-6 flex items-start gap-4 transition-all hover:border-green-500/30 hover:bg-green-500/5 group"
             style={{ background: "#111111", borderColor: "#262626" }}
           >
@@ -149,15 +125,11 @@ export default function SuportePage() {
                 <Zap className="w-3.5 h-3.5" />
               </span>
             </div>
-          </motion.a>
+          </a>
 
           {/* Email */}
-          <motion.a
+          <a
             href="mailto:suporte@gerapropostas.com"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
             className="rounded-2xl border p-6 flex items-start gap-4 transition-all hover:border-blue-500/30 hover:bg-blue-500/5 group"
             style={{ background: "#111111", borderColor: "#262626" }}
           >
@@ -174,29 +146,24 @@ export default function SuportePage() {
                 Resposta em ate 24h
               </span>
             </div>
-          </motion.a>
+          </a>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-16 px-6" style={{ borderTop: "1px solid #1F1F1F" }}>
+      <section className="py-12 px-6" style={{ borderTop: "1px solid #1F1F1F" }}>
         <div className="max-w-2xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
               Perguntas frequentes
             </h2>
             <p className="text-sm" style={{ color: "#737373" }}>
               Encontre respostas para as duvidas mais comuns
             </p>
-          </motion.div>
+          </div>
           <div>
             {faqs.map((faq, i) => (
-              <FaqItem key={i} {...faq} index={i} />
+              <FaqItem key={i} {...faq} />
             ))}
           </div>
         </div>
