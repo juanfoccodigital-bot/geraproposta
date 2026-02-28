@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const billingData: any = {
       frequency: "ONE_TIME",
-      methods: ["PIX"],
+      methods: ["PIX", "CARD"],
       products: [
         {
           externalId: `gp-${plan}-${user.id}`,
