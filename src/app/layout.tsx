@@ -20,6 +20,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "gerapropostas — Feche mais contratos com propostas profissionais",
   description: "A maior plataforma de propostas comerciais do Brasil. Crie, envie e feche contratos em minutos com templates prontos e inteligencia artificial.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
