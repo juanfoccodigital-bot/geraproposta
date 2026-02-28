@@ -13,6 +13,7 @@ import ProofOfImpact from "@/components/landing/ProofOfImpact";
 import CtaSection from "@/components/landing/CtaSection";
 import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
+import LazySection from "@/components/ui/LazySection";
 
 /* ============================================
    HOME — Marketplace de Templates
@@ -23,6 +24,11 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   // Read category from URL param (e.g. /?category=social-media)
   useEffect(() => {
@@ -53,11 +59,17 @@ function HomeContent() {
         searchQuery={searchQuery}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        maxItems={12}
+        maxItems={isMobile ? 6 : 12}
       />
-      <BiolinkTemplatesPreview />
-      <SiteTemplatesPreview />
-      <PricingSection showHeader showCompareCta />
+      <LazySection rootMargin="300px" minHeight={400}>
+        <BiolinkTemplatesPreview />
+      </LazySection>
+      <LazySection rootMargin="300px" minHeight={400}>
+        <SiteTemplatesPreview />
+      </LazySection>
+      <LazySection rootMargin="200px" minHeight={300}>
+        <PricingSection showHeader showCompareCta />
+      </LazySection>
       <CtaSection />
       <Footer />
     </main>

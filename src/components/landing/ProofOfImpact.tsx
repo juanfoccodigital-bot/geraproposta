@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 const stats = [
   { value: "+100", label: "Templates" },
   { value: "+12", label: "Nichos" },
@@ -29,38 +27,27 @@ const testimonials = [
 
 export default function ProofOfImpact() {
   return (
-    <section className="py-14 px-6" style={{ background: "#0A0A0A" }}>
+    <section className="py-10 md:py-14 px-6" style={{ background: "#0A0A0A" }}>
       <div className="max-w-5xl mx-auto">
-        {/* Stats — inline row */}
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mb-10">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="flex items-center gap-2"
-            >
+        {/* Stats */}
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mb-8 md:mb-10">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex items-center gap-2">
               <span className="text-xl font-bold" style={{ color: "#F97316" }}>
                 {stat.value}
               </span>
               <span className="text-xs" style={{ color: "#737373" }}>
                 {stat.label}
               </span>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Testimonials — compact */}
+        {/* Testimonials */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {testimonials.map((t, i) => (
-            <motion.div
+          {testimonials.map((t) => (
+            <div
               key={t.author}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
               className="rounded-xl border px-4 py-3.5"
               style={{ background: "#111111", borderColor: "#1A1A1A" }}
             >
@@ -76,7 +63,7 @@ export default function ProofOfImpact() {
                   <p className="text-[10px]" style={{ color: "#525252" }}>{t.role}</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

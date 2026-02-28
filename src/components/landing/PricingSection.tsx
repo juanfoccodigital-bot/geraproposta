@@ -183,11 +183,11 @@ export default function PricingSection({
   checkingOutPlan,
 }: PricingSectionProps) {
   return (
-    <section id="precos" className="py-12 px-6" style={{ background: "#0A0A0A" }}>
+    <section id="precos" className="py-6 px-6" style={{ background: "#0A0A0A" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         {showHeader && (
-          <div className="text-center mb-14">
+          <div className="text-center mb-8">
             <span
               className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
               style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}

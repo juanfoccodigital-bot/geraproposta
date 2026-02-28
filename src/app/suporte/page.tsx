@@ -80,7 +80,7 @@ export default function SuportePage() {
       <div className="h-16" />
 
       {/* Hero */}
-      <div className="pt-12 pb-6 px-6 text-center relative overflow-hidden">
+      <div className="pt-4 pb-4 px-6 text-center relative overflow-hidden">
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
           style={{ background: "#22C55E" }}
@@ -102,7 +102,7 @@ export default function SuportePage() {
       </div>
 
       {/* Contact cards */}
-      <section className="px-6 pb-12">
+      <section className="px-6 pb-8">
         <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* WhatsApp */}
           <a
@@ -151,9 +151,9 @@ export default function SuportePage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-12 px-6" style={{ borderTop: "1px solid #1F1F1F" }}>
+      <section className="py-8 px-6" style={{ borderTop: "1px solid #1F1F1F" }}>
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
               Perguntas frequentes
             </h2>
@@ -170,7 +170,7 @@ export default function SuportePage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="py-12 px-6 text-center">
+      <section className="py-8 px-6 text-center">
         <p className="text-sm text-white/40 mb-4">
           Nao encontrou o que procurava?
         </p>

@@ -30,7 +30,7 @@ export default function SitePreviewThumbnail({
           observer.disconnect();
         }
       },
-      { rootMargin: "300px" }
+      { rootMargin: "100px" }
     );
 
     observer.observe(el);

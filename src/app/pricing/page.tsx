@@ -106,7 +106,7 @@ export default function PricingPage() {
       <div className="h-16" />
 
       {/* Header — no gap between navbar and gradient */}
-      <div className="pt-12 pb-6 px-6 text-center relative overflow-hidden">
+      <div className="pt-4 pb-4 px-6 text-center relative overflow-hidden">
         {/* Subtle glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
@@ -138,7 +138,7 @@ export default function PricingPage() {
       />
 
       {/* Trust badges */}
-      <section className="py-10 px-6">
+      <section className="py-6 px-6">
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-6">
           {[
             { icon: <Shield className="w-4 h-4" />, text: "Cancele quando quiser" },
@@ -154,9 +154,9 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 px-6">
+      <section className="py-10 px-6">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
               Perguntas frequentes
             </h2>

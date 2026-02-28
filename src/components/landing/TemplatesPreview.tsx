@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { templates, isTemplateFree, FREE_TEMPLATE_IDS } from "@/lib/templates";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { useAuth } from "@/contexts/AuthContext";
@@ -276,14 +275,10 @@ export default function TemplatesPreview({
               const goldColor = template.config.theme.colors.gold;
 
               return (
-                <motion.div
+                <div
                   key={template.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
                   className="group rounded-2xl border overflow-hidden transition-all hover:border-[#404040]"
-                  style={{ background: "#111111", borderColor: "#262626" }}
+                  style={{ background: "#111111", borderColor: "#262626", contentVisibility: "auto", containIntrinsicSize: "auto 400px" } as React.CSSProperties}
                 >
                   {/* Real proposal preview */}
                   <div className="relative overflow-hidden">
@@ -394,7 +389,7 @@ export default function TemplatesPreview({
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
           </div>

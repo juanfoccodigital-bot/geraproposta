@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { LayoutTemplate, Paintbrush, Rocket } from "lucide-react";
 
 const steps = [
@@ -26,9 +25,9 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-16 px-6" style={{ background: "#0A0A0A" }}>
+    <section className="py-10 md:py-16 px-6" style={{ background: "#0A0A0A" }}>
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
+        <div className="text-center mb-6 md:mb-10">
           <span
             className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase mb-3"
             style={{ background: "rgba(249,115,22,0.12)", color: "#F97316" }}
@@ -40,39 +39,35 @@ export default function HowItWorks() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {steps.map((step, i) => {
+        <div className="grid grid-cols-3 gap-2 md:grid-cols-3 md:gap-4">
+          {steps.map((step) => {
             const Icon = step.icon;
             return (
-              <motion.div
+              <div
                 key={step.number}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-start gap-3 rounded-xl border px-4 py-3.5"
+                className="flex flex-col items-center text-center md:flex-row md:items-start md:text-left gap-2 md:gap-3 rounded-xl border px-3 py-3 md:px-4 md:py-3.5"
                 style={{ background: "#111111", borderColor: "#1A1A1A" }}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: "rgba(249,115,22,0.10)" }}
                 >
-                  <Icon size={16} style={{ color: "#F97316" }} />
+                  <Icon size={14} className="md:w-4 md:h-4" style={{ color: "#F97316" }} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-bold" style={{ color: "rgba(249,115,22,0.35)" }}>
+                  <div className="flex items-center justify-center md:justify-start gap-1.5 md:gap-2 mb-0.5">
+                    <span className="text-[9px] md:text-[10px] font-bold" style={{ color: "rgba(249,115,22,0.35)" }}>
                       {step.number}
                     </span>
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-[11px] md:text-sm font-semibold text-white leading-tight">
                       {step.title}
                     </h3>
                   </div>
-                  <p className="text-xs leading-relaxed" style={{ color: "#737373" }}>
+                  <p className="text-[10px] md:text-xs leading-relaxed hidden md:block" style={{ color: "#737373" }}>
                     {step.description}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Link2, Globe, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 
@@ -73,10 +72,10 @@ export default function ProductsShowcase() {
   const current = products.find((p) => p.id === active)!;
 
   return (
-    <section className="py-16" style={{ background: "#0A0A0A" }}>
+    <section className="py-12 md:py-16" style={{ background: "#0A0A0A" }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Section header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 md:mb-10">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
             3 Produtos. <span className="bg-gradient-to-r from-[#F97316] to-[#FB923C] bg-clip-text text-transparent">1 Plataforma.</span>
           </h2>
@@ -86,7 +85,7 @@ export default function ProductsShowcase() {
         </div>
 
         {/* Product tabs */}
-        <div className="flex items-center justify-center gap-3 mb-10">
+        <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:justify-center md:gap-3 mb-8 md:mb-10">
           {products.map((p) => {
             const Icon = p.icon;
             const isActive = active === p.id;
@@ -95,91 +94,74 @@ export default function ProductsShowcase() {
               <button
                 key={p.id}
                 onClick={() => setActive(p.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center justify-center gap-1.5 md:gap-2 px-2 md:px-5 py-2.5 rounded-xl text-[11px] md:text-sm font-medium transition-all cursor-pointer ${
                   isActive
                     ? "text-white shadow-lg"
-                    : "text-white/40 hover:text-white/60 bg-white/5 hover:bg-white/8"
+                    : "text-white/40 hover:text-white/60 bg-white/5"
                 }`}
                 style={isActive ? { background: isSoon ? "#525252" : p.color } : {}}
               >
-                <Icon size={16} />
-                {p.label}
-                {isSoon && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "#F97316", color: "#FFF" }}>
-                    Em breve
-                  </span>
-                )}
+                <Icon size={14} className="flex-shrink-0 md:w-4 md:h-4" />
+                <span className="truncate">{p.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Product content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
-          >
-            {/* Mockup */}
-            <div className="flex justify-center">
-              <div
-                className="w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-                style={{ background: current.mockup.bg }}
-              >
-                <div className="p-4 space-y-2">
-                  {current.mockup.blocks.map((block, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="rounded-lg flex items-center justify-center"
-                      style={{ height: block.h, background: block.bg }}
-                    >
-                      <span className="text-[10px] font-medium text-white/50">{block.label}</span>
-                    </motion.div>
-                  ))}
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+          {/* Mockup */}
+          <div className="flex justify-center">
+            <div
+              className="w-[240px] md:w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+              style={{ background: current.mockup.bg }}
+            >
+              <div className="p-3 md:p-4 space-y-2">
+                {current.mockup.blocks.map((block, i) => (
+                  <div
+                    key={`${active}-${i}`}
+                    className="rounded-lg flex items-center justify-center"
+                    style={{ height: block.h, background: block.bg }}
+                  >
+                    <span className="text-[10px] font-medium text-white/50">{block.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
 
-            {/* Info */}
-            <div>
-              <h3 className="text-xl font-bold text-white mb-3">{current.label}</h3>
-              <p className="text-sm text-white/50 mb-6 leading-relaxed">{current.description}</p>
-              <ul className="space-y-2.5 mb-8">
-                {current.features.map((f, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-white/70">
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: current.color }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {"comingSoon" in current && current.comingSoon ? (
-                <span
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/50"
-                  style={{ background: "#262626" }}
-                >
-                  <Clock size={16} />
-                  Em Breve
-                </span>
-              ) : (
-                <Link
-                  href={current.ctaHref}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ background: current.color }}
-                >
-                  {current.ctaText}
-                  <ArrowRight size={16} />
-                </Link>
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+          {/* Info */}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-3">{current.label}</h3>
+            <p className="text-sm text-white/50 mb-5 md:mb-6 leading-relaxed">{current.description}</p>
+            <ul className="space-y-2.5 mb-6 md:mb-8">
+              {current.features.map((f, i) => (
+                <li key={i} className="flex items-center gap-3 text-sm text-white/70">
+                  <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: current.color }} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            {"comingSoon" in current && current.comingSoon ? (
+              <span
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/50"
+                style={{ background: "#262626" }}
+              >
+                <Clock size={16} />
+                Em Breve
+              </span>
+            ) : (
+              <Link
+                href={current.ctaHref}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: current.color }}
+              >
+                {current.ctaText}
+                <ArrowRight size={16} />
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BIOLINK_TEMPLATES } from "@/lib/biolink-templates";
 import { useAuth } from "@/contexts/AuthContext";
@@ -94,19 +93,15 @@ export default function BiolinkTemplatesPreview() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {BIOLINK_TEMPLATES.map((tmpl, i) => {
+          {BIOLINK_TEMPLATES.map((tmpl) => {
             const theme = tmpl.config.theme;
             const isPremium = tmpl.isPremium;
 
             return (
-              <motion.div
+              <div
                 key={tmpl.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
                 className="group rounded-2xl border overflow-hidden transition-all hover:border-[#404040]"
-                style={{ background: "#111111", borderColor: "#262626" }}
+                style={{ background: "#111111", borderColor: "#262626", contentVisibility: "auto", containIntrinsicSize: "auto 380px" } as React.CSSProperties}
               >
                 {/* Preview area */}
                 <div className="relative">
@@ -182,7 +177,7 @@ export default function BiolinkTemplatesPreview() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

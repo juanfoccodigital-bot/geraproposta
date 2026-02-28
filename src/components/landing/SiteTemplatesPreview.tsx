@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { SITE_TEMPLATES } from "@/lib/site-templates";
 import { siteCategoryLabels, SiteCategory } from "@/types/site";
@@ -122,18 +121,14 @@ export default function SiteTemplatesPreview() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((tmpl, i) => {
+          {filtered.map((tmpl) => {
             const colors = tmpl.config.theme.colors;
 
             return (
-              <motion.div
+              <div
                 key={tmpl.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
                 className="group rounded-2xl border overflow-hidden transition-all"
-                style={{ background: "#111111", borderColor: "#262626", opacity: 0.5 }}
+                style={{ background: "#111111", borderColor: "#262626", opacity: 0.5, contentVisibility: "auto", containIntrinsicSize: "auto 380px" } as React.CSSProperties}
               >
                 {/* Real site preview */}
                 <div className="relative">
@@ -193,7 +188,7 @@ export default function SiteTemplatesPreview() {
                     </span>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
