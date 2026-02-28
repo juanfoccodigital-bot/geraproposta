@@ -78,7 +78,8 @@ export async function GET() {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Profile creation error:", error.message);
+      return NextResponse.json({ error: "Erro ao criar perfil" }, { status: 500 });
     }
 
     return NextResponse.json(created, { status: 201 });
@@ -97,13 +98,7 @@ const ALLOWED_FIELDS = new Set([
   "business_type",
   "service_area",
   "onboarding_complete",
-  "proposals_today",
-  "proposals_month",
-  "edits_today",
-  "last_daily_reset",
-  "last_monthly_reset",
   "full_name",
-  "subscription_status",
 ]);
 
 export async function PATCH(request: NextRequest) {
@@ -140,7 +135,8 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Profile update error:", error.message);
+      return NextResponse.json({ error: "Erro ao atualizar perfil" }, { status: 500 });
     }
 
     return NextResponse.json(data);

@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Perfil nao encontrado" }, { status: 404 });
     }
 
-    // Determinar origin para URLs de redirect
-    const origin = request.headers.get("origin") || request.headers.get("referer")?.replace(/\/[^/]*$/, "") || "https://www.geraproposta.com";
+    // Determinar origin para URLs de redirect (usar env var para evitar open redirect)
+    const origin = process.env.NEXT_PUBLIC_APP_URL || "https://www.geraproposta.com";
 
     // Montar dados do billing
     const customerEmail = profile.email || user.email || "";

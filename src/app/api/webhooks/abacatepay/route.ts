@@ -34,7 +34,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log("Webhook payload:", JSON.stringify(body));
+    console.log("Webhook event received:", body.event || "unknown");
+
+    // Verificar tipo de evento — so processar pagamentos confirmados
+    const eventType = body.event || body.type || "";
+    if (eventType && eventType !== "billing.paid" && eventType !== "BILLING_PAID") {
+      console.log("Webhook: ignoring event type:", eventType);
+      return NextResponse.json({ received: true });
+    }
 
     // AbacatePay pode enviar em diferentes formatos
     // Tentar extrair billing de body.data.billing, body.data, ou body

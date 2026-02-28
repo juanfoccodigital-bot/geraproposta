@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const proposalId = (formData.get("proposalId") as string) || "general";
+    const rawProposalId = (formData.get("proposalId") as string) || "general";
+    const proposalId = /^[a-zA-Z0-9_-]+$/.test(rawProposalId) ? rawProposalId : "general";
 
     if (!file) {
       return NextResponse.json(

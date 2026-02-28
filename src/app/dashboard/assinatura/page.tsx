@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/landing/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,8 +58,13 @@ export default function AssinaturaPage() {
     );
   }
 
+  useEffect(() => {
+    if (!loading && !userProfile) {
+      router.push("/login");
+    }
+  }, [loading, userProfile, router]);
+
   if (!userProfile) {
-    router.push("/login");
     return null;
   }
 
@@ -90,6 +95,8 @@ export default function AssinaturaPage() {
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        alert(data.error || "Erro ao processar renovacao. Tente novamente.");
       }
     } catch {
       alert("Erro ao processar renovacao. Tente novamente.");
@@ -101,14 +108,13 @@ export default function AssinaturaPage() {
   const handleCancel = async () => {
     setCancelling(true);
     try {
-      const res = await fetch("/api/profile/me", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscription_status: "cancelled" }),
-      });
+      const res = await fetch("/api/subscription/cancel", { method: "POST" });
       if (res.ok) {
         await refreshProfile();
         setShowCancelConfirm(false);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Erro ao cancelar. Tente novamente.");
       }
     } catch {
       alert("Erro ao cancelar. Tente novamente.");

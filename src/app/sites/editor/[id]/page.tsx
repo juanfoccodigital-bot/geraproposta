@@ -90,7 +90,7 @@ function EditorContent() {
   // Warn before closing with unsaved changes
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (state.isDirty) { e.preventDefault(); }
+      if (state.isDirty) { e.preventDefault(); e.returnValue = ""; }
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);

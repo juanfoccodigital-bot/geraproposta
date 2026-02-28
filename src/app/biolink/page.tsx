@@ -23,6 +23,14 @@ export default function BiolinkPage() {
     fetch("/api/usage").then((r) => r.json()).then((d) => setIsPremium(d.plan !== "free")).catch(() => {});
   }, []);
 
+  // Fechar menu ao clicar fora
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = () => setMenuOpen(null);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [menuOpen]);
+
   async function loadBiolinks() {
     try {
       const res = await fetch("/api/biolinks");

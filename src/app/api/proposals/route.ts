@@ -38,8 +38,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
+      const sanitizedSearch = search.slice(0, 100).replace(/[%_\\]/g, "\\$&");
       query = query.or(
-        `title.ilike.%${search}%,client_name.ilike.%${search}%`
+        `title.ilike.%${sanitizedSearch}%,client_name.ilike.%${sanitizedSearch}%`
       );
     }
 

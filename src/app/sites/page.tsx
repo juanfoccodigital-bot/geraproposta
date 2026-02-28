@@ -23,6 +23,14 @@ export default function SitesPage() {
     loadSites();
   }, []);
 
+  // Fechar menu ao clicar fora
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = () => setMenuOpen(null);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [menuOpen]);
+
   async function loadSites() {
     try {
       const res = await fetch("/api/sites");

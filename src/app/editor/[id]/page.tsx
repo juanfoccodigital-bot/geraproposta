@@ -72,6 +72,7 @@ export default function EditorByIdPage() {
     const handler = (e: BeforeUnloadEvent) => {
       if (state.isDirty) {
         e.preventDefault();
+        e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", handler);

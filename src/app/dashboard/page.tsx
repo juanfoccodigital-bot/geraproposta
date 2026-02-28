@@ -224,27 +224,37 @@ function DashboardContent() {
   };
 
   const handleStatusChange = async (proposalId: string, newStatus: string) => {
-    await fetch(`/api/proposals/${proposalId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    await fetchProposals();
-    showToast(`Status alterado para ${statusLabels[newStatus as ProposalStatus]}`);
+    try {
+      const res = await fetch(`/api/proposals/${proposalId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Falha ao alterar status");
+      await fetchProposals();
+      showToast(`Status alterado para ${statusLabels[newStatus as ProposalStatus]}`);
+    } catch {
+      showToast("Erro ao alterar status");
+    }
   };
 
   const handleCategoryChange = async (proposalId: string, categoryId: string) => {
-    const cat = categories.find((c) => c.id === categoryId);
-    await fetch(`/api/proposals/${proposalId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        category_id: categoryId || null,
-        category: cat?.slug || null,
-      }),
-    });
-    await fetchProposals();
-    showToast(categoryId ? `Categoria: ${cat?.name}` : "Categoria removida");
+    try {
+      const cat = categories.find((c) => c.id === categoryId);
+      const res = await fetch(`/api/proposals/${proposalId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category_id: categoryId || null,
+          category: cat?.slug || null,
+        }),
+      });
+      if (!res.ok) throw new Error("Falha ao alterar categoria");
+      await fetchProposals();
+      showToast(categoryId ? `Categoria: ${cat?.name}` : "Categoria removida");
+    } catch {
+      showToast("Erro ao alterar categoria");
+    }
   };
 
   // -- Filtered proposals --
