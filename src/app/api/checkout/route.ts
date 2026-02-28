@@ -104,19 +104,39 @@ export async function POST(request: NextRequest) {
     };
 
     // Se ja tem customerId salvo, usa ele. Senao, passa dados inline.
+    const customerInline = {
+      name: customerName,
+      email: customerEmail,
+      cellphone: "11999999999",
+      taxId: "52998224725",
+    };
+
     if (customerId) {
       billingData.customerId = customerId;
     } else {
-      billingData.customer = {
-        name: customerName,
-        email: customerEmail,
-        cellphone: "11999999999",
-        taxId: "52998224725",
-      };
+      billingData.customer = customerInline;
     }
 
     console.log("AbacatePay billing request:", JSON.stringify(billingData));
-    const billingJson = await abacateRequest("/billing/create", billingData);
+    let billingJson;
+    try {
+      billingJson = await abacateRequest("/billing/create", billingData);
+    } catch (err) {
+      // Se customer nao existe (ex: mudou de dev para prod), recria inline
+      if (customerId && err instanceof Error && err.message.includes("Customer not found")) {
+        console.log("AbacatePay: customer not found, recreating inline");
+        delete billingData.customerId;
+        billingData.customer = customerInline;
+        billingJson = await abacateRequest("/billing/create", billingData);
+        // Limpar customer ID antigo do perfil
+        await admin
+          .from("profiles")
+          .update({ abacate_customer_id: null })
+          .eq("id", user.id);
+      } else {
+        throw err;
+      }
+    }
 
     const billing = billingJson.data || billingJson;
 
