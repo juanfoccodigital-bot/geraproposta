@@ -75,29 +75,29 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function SuportePage() {
   return (
-    <main style={{ background: "#0A0A0A" }} className="min-h-screen">
+    <main className="min-h-screen relative overflow-hidden" style={{ background: "#0A0A0A" }}>
+      {/* Background glow — spans header + cards */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[700px] rounded-full blur-[160px] opacity-[0.06] pointer-events-none"
+        style={{ background: "#22C55E" }}
+      />
+
       <Navbar />
 
       {/* Hero */}
-      <div className="pt-2 pb-4 px-6 text-center relative overflow-hidden">
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
-          style={{ background: "#22C55E" }}
-        />
-        <div className="relative z-10">
-          <span
-            className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
-            style={{ background: "#22C55E15", color: "#22C55E", border: "1px solid #22C55E30" }}
-          >
-            Suporte
-          </span>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Central de Suporte
-          </h1>
-          <p className="max-w-lg mx-auto text-base" style={{ color: "#A3A3A3" }}>
-            Estamos aqui para ajudar. Confira as perguntas frequentes ou fale diretamente conosco.
-          </p>
-        </div>
+      <div className="pt-2 pb-4 px-6 text-center relative z-10">
+        <span
+          className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
+          style={{ background: "#22C55E15", color: "#22C55E", border: "1px solid #22C55E30" }}
+        >
+          Suporte
+        </span>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          Central de Suporte
+        </h1>
+        <p className="max-w-lg mx-auto text-base" style={{ color: "#A3A3A3" }}>
+          Estamos aqui para ajudar. Confira as perguntas frequentes ou fale diretamente conosco.
+        </p>
       </div>
 
       {/* Contact cards */}

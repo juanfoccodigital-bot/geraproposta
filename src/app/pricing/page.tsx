@@ -99,31 +99,29 @@ export default function PricingPage() {
   };
 
   return (
-    <main style={{ background: "#0A0A0A" }}>
+    <main className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
+      {/* Background glow — spans header + cards */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[160px] opacity-[0.07] pointer-events-none"
+        style={{ background: "#F97316" }}
+      />
+
       <Navbar />
 
       {/* Header */}
-      <div className="pt-2 pb-4 px-6 text-center relative overflow-hidden">
-        {/* Subtle glow */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[120px] opacity-10 pointer-events-none"
-          style={{ background: "#F97316" }}
-        />
-
-        <div className="relative z-10">
-          <span
-            className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
-            style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
-          >
-            Planos e Precos
-          </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-            Escolha o plano ideal<br className="hidden md:block" /> para seu negocio
-          </h1>
-          <p className="max-w-xl mx-auto text-base" style={{ color: "#A3A3A3" }}>
-            Comece gratis. Crie propostas profissionais, edite quantas vezes precisar e faca upgrade quando quiser.
-          </p>
-        </div>
+      <div className="pt-2 pb-4 px-6 text-center relative z-10">
+        <span
+          className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
+          style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
+        >
+          Planos e Precos
+        </span>
+        <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+          Escolha o plano ideal<br className="hidden md:block" /> para seu negocio
+        </h1>
+        <p className="max-w-xl mx-auto text-base" style={{ color: "#A3A3A3" }}>
+          Comece gratis. Crie propostas profissionais, edite quantas vezes precisar e faca upgrade quando quiser.
+        </p>
       </div>
 
       {/* Pricing Cards + Comparison Table */}
