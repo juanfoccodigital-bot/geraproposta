@@ -7,6 +7,8 @@ import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronDown, Shield } from "lucide-react";
+import CheckoutModal from "@/components/ui/CheckoutModal";
+import { PLAN_LABELS, PLAN_PRICES } from "@/lib/abacatepay";
 
 /* ============================================
    PRICING PAGE
@@ -68,10 +70,20 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+interface PixData {
+  billingId: string;
+  brCode: string;
+  qrCodeImage: string;
+  plan: string;
+  amount: number;
+  cardUrl?: string;
+}
+
 export default function PricingPage() {
   const { user: userProfile } = useAuth();
   const router = useRouter();
   const [checkingOutPlan, setCheckingOutPlan] = useState<string | null>(null);
+  const [pixData, setPixData] = useState<PixData | null>(null);
 
   const handleCheckout = async (plan: string) => {
     if (!userProfile) {
@@ -80,94 +92,142 @@ export default function PricingPage() {
     }
     setCheckingOutPlan(plan);
     try {
-      const res = await fetch("/api/checkout", {
+      // Gerar PIX QR Code diretamente (sem redirect para pagina hosted)
+      const res = await fetch("/api/checkout/pix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+
+      if (data.billingId && (data.brCode || data.qrCodeImage)) {
+        // Sucesso: abrir modal proprio com QR Code
+        setPixData({
+          billingId: data.billingId,
+          brCode: data.brCode,
+          qrCodeImage: data.qrCodeImage,
+          plan,
+          amount: data.amount ?? PLAN_PRICES[plan],
+        });
       } else {
-        alert(data.error || "Erro ao processar pagamento");
-        setCheckingOutPlan(null);
+        // Fallback: tentar rota de billing antiga (retorna url para cartao)
+        const fallbackRes = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan }),
+        });
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.url) {
+          // Abrir modal com aba cartao pre-selecionada
+          setPixData({
+            billingId: "",
+            brCode: data.brCode || "",
+            qrCodeImage: data.qrCodeImage || "",
+            plan,
+            amount: PLAN_PRICES[plan],
+            cardUrl: fallbackData.url,
+          });
+        } else {
+          alert(data.error || fallbackData.error || "Erro ao processar pagamento");
+        }
       }
     } catch {
       alert("Erro ao processar pagamento. Tente novamente.");
+    } finally {
       setCheckingOutPlan(null);
     }
   };
 
+  const handlePaymentSuccess = () => {
+    setPixData(null);
+    router.push(`/dashboard?payment=success&plan=${pixData?.plan ?? ""}`);
+  };
+
   return (
-    <main className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
-      {/* Background glow — spans header + cards */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[160px] opacity-[0.07] pointer-events-none"
-        style={{ background: "#F97316" }}
-      />
+    <>
+      {pixData && (
+        <CheckoutModal
+          plan={pixData.plan}
+          planLabel={PLAN_LABELS[pixData.plan] ?? pixData.plan}
+          amount={pixData.amount}
+          billingId={pixData.billingId}
+          brCode={pixData.brCode}
+          qrCodeImage={pixData.qrCodeImage}
+          cardUrl={pixData.cardUrl}
+          onClose={() => setPixData(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      <main className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
+        {/* Background glow — spans header + cards */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[160px] opacity-[0.07] pointer-events-none"
+          style={{ background: "#F97316" }}
+        />
 
-      <Navbar />
+        <Navbar />
 
-      {/* Header */}
-      <div className="pt-2 pb-4 px-6 text-center relative z-10">
-        <span
-          className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
-          style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
-        >
-          Planos e Precos
-        </span>
-        <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-          Escolha o plano ideal<br className="hidden md:block" /> para seu negocio
-        </h1>
-        <p className="max-w-xl mx-auto text-base" style={{ color: "#A3A3A3" }}>
-          Comece gratis. Crie propostas profissionais, edite quantas vezes precisar e faca upgrade quando quiser.
-        </p>
-      </div>
-
-      {/* Pricing Cards + Comparison Table */}
-      <PricingSection
-        showComparisonTable
-        userPlan={userProfile?.plan}
-        onCheckout={handleCheckout}
-        checkingOutPlan={checkingOutPlan}
-      />
-
-      {/* Trust badges */}
-      <section className="py-6 px-6">
-        <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-6">
-          {[
-            { icon: <Shield className="w-4 h-4" />, text: "Cancele quando quiser" },
-            { icon: <Shield className="w-4 h-4" />, text: "Sem taxa de adesao" },
-            { icon: <Shield className="w-4 h-4" />, text: "Upgrade instantaneo" },
-          ].map((item) => (
-            <div key={item.text} className="flex items-center gap-2 text-sm" style={{ color: "#737373" }}>
-              <span style={{ color: "#22C55E" }}>{item.icon}</span>
-              {item.text}
-            </div>
-          ))}
+        {/* Header */}
+        <div className="pt-2 pb-4 px-6 text-center relative z-10">
+          <span
+            className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-5"
+            style={{ background: "#F9731615", color: "#F97316", border: "1px solid #F9731630" }}
+          >
+            Planos e Precos
+          </span>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+            Escolha o plano ideal<br className="hidden md:block" /> para seu negocio
+          </h1>
+          <p className="max-w-xl mx-auto text-base" style={{ color: "#A3A3A3" }}>
+            Comece gratis. Crie propostas profissionais, edite quantas vezes precisar e faca upgrade quando quiser.
+          </p>
         </div>
-      </section>
 
-      {/* FAQ */}
-      <section className="py-10 px-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Perguntas frequentes
-            </h2>
-            <p className="text-sm" style={{ color: "#737373" }}>
-              Tire suas duvidas sobre os planos
-            </p>
-          </div>
-          <div>
-            {faqs.map((faq, i) => (
-              <FaqItem key={i} {...faq} />
+        {/* Pricing Cards + Comparison Table */}
+        <PricingSection
+          showComparisonTable
+          userPlan={userProfile?.plan}
+          onCheckout={handleCheckout}
+          checkingOutPlan={checkingOutPlan}
+        />
+
+        {/* Trust badges */}
+        <section className="py-6 px-6">
+          <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-6">
+            {[
+              { icon: <Shield className="w-4 h-4" />, text: "Cancele quando quiser" },
+              { icon: <Shield className="w-4 h-4" />, text: "Sem taxa de adesao" },
+              { icon: <Shield className="w-4 h-4" />, text: "Upgrade instantaneo" },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-2 text-sm" style={{ color: "#737373" }}>
+                <span style={{ color: "#22C55E" }}>{item.icon}</span>
+                {item.text}
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Footer />
-    </main>
+        {/* FAQ */}
+        <section className="py-10 px-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                Perguntas frequentes
+              </h2>
+              <p className="text-sm" style={{ color: "#737373" }}>
+                Tire suas duvidas sobre os planos
+              </p>
+            </div>
+            <div>
+              {faqs.map((faq, i) => (
+                <FaqItem key={i} {...faq} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </main>
+    </>
   );
 }
