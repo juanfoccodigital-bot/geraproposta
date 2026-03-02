@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Check, Copy, Loader2, X, QrCode, CreditCard, AlertCircle, RefreshCw } from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 /* ============================================
-   CHECKOUT MODAL — PIX nativo
-   Exibe QR Code PIX gerado pela propria API.
-   Faz polling a cada 3s para confirmar pag.
-   Cartao: link discreto para pagina hosted.
+   CHECKOUT MODAL
+   PIX: QR Code nativo via AbacatePay
+   Cartao: Stripe Elements (transparente)
    ============================================ */
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface CheckoutModalProps {
     plan: string;
@@ -17,7 +20,6 @@ interface CheckoutModalProps {
     billingId: string;
     brCode: string;           // copia-e-cola
     qrCodeImage: string;      // base64 ou url
-    cardUrl?: string;         // fallback hosted (cartao)
     onClose: () => void;
     onSuccess: () => void;
 }
@@ -41,6 +43,142 @@ function useCountdown(seconds: number) {
     return { remaining, label: `${mm}:${ss}` };
 }
 
+/* ---- Stripe Card Form (formulario transparente) ---- */
+function CardForm({ plan, onSuccess, onClose }: { plan: string; onSuccess: () => void; onClose: () => void }) {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements) return;
+
+        setLoading(true);
+        setError("");
+
+        try {
+            // 1. Criar subscription no backend (retorna clientSecret)
+            const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ plan }),
+            });
+            const data = await res.json();
+
+            if (!data.clientSecret) {
+                setError(data.error || "Erro ao processar pagamento.");
+                setLoading(false);
+                return;
+            }
+
+            // 2. Confirmar pagamento com o cartao via Stripe Elements
+            const cardElement = elements.getElement(CardElement);
+            if (!cardElement) {
+                setError("Erro no formulario do cartao.");
+                setLoading(false);
+                return;
+            }
+
+            const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+                data.clientSecret,
+                {
+                    payment_method: { card: cardElement },
+                },
+            );
+
+            if (stripeError) {
+                setError(stripeError.message || "Erro no pagamento.");
+                setLoading(false);
+                return;
+            }
+
+            if (paymentIntent?.status === "succeeded") {
+                setSuccess(true);
+                setTimeout(onSuccess, 1500);
+            }
+        } catch {
+            setError("Erro de conexao. Tente novamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (success) {
+        return (
+            <div className="flex flex-col items-center gap-3 py-8">
+                <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{ background: "#16A34A20" }}
+                >
+                    <Check className="w-8 h-8" style={{ color: "#22C55E" }} />
+                </div>
+                <p className="text-white font-semibold text-lg">Pagamento confirmado!</p>
+                <p className="text-sm" style={{ color: "#737373" }}>Redirecionando para o dashboard…</p>
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-4">
+            <p className="text-sm" style={{ color: "#A3A3A3" }}>
+                Insira os dados do seu cartao de credito
+            </p>
+
+            <div
+                className="rounded-xl p-4"
+                style={{ background: "#0A0A0A", border: "1px solid #1F1F1F" }}
+            >
+                <CardElement
+                    options={{
+                        style: {
+                            base: {
+                                fontSize: "16px",
+                                color: "#FFFFFF",
+                                "::placeholder": { color: "#525252" },
+                                iconColor: "#F97316",
+                            },
+                            invalid: { color: "#EF4444" },
+                        },
+                        hidePostalCode: true,
+                    }}
+                />
+            </div>
+
+            {error && (
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#EF4444" }}>
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {error}
+                </div>
+            )}
+
+            <button
+                type="submit"
+                disabled={!stripe || loading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                style={{ background: "#F97316" }}
+            >
+                {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <><CreditCard className="w-4 h-4" /> Pagar com Cartao</>
+                )}
+            </button>
+
+            <button
+                type="button"
+                onClick={onClose}
+                className="text-xs text-center transition-colors hover:text-white"
+                style={{ color: "#525252" }}
+            >
+                Cancelar
+            </button>
+        </form>
+    );
+}
+
+/* ---- Modal Principal ---- */
 export default function CheckoutModal({
     plan,
     planLabel,
@@ -48,7 +186,6 @@ export default function CheckoutModal({
     billingId,
     brCode,
     qrCodeImage,
-    cardUrl,
     onClose,
     onSuccess,
 }: CheckoutModalProps) {
@@ -56,13 +193,12 @@ export default function CheckoutModal({
     const [copied, setCopied] = useState(false);
     const [status, setStatus] = useState<"pending" | "paid" | "expired">("pending");
     const [pollError, setPollError] = useState(false);
-    const [cardLoading, setCardLoading] = useState(false);
-    const [cardError, setCardError] = useState("");
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const { remaining, label: timeLabel } = useCountdown(3600);
 
-    /* Polling de status a cada 3s */
+    /* Polling de status PIX a cada 3s (so na aba PIX) */
     const poll = useCallback(async () => {
+        if (!billingId) return;
         try {
             const res = await fetch(`/api/checkout/pix/status?billingId=${billingId}`);
             if (!res.ok) { setPollError(true); return; }
@@ -82,14 +218,16 @@ export default function CheckoutModal({
     }, [billingId, onSuccess]);
 
     useEffect(() => {
-        intervalRef.current = setInterval(poll, 3000);
-        return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-    }, [poll]);
+        if (tab === "pix" && billingId) {
+            intervalRef.current = setInterval(poll, 3000);
+            return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+        }
+    }, [poll, tab, billingId]);
 
     /* Expirado por timer local */
     useEffect(() => {
-        if (remaining <= 0) setStatus("expired");
-    }, [remaining]);
+        if (remaining <= 0 && tab === "pix") setStatus("expired");
+    }, [remaining, tab]);
 
     const copyCode = async () => {
         try {
@@ -98,33 +236,6 @@ export default function CheckoutModal({
             setTimeout(() => setCopied(false), 3000);
         } catch {
             /* fallback */
-        }
-    };
-
-    /* Busca URL de cartão no /api/checkout e redireciona */
-    const handleCardRedirect = async () => {
-        if (cardUrl) {
-            window.open(cardUrl, "_blank");
-            return;
-        }
-        setCardLoading(true);
-        setCardError("");
-        try {
-            const res = await fetch("/api/checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ plan }),
-            });
-            const data = await res.json();
-            if (data.url) {
-                window.open(data.url, "_blank");
-            } else {
-                setCardError(data.error || "Erro ao gerar link de pagamento.");
-            }
-        } catch {
-            setCardError("Erro de conexão. Tente novamente.");
-        } finally {
-            setCardLoading(false);
         }
     };
 
@@ -188,14 +299,14 @@ export default function CheckoutModal({
                             }}
                         >
                             {t === "pix" ? <QrCode className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
-                            {t === "pix" ? "PIX" : "Cartão"}
+                            {t === "pix" ? "PIX" : "Cartao"}
                         </button>
                     ))}
                 </div>
 
                 {/* Body */}
                 <div className="p-6">
-                    {/* ---- TAB PIX ---- */}
+                    {/* ---- TAB PIX (AbacatePay) ---- */}
                     {tab === "pix" && (
                         <>
                             {status === "paid" && (
@@ -221,7 +332,7 @@ export default function CheckoutModal({
                                     </div>
                                     <p className="text-white font-semibold">QR Code expirado</p>
                                     <p className="text-sm text-center" style={{ color: "#737373" }}>
-                                        Feche e clique em "Assinar" novamente para gerar um novo QR Code.
+                                        Feche e clique em &quot;Assinar&quot; novamente para gerar um novo QR Code.
                                     </p>
                                     <button
                                         onClick={onClose}
@@ -238,7 +349,7 @@ export default function CheckoutModal({
                                     {/* Timer */}
                                     <div className="flex items-center justify-between mb-4">
                                         <p className="text-sm" style={{ color: "#A3A3A3" }}>
-                                            Escaneie o QR Code com seu app bancário
+                                            Escaneie o QR Code com seu app bancario
                                         </p>
                                         <span
                                             className="text-xs font-mono px-2 py-1 rounded-md"
@@ -269,7 +380,6 @@ export default function CheckoutModal({
                                                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
                                             />
                                         ) : (
-                                            /* Fallback: mostra brCode como QR via API pública */
                                             /* eslint-disable-next-line @next/next/no-img-element */
                                             <img
                                                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(brCode)}`}
@@ -292,7 +402,7 @@ export default function CheckoutModal({
                                         style={{ background: "#0A0A0A", border: "1px solid #1F1F1F" }}
                                     >
                                         <p className="text-xs mb-2 font-medium" style={{ color: "#737373" }}>
-                                            Ou copie o código PIX Copia e Cola
+                                            Ou copie o codigo PIX Copia e Cola
                                         </p>
                                         <div
                                             className="flex items-center gap-2 text-xs font-mono break-all"
@@ -312,7 +422,7 @@ export default function CheckoutModal({
                                             {copied ? (
                                                 <><Check className="w-4 h-4" /> Copiado!</>
                                             ) : (
-                                                <><Copy className="w-4 h-4" /> Copiar código</>
+                                                <><Copy className="w-4 h-4" /> Copiar codigo</>
                                             )}
                                         </button>
                                     </div>
@@ -327,7 +437,7 @@ export default function CheckoutModal({
                                         <p className="text-xs" style={{ color: "#737373" }}>
                                             {pollError
                                                 ? "Verificando status… aguarde."
-                                                : "Aguardando confirmação do pagamento…"}
+                                                : "Aguardando confirmacao do pagamento…"}
                                         </p>
                                     </div>
                                 </>
@@ -335,52 +445,25 @@ export default function CheckoutModal({
                         </>
                     )}
 
-                    {/* ---- TAB CARTÃO ---- */}
+                    {/* ---- TAB CARTAO (Stripe Elements) ---- */}
                     {tab === "card" && (
-                        <div className="flex flex-col items-center gap-5 py-8 text-center">
-                            <div
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
-                                style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
-                            >
-                                <CreditCard className="w-8 h-8" style={{ color: "#525252" }} />
-                                <span
-                                    className="absolute -top-2 -right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                    style={{ background: "#F97316", color: "#fff" }}
-                                >
-                                    EM BREVE
-                                </span>
-                            </div>
-
-                            <div>
-                                <p className="text-white font-semibold mb-1">Cartão de Crédito</p>
-                                <p className="text-sm" style={{ color: "#737373" }}>
-                                    Estamos integrando o Stripe para pagamentos com cartão direto aqui, sem sair da plataforma.
-                                </p>
-                            </div>
-
-                            <button
-                                disabled
-                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold"
-                                style={{
-                                    background: "#1A1A1A",
-                                    color: "#525252",
-                                    border: "1px solid #2A2A2A",
-                                    cursor: "not-allowed",
-                                }}
-                            >
-                                <CreditCard className="w-4 h-4" /> Em breve via Stripe
-                            </button>
-
-                            <div
-                                className="w-full rounded-xl p-3 flex items-start gap-2 text-left"
-                                style={{ background: "#0A0A0A", border: "1px solid #1F1F1F" }}
-                            >
-                                <QrCode className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#F97316" }} />
-                                <p className="text-xs" style={{ color: "#737373" }}>
-                                    <span className="text-white font-medium">Use o PIX agora:</span> é aprovado na hora, sem taxas adicionais e disponível em qualquer banco.
-                                </p>
-                            </div>
-                        </div>
+                        <Elements
+                            stripe={stripePromise}
+                            options={{
+                                appearance: {
+                                    theme: "night",
+                                    variables: {
+                                        colorPrimary: "#F97316",
+                                        colorBackground: "#0A0A0A",
+                                        colorText: "#FFFFFF",
+                                        colorDanger: "#EF4444",
+                                        borderRadius: "12px",
+                                    },
+                                },
+                            }}
+                        >
+                            <CardForm plan={plan} onSuccess={onSuccess} onClose={onClose} />
+                        </Elements>
                     )}
                 </div>
 
@@ -390,7 +473,9 @@ export default function CheckoutModal({
                     style={{ borderTop: "1px solid #1A1A1A", paddingTop: 16 }}
                 >
                     <p className="text-xs" style={{ color: "#525252" }}>
-                        🔒 Pagamento 100% seguro • Processado por AbacatePay
+                        {tab === "pix"
+                            ? "Pagamento PIX processado por AbacatePay"
+                            : "Pagamento seguro processado por Stripe"}
                     </p>
                 </div>
             </div>

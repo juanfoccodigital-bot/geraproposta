@@ -44,7 +44,7 @@ export default function AssinaturaPage() {
   const router = useRouter();
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [renewLoading, setRenewLoading] = useState(false);
+  const [renewLoading] = useState(false);
 
   if (loading) {
     return (
@@ -84,25 +84,8 @@ export default function AssinaturaPage() {
   const isExpiringSoon = daysLeft > 0 && daysLeft <= 7;
   const isExpired = subStatus === "expired" || (expiresAt && expiresAt < now);
 
-  const handleRenew = async () => {
-    setRenewLoading(true);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || "Erro ao processar renovacao. Tente novamente.");
-      }
-    } catch {
-      alert("Erro ao processar renovacao. Tente novamente.");
-    } finally {
-      setRenewLoading(false);
-    }
+  const handleRenew = () => {
+    router.push("/pricing");
   };
 
   const handleCancel = async () => {
@@ -299,7 +282,7 @@ export default function AssinaturaPage() {
 
         {/* Info text */}
         <p className="text-xs text-white/30 mt-6 text-center">
-          Pagamentos processados via PIX pelo AbacatePay. Duvidas? Acesse nosso{" "}
+          Pagamentos processados via PIX (AbacatePay) e Cartao (Stripe). Duvidas? Acesse nosso{" "}
           <a href="/suporte" className="text-[#F97316] hover:underline">suporte</a>.
         </p>
       </div>

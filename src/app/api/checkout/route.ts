@@ -1,53 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
-import { PLAN_PRICES, PLAN_LABELS } from "@/lib/abacatepay";
+import { getStripe, STRIPE_PRICE_IDS } from "@/lib/stripe";
 
 /* ============================================
    POST /api/checkout
-   Cria uma cobranca no AbacatePay e retorna
-   a URL de pagamento para redirect.
-   Usa fetch direto em vez do SDK para melhor
-   controle de erros.
+   Cria uma Subscription no Stripe com
+   payment_behavior: default_incomplete.
+   Retorna clientSecret para confirmar pagamento
+   via Stripe Elements no frontend (transparente).
    ============================================ */
-
-const ABACATE_BASE = "https://api.abacatepay.com/v1";
 
 function getAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
-}
-
-async function abacateRequest(path: string, data: unknown) {
-  const apiKey = process.env.ABACATEPAY_API_KEY;
-  if (!apiKey) throw new Error("ABACATEPAY_API_KEY not configured");
-
-  const res = await fetch(`${ABACATE_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  const text = await res.text();
-  console.log(`AbacatePay ${path} status:${res.status} response:`, text);
-
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    throw new Error(`AbacatePay returned non-JSON: ${text}`);
-  }
-
-  if (!res.ok) {
-    throw new Error(`AbacatePay error (${res.status}): ${JSON.stringify(json)}`);
-  }
-
-  return json;
 }
 
 export async function POST(request: NextRequest) {
@@ -62,7 +30,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const plan = body.plan as string;
 
-    if (!plan || !PLAN_PRICES[plan]) {
+    if (!plan || !STRIPE_PRICE_IDS[plan]) {
       return NextResponse.json({ error: "Plano invalido" }, { status: 400 });
     }
 
@@ -71,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Buscar perfil do usuario
     const { data: profile } = await admin
       .from("profiles")
-      .select("email, full_name, phone, tax_id, abacate_customer_id")
+      .select("email, full_name, stripe_customer_id")
       .eq("id", user.id)
       .single();
 
@@ -79,93 +47,67 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Perfil nao encontrado" }, { status: 404 });
     }
 
-    // Determinar origin para URLs de redirect (usar env var para evitar open redirect)
-    const origin = process.env.NEXT_PUBLIC_APP_URL || "https://www.geraproposta.com";
-
-    // Montar dados do billing
+    const stripe = getStripe();
     const customerEmail = profile.email || user.email || "";
-    const customerName = profile.full_name || "Cliente";
-    const customerId = profile.abacate_customer_id;
 
+    // Buscar ou criar customer no Stripe
+    let customerId = profile.stripe_customer_id;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: customerEmail,
+        name: profile.full_name || undefined,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+      await admin
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", user.id);
+    }
+
+    // Criar Subscription com pagamento incompleto
+    // Isso gera um PaymentIntent que o frontend confirma com Stripe Elements
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: STRIPE_PRICE_IDS[plan] }],
+      payment_behavior: "default_incomplete",
+      payment_settings: {
+        payment_method_types: ["card"],
+        save_default_payment_method: "on_subscription",
+      },
+      metadata: {
+        supabase_user_id: user.id,
+        plan,
+      },
+      expand: ["latest_invoice.payment_intent"],
+    });
+
+    // Extrair clientSecret do PaymentIntent da invoice
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const billingData: any = {
-      frequency: "ONE_TIME",
-      methods: ["PIX", "CARD"],
-      products: [
-        {
-          externalId: `gp-${plan}-${user.id}`,
-          name: `${PLAN_LABELS[plan]} - GeraProposta`,
-          quantity: 1,
-          price: PLAN_PRICES[plan],
-        },
-      ],
-      returnUrl: `${origin}/pricing`,
-      completionUrl: `${origin}/dashboard?payment=success&plan=${plan}`,
-    };
+    const invoice = subscription.latest_invoice as any;
+    const clientSecret = invoice?.payment_intent?.client_secret as string | undefined;
 
-    // Se ja tem customerId salvo, usa ele. Senao, passa dados inline.
-    const customerInline = {
-      name: customerName,
-      email: customerEmail,
-      cellphone: profile.phone || "11999999999",
-      taxId: profile.tax_id || "52998224725",
-    };
-
-    if (customerId) {
-      billingData.customerId = customerId;
-    } else {
-      billingData.customer = customerInline;
-    }
-
-    console.log("AbacatePay billing request:", JSON.stringify(billingData));
-    let billingJson;
-    try {
-      billingJson = await abacateRequest("/billing/create", billingData);
-    } catch (err) {
-      // Se customer nao existe (ex: mudou de dev para prod), recria inline
-      if (customerId && err instanceof Error && err.message.includes("Customer not found")) {
-        console.log("AbacatePay: customer not found, recreating inline");
-        delete billingData.customerId;
-        billingData.customer = customerInline;
-        billingJson = await abacateRequest("/billing/create", billingData);
-        // Limpar customer ID antigo do perfil
-        await admin
-          .from("profiles")
-          .update({ abacate_customer_id: null })
-          .eq("id", user.id);
-      } else {
-        throw err;
-      }
-    }
-
-    const billing = billingJson.data || billingJson;
-
-    if (!billing || !billing.id) {
+    if (!clientSecret) {
       return NextResponse.json(
-        { error: `Resposta inesperada do AbacatePay: ${JSON.stringify(billingJson)}` },
+        { error: "Erro ao criar assinatura: clientSecret nao disponivel" },
         { status: 500 },
       );
     }
 
-    // Salvar customer ID se veio na resposta
-    const billingCustomerId = billing.customer?.id;
-    if (billingCustomerId && !customerId) {
-      await admin
-        .from("profiles")
-        .update({ abacate_customer_id: billingCustomerId })
-        .eq("id", user.id);
-    }
-
-    // Salvar billing ID no perfil para rastrear no webhook
+    // Salvar subscription ID no perfil
     await admin
       .from("profiles")
       .update({
-        subscription_id: billing.id,
+        subscription_id: subscription.id,
+        stripe_customer_id: customerId,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
 
-    return NextResponse.json({ url: billing.url });
+    return NextResponse.json({
+      clientSecret,
+      subscriptionId: subscription.id,
+    });
   } catch (err) {
     console.error("Checkout error:", err);
     const message = err instanceof Error ? err.message : "Erro interno";

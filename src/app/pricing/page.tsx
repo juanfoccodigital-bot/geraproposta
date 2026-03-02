@@ -8,7 +8,7 @@ import Footer from "@/components/landing/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronDown, Shield } from "lucide-react";
 import CheckoutModal from "@/components/ui/CheckoutModal";
-import { PLAN_LABELS, PLAN_PRICES } from "@/lib/abacatepay";
+import { PLAN_LABELS, PLAN_PRICES } from "@/lib/stripe";
 
 /* ============================================
    PRICING PAGE
@@ -76,7 +76,6 @@ interface PixData {
   qrCodeImage: string;
   plan: string;
   amount: number;
-  cardUrl?: string;
 }
 
 export default function PricingPage() {
@@ -101,7 +100,6 @@ export default function PricingPage() {
       const data = await res.json();
 
       if (data.billingId && (data.brCode || data.qrCodeImage)) {
-        // Sucesso: abrir modal proprio com QR Code
         setPixData({
           billingId: data.billingId,
           brCode: data.brCode,
@@ -110,26 +108,7 @@ export default function PricingPage() {
           amount: data.amount ?? PLAN_PRICES[plan],
         });
       } else {
-        // Fallback: tentar rota de billing antiga (retorna url para cartao)
-        const fallbackRes = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan }),
-        });
-        const fallbackData = await fallbackRes.json();
-        if (fallbackData.url) {
-          // Abrir modal com aba cartao pre-selecionada
-          setPixData({
-            billingId: "",
-            brCode: data.brCode || "",
-            qrCodeImage: data.qrCodeImage || "",
-            plan,
-            amount: PLAN_PRICES[plan],
-            cardUrl: fallbackData.url,
-          });
-        } else {
-          alert(data.error || fallbackData.error || "Erro ao processar pagamento");
-        }
+        alert(data.error || "Erro ao processar pagamento");
       }
     } catch {
       alert("Erro ao processar pagamento. Tente novamente.");
@@ -153,7 +132,6 @@ export default function PricingPage() {
           billingId={pixData.billingId}
           brCode={pixData.brCode}
           qrCodeImage={pixData.qrCodeImage}
-          cardUrl={pixData.cardUrl}
           onClose={() => setPixData(null)}
           onSuccess={handlePaymentSuccess}
         />

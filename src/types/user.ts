@@ -28,6 +28,7 @@ export interface UserProfile {
   subscription_status: SubscriptionStatus;
   subscription_expires_at: string | null;
   abacate_customer_id: string | null;
+  stripe_customer_id: string | null;
   last_payment_at: string | null;
   /* Timestamps */
   created_at: string;
