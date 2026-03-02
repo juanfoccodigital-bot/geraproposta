@@ -56,6 +56,8 @@ export default function CheckoutModal({
     const [copied, setCopied] = useState(false);
     const [status, setStatus] = useState<"pending" | "paid" | "expired">("pending");
     const [pollError, setPollError] = useState(false);
+    const [cardLoading, setCardLoading] = useState(false);
+    const [cardError, setCardError] = useState("");
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const { remaining, label: timeLabel } = useCountdown(3600);
 
@@ -96,6 +98,33 @@ export default function CheckoutModal({
             setTimeout(() => setCopied(false), 3000);
         } catch {
             /* fallback */
+        }
+    };
+
+    /* Busca URL de cartão no /api/checkout e redireciona */
+    const handleCardRedirect = async () => {
+        if (cardUrl) {
+            window.open(cardUrl, "_blank");
+            return;
+        }
+        setCardLoading(true);
+        setCardError("");
+        try {
+            const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ plan }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.open(data.url, "_blank");
+            } else {
+                setCardError(data.error || "Erro ao gerar link de pagamento.");
+            }
+        } catch {
+            setCardError("Erro de conexão. Tente novamente.");
+        } finally {
+            setCardLoading(false);
         }
     };
 
@@ -308,33 +337,53 @@ export default function CheckoutModal({
 
                     {/* ---- TAB CARTÃO ---- */}
                     {tab === "card" && (
-                        <div className="flex flex-col items-center gap-4 py-6 text-center">
-                            <CreditCard className="w-12 h-12" style={{ color: "#737373" }} />
+                        <div className="flex flex-col items-center gap-5 py-6 text-center">
+                            <div
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                                style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
+                            >
+                                <CreditCard className="w-8 h-8" style={{ color: "#A3A3A3" }} />
+                            </div>
+
                             <div>
-                                <p className="text-white font-semibold mb-1">Pagamento com cartão</p>
+                                <p className="text-white font-semibold mb-1">Pagar com Cartão de Crédito</p>
                                 <p className="text-sm" style={{ color: "#737373" }}>
-                                    O pagamento por cartão é processado de forma segura em uma página dedicada.
+                                    Você será redirecionado para uma página segura para inserir os dados do cartão.
                                 </p>
                             </div>
-                            {cardUrl ? (
-                                <a
-                                    href={cardUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
-                                    style={{ background: "#F97316", color: "#fff" }}
-                                >
-                                    <CreditCard className="w-4 h-4" />
-                                    Pagar com cartão
-                                </a>
-                            ) : (
-                                <p className="text-xs" style={{ color: "#737373" }}>
-                                    Opção de cartão indisponível no momento. Use o PIX.
-                                </p>
+
+                            <button
+                                onClick={handleCardRedirect}
+                                disabled={cardLoading}
+                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-opacity"
+                                style={{
+                                    background: cardLoading ? "#292929" : "#F97316",
+                                    color: cardLoading ? "#737373" : "#fff",
+                                    opacity: cardLoading ? 0.7 : 1,
+                                    cursor: cardLoading ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                {cardLoading ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" /> Gerando link seguro…</>
+                                ) : (
+                                    <><CreditCard className="w-4 h-4" /> Pagar com cartão de crédito</>
+                                )}
+                            </button>
+
+                            {cardError && (
+                                <p className="text-xs" style={{ color: "#EF4444" }}>{cardError}</p>
                             )}
-                            <p className="text-xs" style={{ color: "#525252" }}>
-                                PIX é instantâneo e não tem taxa adicional. Recomendamos usar PIX.
-                            </p>
+
+                            <div
+                                className="w-full rounded-xl p-3 flex items-start gap-2 text-left"
+                                style={{ background: "#0A0A0A", border: "1px solid #1F1F1F" }}
+                            >
+                                <QrCode className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#F97316" }} />
+                                <p className="text-xs" style={{ color: "#737373" }}>
+                                    <span className="text-white font-medium">Dica:</span> PIX é aprovado na hora e sem taxa extra.
+                                    Volte para a aba PIX para pagar mais rápido.
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>
