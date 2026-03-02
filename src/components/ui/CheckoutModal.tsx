@@ -337,42 +337,39 @@ export default function CheckoutModal({
 
                     {/* ---- TAB CARTÃO ---- */}
                     {tab === "card" && (
-                        <div className="flex flex-col items-center gap-5 py-6 text-center">
+                        <div className="flex flex-col items-center gap-5 py-8 text-center">
                             <div
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
                                 style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
                             >
-                                <CreditCard className="w-8 h-8" style={{ color: "#A3A3A3" }} />
+                                <CreditCard className="w-8 h-8" style={{ color: "#525252" }} />
+                                <span
+                                    className="absolute -top-2 -right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                    style={{ background: "#F97316", color: "#fff" }}
+                                >
+                                    EM BREVE
+                                </span>
                             </div>
 
                             <div>
-                                <p className="text-white font-semibold mb-1">Pagar com Cartão de Crédito</p>
+                                <p className="text-white font-semibold mb-1">Cartão de Crédito</p>
                                 <p className="text-sm" style={{ color: "#737373" }}>
-                                    Você será redirecionado para uma página segura para inserir os dados do cartão.
+                                    Estamos integrando o Stripe para pagamentos com cartão direto aqui, sem sair da plataforma.
                                 </p>
                             </div>
 
                             <button
-                                onClick={handleCardRedirect}
-                                disabled={cardLoading}
-                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-opacity"
+                                disabled
+                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold"
                                 style={{
-                                    background: cardLoading ? "#292929" : "#F97316",
-                                    color: cardLoading ? "#737373" : "#fff",
-                                    opacity: cardLoading ? 0.7 : 1,
-                                    cursor: cardLoading ? "not-allowed" : "pointer",
+                                    background: "#1A1A1A",
+                                    color: "#525252",
+                                    border: "1px solid #2A2A2A",
+                                    cursor: "not-allowed",
                                 }}
                             >
-                                {cardLoading ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" /> Gerando link seguro…</>
-                                ) : (
-                                    <><CreditCard className="w-4 h-4" /> Pagar com cartão de crédito</>
-                                )}
+                                <CreditCard className="w-4 h-4" /> Em breve via Stripe
                             </button>
-
-                            {cardError && (
-                                <p className="text-xs" style={{ color: "#EF4444" }}>{cardError}</p>
-                            )}
 
                             <div
                                 className="w-full rounded-xl p-3 flex items-start gap-2 text-left"
@@ -380,8 +377,7 @@ export default function CheckoutModal({
                             >
                                 <QrCode className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#F97316" }} />
                                 <p className="text-xs" style={{ color: "#737373" }}>
-                                    <span className="text-white font-medium">Dica:</span> PIX é aprovado na hora e sem taxa extra.
-                                    Volte para a aba PIX para pagar mais rápido.
+                                    <span className="text-white font-medium">Use o PIX agora:</span> é aprovado na hora, sem taxas adicionais e disponível em qualquer banco.
                                 </p>
                             </div>
                         </div>
