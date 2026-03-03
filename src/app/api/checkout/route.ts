@@ -66,7 +66,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Cancelar subscriptions incompletas anteriores deste customer
-    // para evitar acumular lixo no Stripe
     const existingSubs = await stripe.subscriptions.list({
       customer: customerId,
       status: "incomplete",
@@ -76,11 +75,11 @@ export async function POST(request: NextRequest) {
         await stripe.subscriptions.cancel(sub.id);
         console.log("Cancelled incomplete subscription:", sub.id);
       } catch {
-        // ignorar se falhar
+        // ignorar
       }
     }
 
-    // Criar Subscription com pagamento incompleto (SEM expand)
+    // Criar Subscription com pagamento incompleto
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: STRIPE_PRICE_IDS[plan] }],
@@ -97,56 +96,40 @@ export async function POST(request: NextRequest) {
 
     console.log("Subscription created:", subscription.id, "status:", subscription.status);
 
-    // Buscar invoice explicitamente (nao depender de expand)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const latestInvoiceId = (subscription as any).latest_invoice;
-    const invoiceId = typeof latestInvoiceId === "object" && latestInvoiceId !== null
-      ? latestInvoiceId.id
-      : latestInvoiceId;
+    // Na API 2025+ (basil/clover), o campo payment_intent foi removido do Invoice.
+    // Precisamos buscar o PaymentIntent pelo customer.
+    // Como acabamos de limpar subs incompletas e criar uma nova,
+    // o PI mais recente com status requires_payment_method e o correto.
+    const paymentIntents = await stripe.paymentIntents.list({
+      customer: customerId,
+      limit: 5,
+    });
 
-    if (!invoiceId) {
-      console.error("No latest_invoice on subscription:", subscription.id);
+    // Encontrar o PI pendente (requires_payment_method ou requires_confirmation)
+    const pendingPI = paymentIntents.data.find(
+      (pi) =>
+        pi.status === "requires_payment_method" ||
+        pi.status === "requires_confirmation",
+    );
+
+    if (!pendingPI || !pendingPI.client_secret) {
+      // Fallback: tentar via invoice.payments (nova API)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const latestInvoiceId = (subscription as any).latest_invoice;
+      const invId = typeof latestInvoiceId === "object" ? latestInvoiceId?.id : latestInvoiceId;
+
+      console.error("No pending PI found via list. Subscription:", subscription.id,
+        "Invoice:", invId,
+        "PI statuses:", paymentIntents.data.map(p => `${p.id}:${p.status}`).join(", "));
+
       return NextResponse.json(
-        { error: "Erro ao criar assinatura: invoice nao encontrada" },
+        { error: "Erro ao criar assinatura: pagamento pendente nao encontrado" },
         { status: 500 },
       );
     }
 
-    console.log("Invoice ID:", invoiceId);
-
-    // Buscar a invoice completa
-    const invoice = await stripe.invoices.retrieve(invoiceId as string);
-
-    // Extrair payment_intent ID da invoice
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const piField = (invoice as any).payment_intent;
-    const paymentIntentId = typeof piField === "object" && piField !== null
-      ? piField.id
-      : piField;
-
-    if (!paymentIntentId) {
-      console.error("No payment_intent on invoice:", invoiceId);
-      return NextResponse.json(
-        { error: "Erro ao criar assinatura: payment intent nao encontrado" },
-        { status: 500 },
-      );
-    }
-
-    console.log("PaymentIntent ID:", paymentIntentId);
-
-    // Buscar o PaymentIntent para obter o client_secret
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string);
-    const clientSecret = paymentIntent.client_secret;
-
-    if (!clientSecret) {
-      console.error("No client_secret on PaymentIntent:", paymentIntentId);
-      return NextResponse.json(
-        { error: "Erro ao criar assinatura: clientSecret nao disponivel" },
-        { status: 500 },
-      );
-    }
-
-    console.log("clientSecret obtained successfully for subscription:", subscription.id);
+    const clientSecret = pendingPI.client_secret;
+    console.log("clientSecret obtained via PI list:", pendingPI.id, "for subscription:", subscription.id);
 
     // Salvar subscription ID no perfil
     await admin
