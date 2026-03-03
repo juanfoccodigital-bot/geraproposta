@@ -77,7 +77,7 @@ export default function ProductsShowcase() {
         {/* Section header */}
         <div className="text-center mb-8 md:mb-10">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            3 Produtos. <span className="bg-gradient-to-r from-[#F97316] to-[#FB923C] bg-clip-text text-transparent">1 Plataforma.</span>
+            3 Produtos <span className="bg-gradient-to-r from-[#F97316] to-[#FB923C] bg-clip-text text-transparent">1 Plataforma</span>
           </h2>
           <p className="text-sm text-white/40 max-w-xl mx-auto">
             Tudo que voce precisa para apresentar, conectar e converter seus clientes.
