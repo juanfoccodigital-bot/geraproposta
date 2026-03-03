@@ -48,7 +48,7 @@ export default function BiolinkSidebar({ isPremium }: BiolinkSidebarProps) {
       <div className="flex-1 overflow-y-auto">
         {state.activeTab === "profile" && <ProfileTab />}
         {state.activeTab === "blocks" && <BlocksTab isPremium={isPremium} />}
-        {state.activeTab === "theme" && <ThemeTab />}
+        {state.activeTab === "theme" && <ThemeTab isPremium={isPremium} />}
       </div>
     </div>
   );

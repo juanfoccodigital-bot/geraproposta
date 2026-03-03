@@ -40,9 +40,9 @@ function getBackgroundStyle(theme: BiolinkTheme): React.CSSProperties {
   if (theme.backgroundType === "gradient" && theme.backgroundValue) {
     return { background: theme.backgroundValue };
   }
-  if (theme.backgroundType === "image" && theme.backgroundValue) {
+  if (theme.backgroundType === "image" && (theme.backgroundImage || theme.backgroundValue)) {
     return {
-      backgroundImage: `url(${theme.backgroundValue})`,
+      backgroundImage: `url(${theme.backgroundImage || theme.backgroundValue})`,
       backgroundSize: "cover",
       backgroundPosition: "center",
     };
@@ -153,6 +153,9 @@ export default function BiolinkRenderer({ config, className, preview }: BiolinkR
   const { theme, blocks } = config;
   const effects = theme.effects;
   const hasAnimatedBg = effects?.animatedBg && effects.animatedBg !== "none";
+  const hasImageBg = theme.backgroundType === "image" && (theme.backgroundImage || theme.backgroundValue);
+  const hasBlur = hasImageBg && (theme.backgroundBlur ?? 0) > 0;
+  const hasOverlay = hasImageBg && (theme.backgroundOverlay ?? 0) > 0;
   const entrance = (!preview && effects?.entrance && effects.entrance !== "none") ? effects.entrance : null;
   const variants = entrance ? entranceVariants[entrance as keyof typeof entranceVariants] : null;
 
@@ -163,9 +166,33 @@ export default function BiolinkRenderer({ config, className, preview }: BiolinkR
         ...getBackgroundStyle(theme),
         color: theme.textColor,
         fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
-        position: hasAnimatedBg ? "relative" : undefined,
+        position: (hasAnimatedBg || hasBlur || hasOverlay) ? "relative" : undefined,
+        overflow: hasBlur ? "hidden" : undefined,
       }}
     >
+      {/* Image background blur layer */}
+      {hasBlur && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${theme.backgroundImage || theme.backgroundValue})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: `blur(${theme.backgroundBlur}px)`,
+            transform: "scale(1.1)",
+          }}
+        />
+      )}
+      {/* Image background overlay */}
+      {hasOverlay && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: theme.backgroundOverlayColor || "#000000",
+            opacity: (theme.backgroundOverlay ?? 0) / 100,
+          }}
+        />
+      )}
       {hasAnimatedBg && effects && (
         <AnimatedBackground effects={effects} buttonColor={theme.buttonColor} />
       )}

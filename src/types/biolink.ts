@@ -140,6 +140,15 @@ export interface BiolinkTheme {
   buttonTextColor: string;
   font: string;
   effects?: BiolinkEffects;
+  /** Gradient visual picker fields */
+  gradientColor1?: string;
+  gradientColor2?: string;
+  gradientDirection?: string;
+  /** Background image fields */
+  backgroundImage?: string;
+  backgroundBlur?: number;
+  backgroundOverlay?: number;
+  backgroundOverlayColor?: string;
 }
 
 // ============================================

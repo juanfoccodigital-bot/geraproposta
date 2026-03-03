@@ -23,13 +23,13 @@ export default function AvatarBlock({ data, theme }: { data: AvatarData; theme?:
         hasGradient ? (
           /* Gradient ring around avatar image */
           <div
-            className="w-[100px] h-[100px] rounded-full flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${effects!.gradientColors![0]}, ${effects!.gradientColors![1]})`, padding: 3 }}
+            className="w-[100px] h-[100px] rounded-full relative"
+            style={{ background: `linear-gradient(135deg, ${effects!.gradientColors![0]}, ${effects!.gradientColors![1]})` }}
           >
             <img
               src={data.image}
               alt={data.name}
-              className="w-full h-full rounded-full object-cover"
+              className="absolute inset-[3px] rounded-full object-cover"
             />
           </div>
         ) : (

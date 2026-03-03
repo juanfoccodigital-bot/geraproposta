@@ -2,7 +2,8 @@
 
 import { useBiolinkEditor } from "@/contexts/BiolinkEditorContext";
 import type { BiolinkTheme, BiolinkEffects } from "@/types/biolink";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Lock } from "lucide-react";
+import ImageUpload from "@/components/editor/controls/ImageUpload";
 
 const buttonStyles = [
   { id: "filled" as const, label: "Preenchido" },
@@ -14,6 +15,14 @@ const buttonStyles = [
 const bgTypes = [
   { id: "solid" as const, label: "Cor sólida" },
   { id: "gradient" as const, label: "Gradiente" },
+  { id: "image" as const, label: "Imagem", premium: true },
+];
+
+const gradientDirections = [
+  { id: "135deg", label: "Diagonal" },
+  { id: "90deg", label: "Horizontal" },
+  { id: "180deg", label: "Vertical" },
+  { id: "45deg", label: "Diagonal inv." },
 ];
 
 const fontOptions = ["Inter", "Playfair Display", "Space Grotesk", "Montserrat", "Nunito", "Poppins", "Cormorant Garamond", "Open Sans", "Lora"];
@@ -50,7 +59,11 @@ function EffectToggle({ label, checked, onChange }: { label: string; checked: bo
   );
 }
 
-export default function ThemeTab() {
+interface ThemeTabProps {
+  isPremium?: boolean;
+}
+
+export default function ThemeTab({ isPremium = false }: ThemeTabProps) {
   const { state, dispatch } = useBiolinkEditor();
   const theme = state.config.theme;
   const effects = theme.effects || {};
@@ -63,26 +76,50 @@ export default function ThemeTab() {
     update({ effects: { ...effects, ...updates } });
   }
 
+  function handleGradientChange(color1?: string, color2?: string, direction?: string) {
+    const c1 = color1 ?? theme.gradientColor1 ?? "#667eea";
+    const c2 = color2 ?? theme.gradientColor2 ?? "#764ba2";
+    const dir = direction ?? theme.gradientDirection ?? "135deg";
+    const css = `linear-gradient(${dir}, ${c1}, ${c2})`;
+    update({
+      backgroundValue: css,
+      gradientColor1: c1,
+      gradientColor2: c2,
+      gradientDirection: dir,
+    });
+  }
+
   return (
     <div className="p-4 space-y-6">
       {/* Background */}
       <div>
         <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Fundo</h3>
         <div className="flex gap-2 mb-3">
-          {bgTypes.map((bt) => (
-            <button
-              key={bt.id}
-              onClick={() => update({ backgroundType: bt.id })}
-              className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
-                theme.backgroundType === bt.id
-                  ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
-                  : "border-white/10 text-white/40 hover:border-white/20"
-              }`}
-            >
-              {bt.label}
-            </button>
-          ))}
+          {bgTypes.map((bt) => {
+            const locked = bt.premium && !isPremium;
+            return (
+              <button
+                key={bt.id}
+                onClick={() => !locked && update({ backgroundType: bt.id })}
+                disabled={locked}
+                className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors cursor-pointer ${
+                  theme.backgroundType === bt.id
+                    ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
+                    : locked
+                      ? "border-white/5 text-white/20 cursor-not-allowed"
+                      : "border-white/10 text-white/40 hover:border-white/20"
+                }`}
+              >
+                <span className="flex items-center justify-center gap-1">
+                  {bt.label}
+                  {locked && <Lock size={10} className="text-white/20" />}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Solid color */}
         {theme.backgroundType === "solid" && (
           <div className="flex items-center gap-3">
             <input
@@ -99,16 +136,90 @@ export default function ThemeTab() {
             />
           </div>
         )}
+
+        {/* Gradient — visual picker */}
         {theme.backgroundType === "gradient" && (
-          <div>
-            <label className="text-xs text-white/40 mb-1 block">CSS Gradient</label>
-            <input
-              type="text"
-              value={theme.backgroundValue}
-              onChange={(e) => update({ backgroundValue: e.target.value })}
-              placeholder="linear-gradient(135deg, #667eea, #764ba2)"
-              className="w-full px-3 py-1.5 rounded-lg text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={theme.gradientColor1 || "#667eea"}
+                onChange={(e) => handleGradientChange(e.target.value, undefined, undefined)}
+                className="w-8 h-8 rounded cursor-pointer border border-white/10"
+              />
+              <span className="text-[10px] text-white/30">&rarr;</span>
+              <input
+                type="color"
+                value={theme.gradientColor2 || "#764ba2"}
+                onChange={(e) => handleGradientChange(undefined, e.target.value, undefined)}
+                className="w-8 h-8 rounded cursor-pointer border border-white/10"
+              />
+              {/* Preview swatch */}
+              <div
+                className="flex-1 h-8 rounded-lg border border-white/10"
+                style={{ background: theme.backgroundValue || `linear-gradient(135deg, ${theme.gradientColor1 || "#667eea"}, ${theme.gradientColor2 || "#764ba2"})` }}
+              />
+            </div>
+            <div>
+              <span className="text-[10px] text-white/40 block mb-1.5">Direção</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {gradientDirections.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => handleGradientChange(undefined, undefined, d.id)}
+                    className={`py-1 text-[10px] rounded-md border transition-colors cursor-pointer ${
+                      (theme.gradientDirection || "135deg") === d.id
+                        ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
+                        : "border-white/10 text-white/40 hover:border-white/20"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Image background (PRO) */}
+        {theme.backgroundType === "image" && (
+          <div className="space-y-3">
+            <ImageUpload
+              value={theme.backgroundImage || ""}
+              onChange={(url) => update({ backgroundImage: url, backgroundValue: url })}
+              variant="dark"
             />
+            <div>
+              <span className="text-[10px] text-white/40 block mb-1.5">Desfoque ({theme.backgroundBlur ?? 0}px)</span>
+              <input
+                type="range"
+                min={0}
+                max={20}
+                value={theme.backgroundBlur ?? 0}
+                onChange={(e) => update({ backgroundBlur: Number(e.target.value) })}
+                className="w-full accent-[#F97316]"
+              />
+            </div>
+            <div>
+              <span className="text-[10px] text-white/40 block mb-1.5">Overlay ({theme.backgroundOverlay ?? 0}%)</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={theme.backgroundOverlay ?? 0}
+                onChange={(e) => update({ backgroundOverlay: Number(e.target.value) })}
+                className="w-full accent-[#F97316]"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={theme.backgroundOverlayColor || "#000000"}
+                onChange={(e) => update({ backgroundOverlayColor: e.target.value })}
+                className="w-8 h-8 rounded cursor-pointer border border-white/10"
+              />
+              <span className="text-xs text-white/40">Cor do overlay</span>
+            </div>
           </div>
         )}
       </div>
@@ -140,7 +251,7 @@ export default function ThemeTab() {
             <button
               key={bs.id}
               onClick={() => update({ buttonStyle: bs.id })}
-              className={`py-2 text-xs rounded-lg border transition-colors ${
+              className={`py-2 text-xs rounded-lg border transition-colors cursor-pointer ${
                 theme.buttonStyle === bs.id
                   ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
                   : "border-white/10 text-white/40 hover:border-white/20"
@@ -208,7 +319,7 @@ export default function ThemeTab() {
                 <button
                   key={opt.id}
                   onClick={() => updateEffects({ entrance: opt.id })}
-                  className={`py-1 text-[10px] rounded-md border transition-colors ${
+                  className={`py-1 text-[10px] rounded-md border transition-colors cursor-pointer ${
                     (effects.entrance || "none") === opt.id
                       ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
                       : "border-white/10 text-white/40 hover:border-white/20"
@@ -228,7 +339,7 @@ export default function ThemeTab() {
                 <button
                   key={opt.id}
                   onClick={() => updateEffects({ animatedBg: opt.id })}
-                  className={`py-1 text-[10px] rounded-md border transition-colors ${
+                  className={`py-1 text-[10px] rounded-md border transition-colors cursor-pointer ${
                     (effects.animatedBg || "none") === opt.id
                       ? "border-[#F97316] text-[#F97316] bg-[#F97316]/10"
                       : "border-white/10 text-white/40 hover:border-white/20"
