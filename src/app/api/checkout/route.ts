@@ -65,8 +65,22 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id);
     }
 
-    // Criar Subscription com pagamento incompleto
-    // Isso gera um PaymentIntent que o frontend confirma com Stripe Elements
+    // Cancelar subscriptions incompletas anteriores deste customer
+    // para evitar acumular lixo no Stripe
+    const existingSubs = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "incomplete",
+    });
+    for (const sub of existingSubs.data) {
+      try {
+        await stripe.subscriptions.cancel(sub.id);
+        console.log("Cancelled incomplete subscription:", sub.id);
+      } catch {
+        // ignorar se falhar
+      }
+    }
+
+    // Criar Subscription com pagamento incompleto (SEM expand)
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: STRIPE_PRICE_IDS[plan] }],
@@ -79,54 +93,60 @@ export async function POST(request: NextRequest) {
         supabase_user_id: user.id,
         plan,
       },
-      expand: ["latest_invoice.payment_intent"],
     });
 
-    // Extrair clientSecret do PaymentIntent da invoice
+    console.log("Subscription created:", subscription.id, "status:", subscription.status);
+
+    // Buscar invoice explicitamente (nao depender de expand)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sub = subscription as any;
-    const invoice = sub.latest_invoice;
+    const latestInvoiceId = (subscription as any).latest_invoice;
+    const invoiceId = typeof latestInvoiceId === "object" && latestInvoiceId !== null
+      ? latestInvoiceId.id
+      : latestInvoiceId;
 
-    console.log("Stripe subscription created:", subscription.id);
-    console.log("Stripe subscription status:", subscription.status);
-    console.log("Stripe latest_invoice type:", typeof invoice);
-    console.log("Stripe latest_invoice:", JSON.stringify(invoice, null, 2)?.substring(0, 500));
-
-    // O expand pode retornar o objeto ou apenas o ID
-    let clientSecret: string | undefined;
-
-    if (typeof invoice === "object" && invoice !== null) {
-      // Invoice expandida — buscar payment_intent
-      const pi = invoice.payment_intent;
-      if (typeof pi === "object" && pi !== null) {
-        clientSecret = pi.client_secret;
-      } else if (typeof pi === "string") {
-        // payment_intent veio como ID, buscar o client_secret
-        const paymentIntent = await stripe.paymentIntents.retrieve(pi);
-        clientSecret = paymentIntent.client_secret ?? undefined;
-      }
-    } else if (typeof invoice === "string") {
-      // latest_invoice veio como ID, buscar invoice + payment_intent
-      const fullInvoice = await stripe.invoices.retrieve(invoice, {
-        expand: ["payment_intent"],
-      });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pi = (fullInvoice as any).payment_intent;
-      if (typeof pi === "object" && pi !== null) {
-        clientSecret = pi.client_secret;
-      } else if (typeof pi === "string") {
-        const paymentIntent = await stripe.paymentIntents.retrieve(pi);
-        clientSecret = paymentIntent.client_secret ?? undefined;
-      }
+    if (!invoiceId) {
+      console.error("No latest_invoice on subscription:", subscription.id);
+      return NextResponse.json(
+        { error: "Erro ao criar assinatura: invoice nao encontrada" },
+        { status: 500 },
+      );
     }
 
+    console.log("Invoice ID:", invoiceId);
+
+    // Buscar a invoice completa
+    const invoice = await stripe.invoices.retrieve(invoiceId as string);
+
+    // Extrair payment_intent ID da invoice
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const piField = (invoice as any).payment_intent;
+    const paymentIntentId = typeof piField === "object" && piField !== null
+      ? piField.id
+      : piField;
+
+    if (!paymentIntentId) {
+      console.error("No payment_intent on invoice:", invoiceId);
+      return NextResponse.json(
+        { error: "Erro ao criar assinatura: payment intent nao encontrado" },
+        { status: 500 },
+      );
+    }
+
+    console.log("PaymentIntent ID:", paymentIntentId);
+
+    // Buscar o PaymentIntent para obter o client_secret
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string);
+    const clientSecret = paymentIntent.client_secret;
+
     if (!clientSecret) {
-      console.error("Stripe: clientSecret not found. Subscription:", subscription.id);
+      console.error("No client_secret on PaymentIntent:", paymentIntentId);
       return NextResponse.json(
         { error: "Erro ao criar assinatura: clientSecret nao disponivel" },
         { status: 500 },
       );
     }
+
+    console.log("clientSecret obtained successfully for subscription:", subscription.id);
 
     // Salvar subscription ID no perfil
     await admin
