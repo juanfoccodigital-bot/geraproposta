@@ -84,10 +84,44 @@ export async function POST(request: NextRequest) {
 
     // Extrair clientSecret do PaymentIntent da invoice
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const invoice = subscription.latest_invoice as any;
-    const clientSecret = invoice?.payment_intent?.client_secret as string | undefined;
+    const sub = subscription as any;
+    const invoice = sub.latest_invoice;
+
+    console.log("Stripe subscription created:", subscription.id);
+    console.log("Stripe subscription status:", subscription.status);
+    console.log("Stripe latest_invoice type:", typeof invoice);
+    console.log("Stripe latest_invoice:", JSON.stringify(invoice, null, 2)?.substring(0, 500));
+
+    // O expand pode retornar o objeto ou apenas o ID
+    let clientSecret: string | undefined;
+
+    if (typeof invoice === "object" && invoice !== null) {
+      // Invoice expandida — buscar payment_intent
+      const pi = invoice.payment_intent;
+      if (typeof pi === "object" && pi !== null) {
+        clientSecret = pi.client_secret;
+      } else if (typeof pi === "string") {
+        // payment_intent veio como ID, buscar o client_secret
+        const paymentIntent = await stripe.paymentIntents.retrieve(pi);
+        clientSecret = paymentIntent.client_secret ?? undefined;
+      }
+    } else if (typeof invoice === "string") {
+      // latest_invoice veio como ID, buscar invoice + payment_intent
+      const fullInvoice = await stripe.invoices.retrieve(invoice, {
+        expand: ["payment_intent"],
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pi = (fullInvoice as any).payment_intent;
+      if (typeof pi === "object" && pi !== null) {
+        clientSecret = pi.client_secret;
+      } else if (typeof pi === "string") {
+        const paymentIntent = await stripe.paymentIntents.retrieve(pi);
+        clientSecret = paymentIntent.client_secret ?? undefined;
+      }
+    }
 
     if (!clientSecret) {
+      console.error("Stripe: clientSecret not found. Subscription:", subscription.id);
       return NextResponse.json(
         { error: "Erro ao criar assinatura: clientSecret nao disponivel" },
         { status: 500 },
