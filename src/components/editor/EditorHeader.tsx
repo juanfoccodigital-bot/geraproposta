@@ -170,7 +170,7 @@ export default function EditorHeader() {
           <button
             onClick={() => router.push("/dashboard")}
             className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
-            title="Voltar ao Dashboard"
+            title="Voltar as Propostas"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>

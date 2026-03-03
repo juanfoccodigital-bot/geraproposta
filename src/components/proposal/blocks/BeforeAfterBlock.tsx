@@ -79,7 +79,7 @@ function SliderView({ config }: { config: BeforeAfterData }) {
         className="absolute top-0 bottom-0 w-1 z-10"
         style={{ left: `${position}%`, backgroundColor: "#fff", transform: "translateX(-50%)" }}
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing">
           <GripVertical className="w-5 h-5 text-zinc-500" />
         </div>
       </div>

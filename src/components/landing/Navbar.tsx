@@ -94,7 +94,7 @@ export default function Navbar({
 
   const authLinks = [
     { label: "Home", href: "/" },
-    { label: "Dashboard", href: "/dashboard" },
+    { label: "Propostas", href: "/dashboard" },
     { label: "Links", href: "/biolink" },
     // Sites: em breve (desabilitado temporariamente)
     // ...(user && PLAN_LIMITS[user.plan].maxSites > 0 ? [{ label: "Sites", href: "/sites" }] : []),
@@ -124,7 +124,7 @@ export default function Navbar({
       {/* ── Top bar ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
         {/* Logo */}
-        <Link href="/" className="flex-shrink-0">
+        <Link href="/" className="flex-shrink-0 cursor-pointer">
           <Logo size="md" />
         </Link>
 
@@ -245,15 +245,15 @@ export default function Navbar({
                     <Link
                       href="/dashboard"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all"
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer"
                     >
                       <LayoutGrid size={13} />
-                      Dashboard
+                      Propostas
                     </Link>
                     <Link
                       href="/templates"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all"
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer"
                     >
                       <Search size={13} />
                       Templates
@@ -262,7 +262,7 @@ export default function Navbar({
                       <Link
                         href="/pricing"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-[#1A1A1A] transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-[#1A1A1A] transition-all cursor-pointer"
                         style={{ color: "#F97316" }}
                       >
                         <Zap size={13} />
@@ -272,7 +272,7 @@ export default function Navbar({
                       <Link
                         href="/dashboard/assinatura"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer"
                       >
                         <CreditCard size={13} />
                         Minha Assinatura
@@ -281,7 +281,7 @@ export default function Navbar({
                     <Link
                       href="/suporte"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all"
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer"
                     >
                       <MessageCircle size={13} />
                       Suporte
@@ -319,7 +319,7 @@ export default function Navbar({
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90 cursor-pointer"
               style={{ color: "#F97316" }}
             >
               <Crown size={14} />
@@ -327,14 +327,14 @@ export default function Navbar({
             </Link>
             <Link
               href="/signup"
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:text-white"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:text-white cursor-pointer"
               style={{ color: "#A3A3A3" }}
             >
               Cadastre-se
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all hover:bg-[#1A1A1A]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all hover:bg-[#1A1A1A] cursor-pointer"
               style={{ color: "#FFFFFF", borderColor: "#333333" }}
             >
               Entrar
@@ -347,7 +347,7 @@ export default function Navbar({
           {!loading && isLoggedIn && (
             <Link
               href="/editor/new"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white cursor-pointer"
               style={{ backgroundColor: "#F97316" }}
             >
               <Plus size={14} />
@@ -367,7 +367,7 @@ export default function Navbar({
             <Link
               key={l.href}
               href={l.href}
-              className="text-xs font-medium whitespace-nowrap transition-colors hover:text-white"
+              className="text-xs font-medium whitespace-nowrap transition-colors hover:text-white cursor-pointer"
               style={{ color: pathname === l.href ? "#F97316" : "#A3A3A3" }}
             >
               {l.label}
@@ -445,7 +445,7 @@ export default function Navbar({
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium"
+                className="text-sm font-medium cursor-pointer"
                 style={{ color: pathname === l.href ? "#F97316" : "#A3A3A3" }}
               >
                 {l.label}
@@ -478,7 +478,7 @@ export default function Navbar({
                   <Link
                     href="/pricing"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-2 py-2.5 rounded-lg text-sm font-semibold"
+                    className="flex items-center gap-2 px-2 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
                     style={{ color: "#F97316" }}
                   >
                     <Zap size={14} />
@@ -496,14 +496,14 @@ export default function Navbar({
               </div>
             ) : !loading ? (
               <div className="flex flex-col gap-2 pt-3 border-t" style={{ borderColor: "#262626" }}>
-                <Link href="/pricing" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold" style={{ color: "#F97316" }}>
+                <Link href="/pricing" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold cursor-pointer" style={{ color: "#F97316" }}>
                   <Crown size={14} />
                   Assine o Premium
                 </Link>
-                <Link href="/signup" className="px-4 py-2.5 rounded-lg text-sm font-medium text-center border" style={{ color: "#A3A3A3", borderColor: "#262626" }}>
+                <Link href="/signup" className="px-4 py-2.5 rounded-lg text-sm font-medium text-center border cursor-pointer" style={{ color: "#A3A3A3", borderColor: "#262626" }}>
                   Cadastre-se
                 </Link>
-                <Link href="/login" className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white text-center" style={{ background: "#F97316" }}>
+                <Link href="/login" className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white text-center cursor-pointer" style={{ background: "#F97316" }}>
                   Entrar
                 </Link>
               </div>

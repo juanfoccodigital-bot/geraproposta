@@ -91,7 +91,7 @@ export default function ProfileTab() {
           {linksData.items.map((item) => (
             <div key={item.id} className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
               <div className="flex items-center gap-2">
-                <GripVertical size={14} className="text-white/20 flex-shrink-0" />
+                <GripVertical size={14} className="text-white/20 flex-shrink-0 cursor-grab active:cursor-grabbing" />
                 <input
                   type="text"
                   value={item.title}

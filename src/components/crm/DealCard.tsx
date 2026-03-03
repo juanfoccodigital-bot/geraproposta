@@ -78,7 +78,7 @@ export function DealCardOverlay({ deal, onClick }: { deal: Deal; onClick: (d: De
       style={{ background: "#1A1A1A", border: "1px solid #404040", width: 260 }}
     >
       <div className="flex items-start gap-2">
-        <div className="mt-0.5 p-0.5"><GripVertical size={12} style={{ color: "#737373" }} /></div>
+        <div className="mt-0.5 p-0.5 cursor-grab active:cursor-grabbing"><GripVertical size={12} style={{ color: "#737373" }} /></div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-white truncate">{deal.title}</p>
           {deal.contact && (
