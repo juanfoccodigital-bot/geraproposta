@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Check, Copy, Loader2, X, QrCode, CreditCard, AlertCircle, RefreshCw } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { loadStripe, PaymentRequest } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  PaymentRequestButtonElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 /* ============================================
    CHECKOUT MODAL
@@ -43,13 +49,109 @@ function useCountdown(seconds: number) {
     return { remaining, label: `${mm}:${ss}` };
 }
 
-/* ---- Stripe Card Form (formulario transparente) ---- */
-function CardForm({ plan, onSuccess, onClose }: { plan: string; onSuccess: () => void; onClose: () => void }) {
+/* ---- Stripe Card Form (formulario transparente + Apple/Google Pay) ---- */
+function CardForm({
+    plan,
+    amount,
+    planLabel,
+    onSuccess,
+    onClose,
+}: {
+    plan: string;
+    amount: number;
+    planLabel: string;
+    onSuccess: () => void;
+    onClose: () => void;
+}) {
     const stripe = useStripe();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+
+    // Apple Pay / Google Pay via PaymentRequest API
+    const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
+    const [walletAvailable, setWalletAvailable] = useState(false);
+
+    useEffect(() => {
+        if (!stripe) return;
+
+        const pr = stripe.paymentRequest({
+            country: "BR",
+            currency: "brl",
+            total: {
+                label: planLabel,
+                amount, // em centavos
+            },
+            requestPayerName: true,
+            requestPayerEmail: true,
+        });
+
+        pr.canMakePayment().then((result) => {
+            if (result) {
+                setPaymentRequest(pr);
+                setWalletAvailable(true);
+            }
+        });
+
+        // Quando o usuario confirma no Apple/Google Pay
+        pr.on("paymentmethod", async (ev) => {
+            setLoading(true);
+            setError("");
+
+            try {
+                // 1. Criar subscription no backend
+                const res = await fetch("/api/checkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ plan }),
+                });
+                const data = await res.json();
+
+                if (!data.clientSecret) {
+                    ev.complete("fail");
+                    setError(data.error || "Erro ao processar pagamento.");
+                    setLoading(false);
+                    return;
+                }
+
+                // 2. Confirmar com o payment method da wallet
+                const { error: confirmError, paymentIntent } =
+                    await stripe.confirmCardPayment(
+                        data.clientSecret,
+                        { payment_method: ev.paymentMethod.id },
+                        { handleActions: false },
+                    );
+
+                if (confirmError) {
+                    ev.complete("fail");
+                    setError(confirmError.message || "Erro no pagamento.");
+                    setLoading(false);
+                    return;
+                }
+
+                ev.complete("success");
+
+                // Pode precisar de 3DS
+                if (paymentIntent?.status === "requires_action") {
+                    const { error: actionError } = await stripe.confirmCardPayment(data.clientSecret);
+                    if (actionError) {
+                        setError(actionError.message || "Erro na autenticacao.");
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                setSuccess(true);
+                setTimeout(onSuccess, 1500);
+            } catch {
+                ev.complete("fail");
+                setError("Erro de conexao. Tente novamente.");
+            } finally {
+                setLoading(false);
+            }
+        });
+    }, [stripe, plan, amount, planLabel, onSuccess]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -122,6 +224,29 @@ function CardForm({ plan, onSuccess, onClose }: { plan: string; onSuccess: () =>
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-4">
+            {/* Apple Pay / Google Pay button */}
+            {walletAvailable && paymentRequest && (
+                <>
+                    <PaymentRequestButtonElement
+                        options={{
+                            paymentRequest,
+                            style: {
+                                paymentRequestButton: {
+                                    type: "default",
+                                    theme: "light",
+                                    height: "48px",
+                                },
+                            },
+                        }}
+                    />
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px" style={{ background: "#262626" }} />
+                        <span className="text-xs" style={{ color: "#525252" }}>ou pague com cartao</span>
+                        <div className="flex-1 h-px" style={{ background: "#262626" }} />
+                    </div>
+                </>
+            )}
+
             <p className="text-sm" style={{ color: "#A3A3A3" }}>
                 Insira os dados do seu cartao de credito
             </p>
@@ -462,7 +587,7 @@ export default function CheckoutModal({
                                 },
                             }}
                         >
-                            <CardForm plan={plan} onSuccess={onSuccess} onClose={onClose} />
+                            <CardForm plan={plan} amount={amount} planLabel={planLabel} onSuccess={onSuccess} onClose={onClose} />
                         </Elements>
                     )}
                 </div>
