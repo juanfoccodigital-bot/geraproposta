@@ -15,9 +15,9 @@ export const templateConfig: ProposalConfig = {
       goldDark: "#475569",
       background: "#F8FAFC",
       foreground: "#0F172A",
-      beige: "#F1F5F9",
+      beige: "#ECF1F4",
       nude: "#E2E8F0",
-      cream: "#F8FAFC",
+      cream: "#F0F2F4",
     },
     fonts: {
       heading: "IBM Plex Sans",

@@ -17,7 +17,7 @@ export const templateConfig: ProposalConfig = {
       foreground: "#2D1B0E",
       beige: "#F5EDE5",
       nude: "#E8D5C4",
-      cream: "#FAF4EE",
+      cream: "#F5F1ED",
     },
     fonts: {
       heading: "Libre Baskerville",

@@ -16,9 +16,9 @@ export const templateConfig: ProposalConfig = {
       goldDark: "#B8942E",
       background: "#050505",
       foreground: "#F5F0E8",
-      beige: "#0D0D08",
+      beige: "#10100D",
       nude: "#1A1A10",
-      cream: "#080805",
+      cream: "#0D0D0D",
     },
     fonts: {
       heading: "Playfair Display",
