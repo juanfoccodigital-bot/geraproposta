@@ -104,7 +104,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: "Erro ao atualizar biolink" }, { status: 500 });
+    if (error) {
+      console.error("Biolink update error:", error.message, error.code, error.details);
+      return NextResponse.json({ error: `Erro ao atualizar biolink: ${error.message}` }, { status: 500 });
+    }
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
