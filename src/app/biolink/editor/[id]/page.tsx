@@ -33,7 +33,7 @@ function EditorContent() {
         if (!res.ok) throw new Error("Biolink não encontrado");
         const record: BiolinkRecord = await res.json();
         dispatch({ type: "SET_CONFIG", payload: record.config });
-        dispatch({ type: "SET_META", payload: { biolinkId: record.id, slug: record.slug, title: record.title } });
+        dispatch({ type: "SET_META", payload: { biolinkId: record.id, slug: record.slug, title: record.title, customDomain: record.custom_domain } });
 
         // Check plan
         const profileRes = await fetch("/api/usage");
@@ -58,6 +58,7 @@ function EditorContent() {
       body: JSON.stringify({
         title: state.title,
         slug: state.slug,
+        custom_domain: state.customDomain,
         config: state.config,
       }),
     });
@@ -66,7 +67,7 @@ function EditorContent() {
       throw new Error(err.error || "Erro ao salvar");
     }
     dispatch({ type: "MARK_CLEAN" });
-  }, [state.biolinkId, state.title, state.slug, state.config, dispatch]);
+  }, [state.biolinkId, state.title, state.slug, state.customDomain, state.config, dispatch]);
 
   const { saving: autoSaving, lastSaved } = useAutosave({
     data: state.config,

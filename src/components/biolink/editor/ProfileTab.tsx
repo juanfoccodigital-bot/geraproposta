@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useBiolinkEditor } from "@/contexts/BiolinkEditorContext";
 import type { AvatarData, LinksData, LinkItem } from "@/types/biolink";
-import { Plus, Trash2, GripVertical, Upload, Crop, Link, Check, X, Loader2, Copy } from "lucide-react";
-import ImageUpload from "@/components/editor/controls/ImageUpload";
+import { Plus, Trash2, GripVertical, Upload, Crop, Link, Check, X, Loader2, Copy, Globe, Lock } from "lucide-react";
 import AvatarCropModal from "./AvatarCropModal";
+
+const APP_DOMAIN = "geraproposta.com";
 
 function SlugEditor() {
   const { state, dispatch } = useBiolinkEditor();
@@ -57,10 +58,11 @@ function SlugEditor() {
     if (e.key === "Enter") { e.preventDefault(); applySlug(); }
   }
 
-  const publicUrl = `geraproposta.com/link/${value || state.slug || "..."}`;
+  const slug = value || state.slug || "...";
+  const subdomainUrl = `${slug}.${APP_DOMAIN}`;
 
   function copyUrl() {
-    navigator.clipboard.writeText(`https://${publicUrl}`);
+    navigator.clipboard.writeText(`https://${subdomainUrl}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -69,45 +71,135 @@ function SlugEditor() {
     <div className="space-y-2">
       <label className="text-xs text-white/40 mb-1 flex items-center gap-1.5">
         <Link size={12} />
-        Slug (URL pública)
+        Seu Link
       </label>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-white/20 pointer-events-none select-none">/link/</span>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            placeholder="meu-link"
-            className="w-full pl-[50px] pr-8 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#F97316]/50"
-          />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
-            {status === "checking" && <Loader2 size={14} className="text-white/30 animate-spin" />}
-            {status === "available" && <Check size={14} className="text-green-400" />}
-            {status === "taken" && <X size={14} className="text-red-400" />}
-            {status === "invalid" && value.length > 0 && <X size={14} className="text-yellow-400" />}
-          </span>
-        </div>
+      <div className="relative">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="meu-link"
+          className="w-full px-3 pr-8 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#F97316]/50"
+        />
+        <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+          {status === "checking" && <Loader2 size={14} className="text-white/30 animate-spin" />}
+          {status === "available" && <Check size={14} className="text-green-400" />}
+          {status === "taken" && <X size={14} className="text-red-400" />}
+          {status === "invalid" && value.length > 0 && <X size={14} className="text-yellow-400" />}
+        </span>
       </div>
       {/* Status message */}
       {status === "taken" && <p className="text-[10px] text-red-400">Esse slug já está em uso</p>}
       {status === "invalid" && value.length > 0 && <p className="text-[10px] text-yellow-400">Mínimo 3 caracteres (letras, números e hifens)</p>}
       {status === "available" && <p className="text-[10px] text-green-400">Disponível! Salve para aplicar</p>}
-      {/* Public URL preview */}
+      {/* Subdomain URL — primary */}
       <button
         onClick={copyUrl}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] text-white/30 hover:text-white/50 hover:border-white/10 transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F97316]/5 border border-[#F97316]/20 text-[11px] text-[#F97316]/70 hover:text-[#F97316] hover:border-[#F97316]/30 transition-colors cursor-pointer group"
       >
-        <span className="truncate flex-1 text-left">{publicUrl}</span>
+        <span className="truncate flex-1 text-left font-medium">{subdomainUrl}</span>
         {copied ? <Check size={12} className="text-green-400 flex-shrink-0" /> : <Copy size={12} className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />}
       </button>
     </div>
   );
 }
 
-export default function ProfileTab() {
+function CustomDomainEditor({ isPremium }: { isPremium: boolean }) {
+  const { state, dispatch } = useBiolinkEditor();
+  const [value, setValue] = useState(state.customDomain || "");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setValue(state.customDomain || "");
+  }, [state.customDomain]);
+
+  function handleChange(raw: string) {
+    const clean = raw.toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "").trim();
+    setValue(clean);
+  }
+
+  function apply() {
+    dispatch({ type: "SET_CUSTOM_DOMAIN", payload: value || null });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  function handleBlur() {
+    if (value !== (state.customDomain || "")) apply();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") { e.preventDefault(); apply(); }
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="space-y-2">
+        <label className="text-xs text-white/40 mb-1 flex items-center gap-1.5">
+          <Globe size={12} />
+          Domínio Próprio
+        </label>
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-[11px] text-white/20">
+          <Lock size={12} />
+          <span>Disponível no plano Pro e Plus</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs text-white/40 mb-1 flex items-center gap-1.5">
+        <Globe size={12} />
+        Domínio Próprio
+      </label>
+      <div className="relative">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="meudominio.com.br"
+          className="w-full px-3 pr-8 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+        />
+        {saved && (
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+            <Check size={14} className="text-green-400" />
+          </span>
+        )}
+      </div>
+      {value && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] text-white/30">Configure no seu provedor de domínio:</p>
+          <div className="rounded-lg bg-white/[0.03] border border-white/5 p-2.5 space-y-1">
+            <div className="flex items-center gap-2 text-[10px]">
+              <span className="text-white/30 w-12">Tipo:</span>
+              <span className="text-white/60 font-mono">CNAME</span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px]">
+              <span className="text-white/30 w-12">Nome:</span>
+              <span className="text-white/60 font-mono">@</span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px]">
+              <span className="text-white/30 w-12">Valor:</span>
+              <span className="text-white/60 font-mono">cname.vercel-dns.com</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-white/20">Após configurar o DNS, adicione o domínio no painel do Vercel</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ProfileTabProps {
+  isPremium?: boolean;
+}
+
+export default function ProfileTab({ isPremium = false }: ProfileTabProps) {
   const { state, dispatch } = useBiolinkEditor();
   const blocks = state.config.blocks;
   const avatarBlock = blocks.find((b) => b.type === "avatar");
@@ -190,6 +282,11 @@ export default function ProfileTab() {
       <div>
         <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Link Público</h3>
         <SlugEditor />
+      </div>
+
+      {/* Custom Domain Section */}
+      <div>
+        <CustomDomainEditor isPremium={isPremium} />
       </div>
 
       {/* Avatar Section */}

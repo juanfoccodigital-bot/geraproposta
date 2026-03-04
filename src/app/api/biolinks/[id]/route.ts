@@ -77,6 +77,25 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         updates.slug = newSlug;
       }
     }
+    if (parsed.data.custom_domain !== undefined) {
+      if (parsed.data.custom_domain) {
+        // Clean and validate domain
+        const domain = parsed.data.custom_domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+        if (domain) {
+          // Check uniqueness
+          const { data: domainExists } = await supabase
+            .from("biolinks")
+            .select("id")
+            .eq("custom_domain", domain)
+            .neq("id", id)
+            .maybeSingle();
+          if (domainExists) return NextResponse.json({ error: "Domínio já está em uso" }, { status: 409 });
+          updates.custom_domain = domain;
+        }
+      } else {
+        updates.custom_domain = null;
+      }
+    }
 
     const { data, error } = await supabase
       .from("biolinks")

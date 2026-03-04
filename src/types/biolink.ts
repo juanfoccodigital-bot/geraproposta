@@ -239,6 +239,7 @@ export interface BiolinkRecord {
   config: BiolinkConfig;
   views: number;
   is_active: boolean;
+  custom_domain: string | null;
   created_at: string;
   updated_at: string;
 }

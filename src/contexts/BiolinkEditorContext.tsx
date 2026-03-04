@@ -17,6 +17,7 @@ interface BiolinkEditorState {
   activeBlockId: string | null;
   biolinkId: string | null;
   slug: string | null;
+  customDomain: string | null;
   title: string;
   history: BiolinkConfig[];
   historyIndex: number;
@@ -43,6 +44,7 @@ const initialState: BiolinkEditorState = {
   activeBlockId: null,
   biolinkId: null,
   slug: null,
+  customDomain: null,
   title: "Meu Link",
   history: [defaultConfig],
   historyIndex: 0,
@@ -52,7 +54,7 @@ const initialState: BiolinkEditorState = {
 // ── Ações ──
 type BiolinkAction =
   | { type: "SET_CONFIG"; payload: BiolinkConfig }
-  | { type: "SET_META"; payload: { biolinkId: string; slug: string; title: string } }
+  | { type: "SET_META"; payload: { biolinkId: string; slug: string; title: string; customDomain?: string | null } }
   | { type: "UPDATE_THEME"; payload: Partial<BiolinkTheme> }
   | { type: "UPDATE_BLOCK_DATA"; blockId: string; payload: Record<string, unknown> }
   | { type: "TOGGLE_BLOCK"; blockId: string }
@@ -63,6 +65,7 @@ type BiolinkAction =
   | { type: "SET_ACTIVE_BLOCK"; payload: string | null }
   | { type: "SET_TITLE"; payload: string }
   | { type: "SET_SLUG"; payload: string }
+  | { type: "SET_CUSTOM_DOMAIN"; payload: string | null }
   | { type: "MARK_CLEAN" }
   | { type: "UNDO" }
   | { type: "REDO" };
@@ -93,6 +96,7 @@ function biolinkReducer(state: BiolinkEditorState, action: BiolinkAction): Bioli
         biolinkId: action.payload.biolinkId,
         slug: action.payload.slug,
         title: action.payload.title,
+        customDomain: action.payload.customDomain ?? state.customDomain,
       };
     }
     case "UPDATE_THEME": {
@@ -158,6 +162,8 @@ function biolinkReducer(state: BiolinkEditorState, action: BiolinkAction): Bioli
       return { ...state, title: action.payload, isDirty: true };
     case "SET_SLUG":
       return { ...state, slug: action.payload, isDirty: true };
+    case "SET_CUSTOM_DOMAIN":
+      return { ...state, customDomain: action.payload, isDirty: true };
     case "MARK_CLEAN":
       return { ...state, isDirty: false };
     case "UNDO": {

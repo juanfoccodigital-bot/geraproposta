@@ -27,6 +27,7 @@ export const PLAN_LIMITS = {
     maxBiolinks: 1,
     biolinkCustomSlug: false,
     biolinkAllTemplates: false,
+    biolinkCustomDomain: false,
     // GeraSites
     maxSites: 0,
     siteAllTemplates: false,
@@ -55,6 +56,7 @@ export const PLAN_LIMITS = {
     maxBiolinks: 3,
     biolinkCustomSlug: true,
     biolinkAllTemplates: true,
+    biolinkCustomDomain: false,
     // GeraSites
     maxSites: 2,
     siteAllTemplates: true,
@@ -83,6 +85,7 @@ export const PLAN_LIMITS = {
     maxBiolinks: 10,
     biolinkCustomSlug: true,
     biolinkAllTemplates: true,
+    biolinkCustomDomain: true,
     // GeraSites
     maxSites: 10,
     siteAllTemplates: true,
@@ -111,6 +114,7 @@ export const PLAN_LIMITS = {
     maxBiolinks: Infinity,
     biolinkCustomSlug: true,
     biolinkAllTemplates: true,
+    biolinkCustomDomain: true,
     // GeraSites
     maxSites: Infinity,
     siteAllTemplates: true,

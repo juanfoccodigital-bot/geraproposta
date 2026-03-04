@@ -74,6 +74,7 @@ export const updateBiolinkSchema = z.object({
   is_active: z.boolean().optional(),
   template_id: safeString(100).optional(),
   slug: safeString(60).optional(),
+  custom_domain: safeString(253).optional().nullable(),
 });
 
 // ---- Sites ----
