@@ -27,7 +27,7 @@ interface Props {
 
 export default function DiagnosticoSection({ config }: Props) {
   return (
-    <section id="diagnostico" className="py-24 sm:py-32 bg-white">
+    <section id="diagnostico" className="py-24 sm:py-32 bg-background">
       <div className="max-w-6xl mx-auto px-6">
         {/* Cabeçalho */}
         <ScrollReveal className="text-center mb-16">
@@ -55,7 +55,7 @@ export default function DiagnosticoSection({ config }: Props) {
                   {config.images.map((img, i) => (
                     <div
                       key={i}
-                      className="relative w-56 sm:w-64 bg-white rounded-xl border border-gold/10 shadow-sm overflow-hidden hover:shadow-lg hover:shadow-gold/5 hover:border-gold/20 transition-all duration-500"
+                      className="relative w-56 sm:w-64 bg-cream rounded-xl border border-gold/10 shadow-sm overflow-hidden hover:shadow-lg hover:shadow-gold/5 hover:border-gold/20 transition-all duration-500"
                     >
                       <Image
                         src={img.src}
@@ -78,7 +78,7 @@ export default function DiagnosticoSection({ config }: Props) {
             const Icon = resolveIcon(item.icon);
             return (
               <ScrollReveal key={index} delay={index * 0.1}>
-                <div className="group h-full p-6 sm:p-8 rounded-2xl bg-white border border-foreground/5 hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
+                <div className="group h-full p-6 sm:p-8 rounded-2xl bg-cream border border-foreground/5 hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-beige flex items-center justify-center mb-5 group-hover:bg-gold/10 transition-colors duration-300">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>

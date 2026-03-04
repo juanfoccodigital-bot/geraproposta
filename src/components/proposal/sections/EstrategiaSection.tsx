@@ -37,7 +37,7 @@ export default function EstrategiaSection({ config }: Props) {
             const Icon = resolveIcon(card.icon);
             return (
               <ScrollReveal key={index} delay={index * 0.15}>
-                <div className="group h-full p-8 sm:p-10 rounded-2xl bg-white border border-foreground/5 hover:border-gold/20 hover:shadow-xl hover:shadow-gold/5 transition-all duration-500 hover:-translate-y-1">
+                <div className="group h-full p-8 sm:p-10 rounded-2xl bg-cream border border-foreground/5 hover:border-gold/20 hover:shadow-xl hover:shadow-gold/5 transition-all duration-500 hover:-translate-y-1">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center shadow-lg shadow-gold/20 group-hover:shadow-gold/30 transition-shadow duration-300">
                       <Icon className="w-6 h-6 text-white" />

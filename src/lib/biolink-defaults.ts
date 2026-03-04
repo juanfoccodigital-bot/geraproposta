@@ -40,6 +40,44 @@ const defaults: Record<BiolinkBlockType, BiolinkBlockData> = {
     items: ["Novidade", "Confira", "Link na Bio"],
     speed: "normal",
   },
+  "image-link": {
+    items: [
+      { id: "il-1", title: "Produto 1", subtitle: "Confira agora", url: "https://", image: "", enabled: true },
+      { id: "il-2", title: "Produto 2", subtitle: "Saiba mais", url: "https://", image: "", enabled: true },
+    ],
+    layout: "overlay",
+  },
+  cta: {
+    headline: "Pronto para começar?",
+    description: "Clique no botão abaixo e transforme seu negócio hoje.",
+    buttonText: "Quero Começar Agora",
+    buttonUrl: "https://",
+    image: "",
+    style: "gradient",
+  },
+  banner: {
+    image: "",
+    title: "Título do Banner",
+    subtitle: "Subtítulo com mais informações",
+    url: "https://",
+    overlay: 40,
+    height: "md",
+  },
+  countdown: {
+    targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    label: "Oferta termina em",
+    endMessage: "Oferta encerrada!",
+    style: "cards",
+  },
+  carousel: {
+    items: [
+      { id: "cr-1", image: "", title: "Slide 1", url: "https://" },
+      { id: "cr-2", image: "", title: "Slide 2", url: "https://" },
+      { id: "cr-3", image: "", title: "Slide 3", url: "https://" },
+    ],
+    autoPlay: 4,
+    aspectRatio: "16:9",
+  },
 };
 
 export function getBiolinkBlockDefault(type: BiolinkBlockType): BiolinkBlockData {

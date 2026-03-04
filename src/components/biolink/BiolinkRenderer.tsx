@@ -10,6 +10,11 @@ import TextBlock from "./blocks/TextBlock";
 import FeaturedBlock from "./blocks/FeaturedBlock";
 import VideoBlock from "./blocks/VideoBlock";
 import MarqueeBlock from "./blocks/MarqueeBlock";
+import ImageLinkBlock from "./blocks/ImageLinkBlock";
+import CtaBlock from "./blocks/CtaBlock";
+import BannerBlock from "./blocks/BannerBlock";
+import CountdownBlock from "./blocks/CountdownBlock";
+import CarouselBlock from "./blocks/CarouselBlock";
 
 function renderBlock(block: BiolinkBlock, theme: BiolinkTheme) {
   if (!block.visible) return null;
@@ -31,6 +36,16 @@ function renderBlock(block: BiolinkBlock, theme: BiolinkTheme) {
       return <VideoBlock data={block.data as import("@/types/biolink").BiolinkVideoData} />;
     case "marquee":
       return <MarqueeBlock data={block.data as import("@/types/biolink").BiolinkMarqueeData} />;
+    case "image-link":
+      return <ImageLinkBlock data={block.data as import("@/types/biolink").ImageLinkData} theme={theme} />;
+    case "cta":
+      return <CtaBlock data={block.data as import("@/types/biolink").CtaData} theme={theme} />;
+    case "banner":
+      return <BannerBlock data={block.data as import("@/types/biolink").BannerData} theme={theme} />;
+    case "countdown":
+      return <CountdownBlock data={block.data as import("@/types/biolink").CountdownData} theme={theme} />;
+    case "carousel":
+      return <CarouselBlock data={block.data as import("@/types/biolink").CarouselData} theme={theme} />;
     default:
       return null;
   }

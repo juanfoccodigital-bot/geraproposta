@@ -14,7 +14,12 @@ export type BiolinkBlockType =
   | "text"
   | "featured"
   | "video"
-  | "marquee";
+  | "marquee"
+  | "image-link"
+  | "cta"
+  | "banner"
+  | "countdown"
+  | "carousel";
 
 export const BIOLINK_FREE_BLOCKS: BiolinkBlockType[] = ["avatar", "links"];
 
@@ -27,6 +32,11 @@ export const biolinkBlockLabels: Record<BiolinkBlockType, string> = {
   featured: "Destaque",
   video: "Vídeo",
   marquee: "Faixa Animada",
+  "image-link": "Botões com Imagem",
+  cta: "Chamada para Ação",
+  banner: "Banner",
+  countdown: "Contagem Regressiva",
+  carousel: "Carrossel",
 };
 
 // ============================================
@@ -87,6 +97,59 @@ export interface BiolinkMarqueeData {
   speed: "slow" | "normal" | "fast";
 }
 
+export interface ImageLinkItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  url: string;
+  image: string;
+  enabled: boolean;
+}
+
+export interface ImageLinkData {
+  items: ImageLinkItem[];
+  /** Card layout — overlay text on image or side-by-side */
+  layout: "overlay" | "side";
+}
+
+export interface CtaData {
+  headline: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  image: string;
+  /** Visual style of the CTA */
+  style: "gradient" | "image" | "glass";
+}
+
+export interface BannerData {
+  image: string;
+  title: string;
+  subtitle: string;
+  url: string;
+  /** Overlay darkness 0-100 */
+  overlay: number;
+  /** Height style */
+  height: "sm" | "md" | "lg";
+}
+
+export interface CountdownData {
+  /** ISO date string target */
+  targetDate: string;
+  label: string;
+  /** What to show when countdown ends */
+  endMessage: string;
+  style: "cards" | "inline" | "minimal";
+}
+
+export interface CarouselData {
+  items: { id: string; image: string; title: string; url: string }[];
+  /** Auto-play speed in seconds (0 = disabled) */
+  autoPlay: number;
+  /** Aspect ratio of carousel */
+  aspectRatio: "16:9" | "1:1" | "4:3";
+}
+
 export type BiolinkBlockData =
   | AvatarData
   | LinksData
@@ -95,7 +158,12 @@ export type BiolinkBlockData =
   | BiolinkTextData
   | FeaturedData
   | BiolinkVideoData
-  | BiolinkMarqueeData;
+  | BiolinkMarqueeData
+  | ImageLinkData
+  | CtaData
+  | BannerData
+  | CountdownData
+  | CarouselData;
 
 // ============================================
 // BLOCK

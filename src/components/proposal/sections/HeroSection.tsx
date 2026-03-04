@@ -37,7 +37,7 @@ export default function HeroSection({ config, meta }: Props) {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gold/20 bg-white/60 backdrop-blur-sm mb-8"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gold/20 bg-cream/60 backdrop-blur-sm mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
           <span className="text-sm font-medium text-foreground/70 tracking-wide uppercase">

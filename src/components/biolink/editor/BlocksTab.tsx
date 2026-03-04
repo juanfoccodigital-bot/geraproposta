@@ -11,6 +11,11 @@ import type {
   BiolinkMarqueeData,
   BiolinkVideoData,
   FeaturedData,
+  ImageLinkData,
+  CtaData,
+  BannerData,
+  CountdownData,
+  CarouselData,
 } from "@/types/biolink";
 import { Eye, EyeOff, Trash2, GripVertical, Plus, Lock, ChevronDown } from "lucide-react";
 import {
@@ -36,6 +41,11 @@ import DividerEditor from "./blocks/DividerEditor";
 import MarqueeEditor from "./blocks/MarqueeEditor";
 import VideoEditor from "./blocks/VideoEditor";
 import FeaturedEditor from "./blocks/FeaturedEditor";
+import ImageLinkEditor from "./blocks/ImageLinkEditor";
+import CtaEditor from "./blocks/CtaEditor";
+import BannerEditor from "./blocks/BannerEditor";
+import CountdownEditor from "./blocks/CountdownEditor";
+import CarouselEditor from "./blocks/CarouselEditor";
 
 const addableBlocks: { type: BiolinkBlockType; label: string; premium: boolean }[] = [
   { type: "social", label: "Redes Sociais", premium: true },
@@ -44,6 +54,11 @@ const addableBlocks: { type: BiolinkBlockType; label: string; premium: boolean }
   { type: "featured", label: "Destaque", premium: true },
   { type: "video", label: "Vídeo", premium: true },
   { type: "marquee", label: "Faixa Animada", premium: true },
+  { type: "image-link", label: "Botões com Imagem", premium: true },
+  { type: "cta", label: "Chamada para Ação", premium: true },
+  { type: "banner", label: "Banner", premium: true },
+  { type: "countdown", label: "Contagem Regressiva", premium: true },
+  { type: "carousel", label: "Carrossel", premium: true },
 ];
 
 function BlockEditor({ block }: { block: BiolinkBlock }) {
@@ -60,6 +75,16 @@ function BlockEditor({ block }: { block: BiolinkBlock }) {
       return <VideoEditor blockId={block.id} data={block.data as BiolinkVideoData} />;
     case "featured":
       return <FeaturedEditor blockId={block.id} data={block.data as FeaturedData} />;
+    case "image-link":
+      return <ImageLinkEditor blockId={block.id} data={block.data as ImageLinkData} />;
+    case "cta":
+      return <CtaEditor blockId={block.id} data={block.data as CtaData} />;
+    case "banner":
+      return <BannerEditor blockId={block.id} data={block.data as BannerData} />;
+    case "countdown":
+      return <CountdownEditor blockId={block.id} data={block.data as CountdownData} />;
+    case "carousel":
+      return <CarouselEditor blockId={block.id} data={block.data as CarouselData} />;
     default:
       return null;
   }

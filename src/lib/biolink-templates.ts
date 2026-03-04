@@ -473,6 +473,285 @@ const luxuryDark: BiolinkTemplate = {
 };
 
 // ============================================
+// ULTRA PREMIUM 1 — Agency Dark (Agência / Vendas Online)
+// Inspirado no link do João Castanheiro
+// Blocos: Avatar → Banner → ImageLink(4) → Video → CTA → Marquee → Social
+// ============================================
+const agencyDark: BiolinkTemplate = {
+  id: "agency-dark",
+  name: "Agency Dark",
+  description: "Link premium nível agência com botões visuais, vídeo e CTA poderoso.",
+  isPremium: true,
+  config: {
+    theme: {
+      background: "#050510",
+      backgroundType: "gradient",
+      backgroundValue: "linear-gradient(180deg, #050510 0%, #0A0A2E 40%, #0F0F35 100%)",
+      textColor: "#FFFFFF",
+      buttonStyle: "filled",
+      buttonColor: "#3B82F6",
+      buttonTextColor: "#FFFFFF",
+      font: "Space Grotesk",
+      effects: {
+        entrance: "fade",
+        buttonGlow: true,
+        buttonShimmer: true,
+        gradientText: true,
+        gradientColors: ["#3B82F6", "#8B5CF6"],
+        glassmorphism: true,
+        animatedBg: "particles",
+      },
+    },
+    blocks: [
+      { id: "blk-avatar", type: "avatar", visible: true, data: { image: "", name: "Seu Nome", bio: "Especialista em Vendas Online | Marketing Digital", nameSize: "lg" } },
+      { id: "blk-banner", type: "banner", visible: true, data: { image: "", title: "Enriquecendo Online", subtitle: "O método completo para dominar a internet e faturar 5 dígitos", url: "https://", overlay: 50, height: "lg" } },
+      { id: "blk-imagelink", type: "image-link", visible: true, data: { items: [
+        { id: "il-1", title: "Especialista em Vendas Online", subtitle: "O melhor curso de marketing digital", url: "https://", image: "", enabled: true },
+        { id: "il-2", title: "Jornada Enriquecendo Online", subtitle: "Marketing para vender de R$2.000 a R$10.000", url: "https://", image: "", enabled: true },
+        { id: "il-3", title: "Primeiras Vendas em Tempo Recorde", subtitle: "Sem precisar produzir conteúdo", url: "https://", image: "", enabled: true },
+        { id: "il-4", title: "Curso Gratuito de Marketing Digital", subtitle: "Do extremo básico às primeiras vendas", url: "https://", image: "", enabled: true },
+      ], layout: "overlay" } },
+      { id: "blk-video", type: "video", visible: true, data: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", aspectRatio: "16:9" } },
+      { id: "blk-cta", type: "cta", visible: true, data: { headline: "Quer um link desse para você?", description: "Me chama no WhatsApp e a gente produz um link premium personalizado para o seu negócio.", buttonText: "Chamar no WhatsApp", buttonUrl: "https://wa.me/", image: "", style: "glass" } },
+      { id: "blk-marquee", type: "marquee", visible: true, data: { items: ["Marketing Digital", "Vendas Online", "Tráfego Pago", "Funis de Venda", "Escala"], speed: "normal" } },
+      { id: "blk-social", type: "social", visible: true, data: { items: [
+        { platform: "instagram", url: "https://instagram.com/" },
+        { platform: "youtube", url: "https://youtube.com/@" },
+        { platform: "tiktok", url: "https://tiktok.com/@" },
+        { platform: "twitter", url: "https://x.com/" },
+      ], size: "md" } },
+    ],
+  },
+};
+
+// ============================================
+// ULTRA PREMIUM 2 — Motion Studio (Videomaker / Motion Designer)
+// Blocos: Avatar → Carousel → Text → ImageLink(3) → Video → Countdown → CTA → Social
+// ============================================
+const motionStudio: BiolinkTemplate = {
+  id: "motion-studio",
+  name: "Motion Studio",
+  description: "Cinematográfico com carrossel, motion e countdown para lançamentos.",
+  isPremium: true,
+  config: {
+    theme: {
+      background: "#0A0A0A",
+      backgroundType: "gradient",
+      backgroundValue: "linear-gradient(135deg, #0A0A0A 0%, #1A0A2E 50%, #0A1628 100%)",
+      textColor: "#F5F5F5",
+      buttonStyle: "rounded",
+      buttonColor: "#A855F7",
+      buttonTextColor: "#FFFFFF",
+      font: "Montserrat",
+      effects: {
+        entrance: "scale",
+        buttonGlow: true,
+        buttonShimmer: true,
+        gradientText: true,
+        gradientColors: ["#A855F7", "#EC4899"],
+        glassmorphism: true,
+        animatedBg: "aurora",
+      },
+    },
+    blocks: [
+      { id: "blk-avatar", type: "avatar", visible: true, data: { image: "", name: "Seu Nome", bio: "Motion Designer & Videomaker", nameSize: "lg" } },
+      { id: "blk-carousel", type: "carousel", visible: true, data: { items: [
+        { id: "cr-1", image: "", title: "Projeto Alpha", url: "https://" },
+        { id: "cr-2", image: "", title: "Projeto Beta", url: "https://" },
+        { id: "cr-3", image: "", title: "Projeto Gamma", url: "https://" },
+      ], autoPlay: 4, aspectRatio: "16:9" } },
+      { id: "blk-text", type: "text", visible: true, data: { content: "Criando experiências visuais que vendem e impactam", align: "center" } },
+      { id: "blk-imagelink", type: "image-link", visible: true, data: { items: [
+        { id: "il-1", title: "Portfólio Completo", subtitle: "Veja meus melhores trabalhos", url: "https://", image: "", enabled: true },
+        { id: "il-2", title: "Curso de Motion Design", subtitle: "Do zero ao profissional", url: "https://", image: "", enabled: true },
+        { id: "il-3", title: "Pack de Templates", subtitle: "After Effects & Premiere Pro", url: "https://", image: "", enabled: true },
+      ], layout: "overlay" } },
+      { id: "blk-video", type: "video", visible: true, data: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", aspectRatio: "16:9" } },
+      { id: "blk-countdown", type: "countdown", visible: true, data: { targetDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), label: "Novo curso lança em", endMessage: "Lançamento disponível!", style: "cards" } },
+      { id: "blk-cta", type: "cta", visible: true, data: { headline: "Solicite um Orçamento", description: "Vídeos, motion graphics e edição profissional para sua marca.", buttonText: "Solicitar Orçamento", buttonUrl: "https://", image: "", style: "gradient" } },
+      { id: "blk-social", type: "social", visible: true, data: { items: [
+        { platform: "instagram", url: "https://instagram.com/" },
+        { platform: "youtube", url: "https://youtube.com/@" },
+        { platform: "behance", url: "https://behance.net/" },
+        { platform: "dribbble", url: "https://dribbble.com/" },
+      ], size: "md" } },
+    ],
+  },
+};
+
+// ============================================
+// ULTRA PREMIUM 3 — Infoprodutor Pro (Infoprodutor / Lançador)
+// Blocos: Avatar → Marquee → Banner → ImageLink(3) → Countdown → Video → CTA → Divider → Featured → Social
+// ============================================
+const infoprodutorPro: BiolinkTemplate = {
+  id: "infoprodutor-pro",
+  name: "Infoprodutor Pro",
+  description: "Completo para infoprodutores com countdown, CTA e botões visuais.",
+  isPremium: true,
+  config: {
+    theme: {
+      background: "#0B0B0F",
+      backgroundType: "gradient",
+      backgroundValue: "linear-gradient(180deg, #0B0B0F 0%, #1A0F0F 50%, #0F1A0F 100%)",
+      textColor: "#FFFFFF",
+      buttonStyle: "filled",
+      buttonColor: "#EF4444",
+      buttonTextColor: "#FFFFFF",
+      font: "Inter",
+      effects: {
+        entrance: "slide",
+        buttonGlow: true,
+        buttonShimmer: true,
+        gradientText: true,
+        gradientColors: ["#EF4444", "#F97316"],
+        glassmorphism: true,
+        animatedBg: "aurora",
+      },
+    },
+    blocks: [
+      { id: "blk-avatar", type: "avatar", visible: true, data: { image: "", name: "Seu Nome", bio: "Infoprodutor | Mentor de Lançamentos Digitais", nameSize: "lg" } },
+      { id: "blk-marquee", type: "marquee", visible: true, data: { items: ["Lançamento Aberto", "Vagas Limitadas", "Garantia de 7 Dias", "Bônus Exclusivos"], speed: "normal" } },
+      { id: "blk-banner", type: "banner", visible: true, data: { image: "", title: "Método 6em7", subtitle: "Fature 6 dígitos em 7 dias com lançamentos digitais", url: "https://", overlay: 45, height: "md" } },
+      { id: "blk-imagelink", type: "image-link", visible: true, data: { items: [
+        { id: "il-1", title: "Treinamento Completo", subtitle: "Acesso vitalício + comunidade VIP", url: "https://", image: "", enabled: true },
+        { id: "il-2", title: "Mentoria Individual", subtitle: "Acompanhamento 1:1 por 90 dias", url: "https://", image: "", enabled: true },
+        { id: "il-3", title: "Pack de Materiais", subtitle: "Scripts, templates e checklists", url: "https://", image: "", enabled: true },
+      ], layout: "side" } },
+      { id: "blk-countdown", type: "countdown", visible: true, data: { targetDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), label: "Oferta especial termina em", endMessage: "Inscrições encerradas!", style: "cards" } },
+      { id: "blk-video", type: "video", visible: true, data: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", aspectRatio: "16:9" } },
+      { id: "blk-cta", type: "cta", visible: true, data: { headline: "Garanta sua Vaga Agora", description: "São apenas 50 vagas nessa turma. Não fique de fora!", buttonText: "QUERO MINHA VAGA", buttonUrl: "https://", image: "", style: "glass" } },
+      { id: "blk-divider", type: "divider", visible: true, data: { style: "dots" } },
+      { id: "blk-featured", type: "featured", visible: true, data: { image: "", title: "Case: R$127k em 7 dias", description: "Veja o passo a passo do meu último lançamento de sucesso.", url: "https://" } },
+      { id: "blk-social", type: "social", visible: true, data: { items: [
+        { platform: "instagram", url: "https://instagram.com/" },
+        { platform: "youtube", url: "https://youtube.com/@" },
+        { platform: "tiktok", url: "https://tiktok.com/@" },
+        { platform: "telegram", url: "https://t.me/" },
+      ], size: "md" } },
+    ],
+  },
+};
+
+// ============================================
+// ULTRA PREMIUM 4 — Personal Brand (Marca Pessoal / Influencer Top)
+// Blocos: Avatar → Banner → Carousel → Links(3) → ImageLink(2) → Video → Marquee → CTA → Social
+// ============================================
+const personalBrand: BiolinkTemplate = {
+  id: "personal-brand",
+  name: "Personal Brand",
+  description: "Identidade visual premium para marcas pessoais e influencers de alto nível.",
+  isPremium: true,
+  config: {
+    theme: {
+      background: "#0C0C0C",
+      backgroundType: "gradient",
+      backgroundValue: "linear-gradient(180deg, #0C0C0C 0%, #1A1A1A 100%)",
+      textColor: "#FFFFFF",
+      buttonStyle: "outline",
+      buttonColor: "#D4AF37",
+      buttonTextColor: "#D4AF37",
+      font: "Playfair Display",
+      effects: {
+        entrance: "fade",
+        buttonGlow: true,
+        gradientText: true,
+        gradientColors: ["#D4AF37", "#F4E4A6"],
+        glassmorphism: true,
+        animatedBg: "float",
+      },
+    },
+    blocks: [
+      { id: "blk-avatar", type: "avatar", visible: true, data: { image: "", name: "Seu Nome", bio: "Marca Pessoal | Autoridade | Lifestyle", nameSize: "lg" } },
+      { id: "blk-banner", type: "banner", visible: true, data: { image: "", title: "", subtitle: "", url: "https://", overlay: 0, height: "lg" } },
+      { id: "blk-carousel", type: "carousel", visible: true, data: { items: [
+        { id: "cr-1", image: "", title: "Minha História", url: "https://" },
+        { id: "cr-2", image: "", title: "Nos Bastidores", url: "https://" },
+        { id: "cr-3", image: "", title: "Eventos VIP", url: "https://" },
+        { id: "cr-4", image: "", title: "Resultados", url: "https://" },
+      ], autoPlay: 5, aspectRatio: "4:3" } },
+      { id: "blk-links", type: "links", visible: true, data: { items: [
+        { id: "lnk-1", title: "Meu Podcast", url: "https://", icon: "Headphones", enabled: true },
+        { id: "lnk-2", title: "Livro Best-Seller", url: "https://", icon: "BookOpen", enabled: true },
+        { id: "lnk-3", title: "Agenda de Eventos", url: "https://", icon: "Calendar", enabled: true },
+      ] } },
+      { id: "blk-imagelink", type: "image-link", visible: true, data: { items: [
+        { id: "il-1", title: "Mentoria Premium", subtitle: "Programa exclusivo de 6 meses", url: "https://", image: "", enabled: true },
+        { id: "il-2", title: "Círculo de Líderes", subtitle: "Networking de alto nível", url: "https://", image: "", enabled: true },
+      ], layout: "overlay" } },
+      { id: "blk-video", type: "video", visible: true, data: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", aspectRatio: "16:9" } },
+      { id: "blk-marquee", type: "marquee", visible: true, data: { items: ["Autoridade", "Influência", "Impacto", "Legacy", "Premium"], speed: "slow" } },
+      { id: "blk-cta", type: "cta", visible: true, data: { headline: "Agende uma Reunião Exclusiva", description: "Vagas limitadas para assessoria de marca pessoal.", buttonText: "Falar com minha Equipe", buttonUrl: "https://", image: "", style: "glass" } },
+      { id: "blk-social", type: "social", visible: true, data: { items: [
+        { platform: "instagram", url: "https://instagram.com/" },
+        { platform: "youtube", url: "https://youtube.com/@" },
+        { platform: "linkedin", url: "https://linkedin.com/in/" },
+        { platform: "twitter", url: "https://x.com/" },
+      ], size: "lg" } },
+    ],
+  },
+};
+
+// ============================================
+// ULTRA PREMIUM 5 — E-commerce Vitrine (Loja / Dropshipping)
+// Blocos: Avatar → Marquee → Carousel → ImageLink(4) → Banner → Countdown → Links(3) → CTA → Social
+// ============================================
+const ecommerceVitrine: BiolinkTemplate = {
+  id: "ecommerce-vitrine",
+  name: "E-commerce Vitrine",
+  description: "Vitrine completa para lojas online com carrossel de produtos e ofertas.",
+  isPremium: true,
+  config: {
+    theme: {
+      background: "#0F0F0F",
+      backgroundType: "gradient",
+      backgroundValue: "linear-gradient(180deg, #0F0F0F 0%, #0F1419 50%, #0A1A1A 100%)",
+      textColor: "#FFFFFF",
+      buttonStyle: "filled",
+      buttonColor: "#10B981",
+      buttonTextColor: "#FFFFFF",
+      font: "Poppins",
+      effects: {
+        entrance: "slide",
+        buttonShimmer: true,
+        gradientText: true,
+        gradientColors: ["#10B981", "#34D399"],
+        glassmorphism: true,
+        animatedBg: "float",
+      },
+    },
+    blocks: [
+      { id: "blk-avatar", type: "avatar", visible: true, data: { image: "", name: "Sua Marca", bio: "Loja Oficial | Frete Grátis acima de R$199", nameSize: "lg" } },
+      { id: "blk-marquee", type: "marquee", visible: true, data: { items: ["Frete Grátis", "Até 70% OFF", "Pix com Desconto", "Parcele em 12x", "Troca Grátis"], speed: "normal" } },
+      { id: "blk-carousel", type: "carousel", visible: true, data: { items: [
+        { id: "cr-1", image: "", title: "Nova Coleção", url: "https://" },
+        { id: "cr-2", image: "", title: "Mais Vendidos", url: "https://" },
+        { id: "cr-3", image: "", title: "Promoções", url: "https://" },
+      ], autoPlay: 3, aspectRatio: "1:1" } },
+      { id: "blk-imagelink", type: "image-link", visible: true, data: { items: [
+        { id: "il-1", title: "Nova Coleção 2025", subtitle: "Lançamento exclusivo com até 30% OFF", url: "https://", image: "", enabled: true },
+        { id: "il-2", title: "Kit Bestseller", subtitle: "Nossos 3 produtos mais vendidos", url: "https://", image: "", enabled: true },
+        { id: "il-3", title: "Outlet até 70% OFF", subtitle: "Últimas unidades com preço de custo", url: "https://", image: "", enabled: true },
+        { id: "il-4", title: "Catálogo Completo", subtitle: "+200 produtos disponíveis", url: "https://", image: "", enabled: true },
+      ], layout: "side" } },
+      { id: "blk-banner", type: "banner", visible: true, data: { image: "", title: "MEGA PROMO", subtitle: "Até 70% de desconto em produtos selecionados", url: "https://", overlay: 40, height: "md" } },
+      { id: "blk-countdown", type: "countdown", visible: true, data: { targetDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), label: "Promoção termina em", endMessage: "Promoção encerrada!", style: "inline" } },
+      { id: "blk-links", type: "links", visible: true, data: { items: [
+        { id: "lnk-1", title: "WhatsApp — Atendimento", url: "https://", icon: "MessageCircle", enabled: true },
+        { id: "lnk-2", title: "Rastrear Meu Pedido", url: "https://", icon: "ExternalLink", enabled: true },
+        { id: "lnk-3", title: "Trocas e Devoluções", url: "https://", icon: "Mail", enabled: true },
+      ] } },
+      { id: "blk-cta", type: "cta", visible: true, data: { headline: "Primeira Compra?", description: "Ganhe 15% de desconto usando o cupom PRIMEIRA15 na sua primeira compra.", buttonText: "Comprar com Desconto", buttonUrl: "https://", image: "", style: "gradient" } },
+      { id: "blk-social", type: "social", visible: true, data: { items: [
+        { platform: "instagram", url: "https://instagram.com/" },
+        { platform: "tiktok", url: "https://tiktok.com/@" },
+        { platform: "facebook", url: "https://facebook.com/" },
+        { platform: "pinterest", url: "https://pinterest.com/" },
+      ], size: "md" } },
+    ],
+  },
+};
+
+// ============================================
 // EXPORTS
 // ============================================
 export const BIOLINK_TEMPLATES: BiolinkTemplate[] = [
@@ -486,6 +765,11 @@ export const BIOLINK_TEMPLATES: BiolinkTemplate[] = [
   natureGreen,
   oceanBlue,
   luxuryDark,
+  agencyDark,
+  motionStudio,
+  infoprodutorPro,
+  personalBrand,
+  ecommerceVitrine,
 ];
 
 export function getBiolinkTemplate(id: string): BiolinkTemplate | undefined {
