@@ -1,11 +1,111 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useBiolinkEditor } from "@/contexts/BiolinkEditorContext";
 import type { AvatarData, LinksData, LinkItem } from "@/types/biolink";
-import { Plus, Trash2, GripVertical, Upload, Crop } from "lucide-react";
+import { Plus, Trash2, GripVertical, Upload, Crop, Link, Check, X, Loader2, Copy } from "lucide-react";
 import ImageUpload from "@/components/editor/controls/ImageUpload";
 import AvatarCropModal from "./AvatarCropModal";
+
+function SlugEditor() {
+  const { state, dispatch } = useBiolinkEditor();
+  const [value, setValue] = useState(state.slug || "");
+  const [status, setStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [copied, setCopied] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Sync external slug changes
+  useEffect(() => {
+    if (state.slug && state.slug !== value) setValue(state.slug);
+  }, [state.slug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const checkSlug = useCallback(async (slug: string) => {
+    if (slug.length < 3) { setStatus("invalid"); return; }
+    if (slug === state.slug) { setStatus("idle"); return; }
+    setStatus("checking");
+    try {
+      const res = await fetch(`/api/biolinks/check-slug?slug=${encodeURIComponent(slug)}`);
+      if (!res.ok) { setStatus("idle"); return; }
+      const data = await res.json();
+      setStatus(data.available ? "available" : "taken");
+    } catch {
+      setStatus("idle");
+    }
+  }, [state.slug]);
+
+  function handleChange(raw: string) {
+    const clean = raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60);
+    setValue(clean);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (clean.length < 3) { setStatus("invalid"); return; }
+    if (clean === state.slug) { setStatus("idle"); return; }
+    setStatus("checking");
+    debounceRef.current = setTimeout(() => checkSlug(clean), 500);
+  }
+
+  function applySlug() {
+    if (status === "available" || value === state.slug) {
+      dispatch({ type: "SET_SLUG", payload: value });
+    }
+  }
+
+  function handleBlur() {
+    if (status === "available") applySlug();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") { e.preventDefault(); applySlug(); }
+  }
+
+  const publicUrl = `geraproposta.com/link/${value || state.slug || "..."}`;
+
+  function copyUrl() {
+    navigator.clipboard.writeText(`https://${publicUrl}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs text-white/40 mb-1 flex items-center gap-1.5">
+        <Link size={12} />
+        Slug (URL pública)
+      </label>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-white/20 pointer-events-none select-none">/link/</span>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => handleChange(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder="meu-link"
+            className="w-full pl-[50px] pr-8 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#F97316]/50"
+          />
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+            {status === "checking" && <Loader2 size={14} className="text-white/30 animate-spin" />}
+            {status === "available" && <Check size={14} className="text-green-400" />}
+            {status === "taken" && <X size={14} className="text-red-400" />}
+            {status === "invalid" && value.length > 0 && <X size={14} className="text-yellow-400" />}
+          </span>
+        </div>
+      </div>
+      {/* Status message */}
+      {status === "taken" && <p className="text-[10px] text-red-400">Esse slug já está em uso</p>}
+      {status === "invalid" && value.length > 0 && <p className="text-[10px] text-yellow-400">Mínimo 3 caracteres (letras, números e hifens)</p>}
+      {status === "available" && <p className="text-[10px] text-green-400">Disponível! Salve para aplicar</p>}
+      {/* Public URL preview */}
+      <button
+        onClick={copyUrl}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] text-white/30 hover:text-white/50 hover:border-white/10 transition-colors cursor-pointer group"
+      >
+        <span className="truncate flex-1 text-left">{publicUrl}</span>
+        {copied ? <Check size={12} className="text-green-400 flex-shrink-0" /> : <Copy size={12} className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />}
+      </button>
+    </div>
+  );
+}
 
 export default function ProfileTab() {
   const { state, dispatch } = useBiolinkEditor();
@@ -86,6 +186,12 @@ export default function ProfileTab() {
 
   return (
     <div className="p-4 space-y-6">
+      {/* Slug Section */}
+      <div>
+        <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Link Público</h3>
+        <SlugEditor />
+      </div>
+
       {/* Avatar Section */}
       <div>
         <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Perfil</h3>
