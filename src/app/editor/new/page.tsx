@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Sparkles, ArrowLeft, Plus, Lock, Crown, Search, Eye } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import TemplatePreviewThumbnail from "@/components/ui/TemplatePreviewThumbnail";
+import AiWizardModal from "@/components/proposal/AiWizardModal";
 import Link from "next/link";
 
 /* ============================================
@@ -43,6 +44,7 @@ export default function NewProposalPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [colorStyle, setColorStyle] = useState<ColorStyle>("all");
   const [accessFilter, setAccessFilter] = useState<"all" | "free" | "premium">("all");
+  const [showAiWizard, setShowAiWizard] = useState(false);
 
   const userPlan = user?.plan || "free";
   const canUseAllTemplates = PLAN_LIMITS[userPlan as keyof typeof PLAN_LIMITS]?.allTemplates ?? false;
@@ -198,9 +200,19 @@ export default function NewProposalPage() {
                 </p>
               </div>
             </div>
-            <Link href="/" className="flex-shrink-0">
-              <Logo size="sm" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAiWizard(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all hover:opacity-90 cursor-pointer border"
+                style={{ borderColor: "#F97316", color: "#F97316", background: "rgba(249,115,22,0.08)" }}
+              >
+                <Sparkles size={14} />
+                Gerar com IA
+              </button>
+              <Link href="/" className="flex-shrink-0">
+                <Logo size="sm" />
+              </Link>
+            </div>
           </div>
 
           {/* Search */}
@@ -471,6 +483,7 @@ export default function NewProposalPage() {
           </div>
         )}
       </div>
+      <AiWizardModal open={showAiWizard} onClose={() => setShowAiWizard(false)} />
     </div>
   );
 }

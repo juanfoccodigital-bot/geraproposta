@@ -14,7 +14,11 @@ const marqueeFeatures = [
 ];
 const doubledFeatures = [...marqueeFeatures, ...marqueeFeatures];
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  onOpenAiWizard?: () => void;
+}
+
+export default function HeroSection({ onOpenAiWizard }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
       {/* Background gradient orbs */}
@@ -56,6 +60,27 @@ export default function HeroSection() {
           Propostas profissionais, links na bio e landing pages prontos
           em minutos. Envie, impressione e converta mais clientes.
         </p>
+
+        {/* CTA Buttons */}
+        {onOpenAiWizard && (
+          <div className="flex items-center justify-center gap-3 mb-6 md:mb-8">
+            <button
+              onClick={onOpenAiWizard}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] cursor-pointer"
+              style={{ background: "#F97316", color: "#fff" }}
+            >
+              <Sparkles size={16} />
+              Gerar Proposta com IA
+            </button>
+            <a
+              href="/templates"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all border cursor-pointer hover:bg-white/5"
+              style={{ borderColor: "#333", color: "#A3A3A3" }}
+            >
+              Ver Templates
+            </a>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">

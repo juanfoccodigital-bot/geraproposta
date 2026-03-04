@@ -14,6 +14,7 @@ import CtaSection from "@/components/landing/CtaSection";
 import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import LazySection from "@/components/ui/LazySection";
+import AiWizardModal from "@/components/proposal/AiWizardModal";
 
 /* ============================================
    HOME — Marketplace de Templates
@@ -25,6 +26,7 @@ function HomeContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [isMobile, setIsMobile] = useState(false);
+  const [showAiWizard, setShowAiWizard] = useState(false);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -51,7 +53,7 @@ function HomeContent() {
         activeCategory={activeCategory}
         onCategoryFilter={handleCategoryFilter}
       />
-      <HeroSection />
+      <HeroSection onOpenAiWizard={() => setShowAiWizard(true)} />
       <HowItWorks />
       <ProductsShowcase />
       <ProofOfImpact />
@@ -72,6 +74,7 @@ function HomeContent() {
       </LazySection>
       <CtaSection />
       <Footer />
+      <AiWizardModal open={showAiWizard} onClose={() => setShowAiWizard(false)} />
     </main>
   );
 }

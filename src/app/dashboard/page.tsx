@@ -10,6 +10,7 @@ import CategoriesManager from "@/components/dashboard/CategoriesManager";
 import ConversionCards from "@/components/dashboard/ConversionCards";
 import UrgencyBanner from "@/components/dashboard/UrgencyBanner";
 import Navbar from "@/components/landing/Navbar";
+import AiWizardModal from "@/components/proposal/AiWizardModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 /* ============================================
@@ -102,6 +103,7 @@ function DashboardContent() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
+  const [showAiWizard, setShowAiWizard] = useState(false);
 
   // -- Usage stats derived from auth profile --
   const usageStats = useMemo(() => {
@@ -285,6 +287,7 @@ function DashboardContent() {
         onClose={() => setShowCategoriesManager(false)}
         onUpdate={fetchCategories}
       />
+      <AiWizardModal open={showAiWizard} onClose={() => setShowAiWizard(false)} />
 
       {/* ── Shared Navbar ── */}
       <Navbar
@@ -302,6 +305,14 @@ function DashboardContent() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAiWizard(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-90 cursor-pointer border"
+                style={{ borderColor: "#F97316", color: "#F97316", background: "rgba(249,115,22,0.08)" }}
+              >
+                <Sparkles size={16} />
+                Gerar com IA
+              </button>
               <button
                 onClick={() => router.push("/templates")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all hover:opacity-90 cursor-pointer"
@@ -539,14 +550,24 @@ function DashboardContent() {
                 : "Tente ajustar os filtros ou o termo de busca."}
             </p>
             {proposals.length === 0 && (
-              <button
-                onClick={() => router.push("/templates")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all duration-200 hover:opacity-90 cursor-pointer"
-                style={{ backgroundColor: "#F97316" }}
-              >
-                <Plus size={16} />
-                Criar Proposta
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowAiWizard(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-90 cursor-pointer border"
+                  style={{ borderColor: "#F97316", color: "#F97316", background: "rgba(249,115,22,0.08)" }}
+                >
+                  <Sparkles size={16} />
+                  Gerar com IA
+                </button>
+                <button
+                  onClick={() => router.push("/templates")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all duration-200 hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: "#F97316" }}
+                >
+                  <Plus size={16} />
+                  Criar Proposta
+                </button>
+              </div>
             )}
           </div>
         )}
