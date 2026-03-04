@@ -173,7 +173,7 @@ function CustomDomainEditor({ isPremium }: { isPremium: boolean }) {
       </div>
       {value && (
         <div className="space-y-1.5">
-          <p className="text-[10px] text-white/30">Configure no seu provedor de domínio:</p>
+          <p className="text-[10px] text-white/30">Configure no DNS do seu domínio:</p>
           <div className="rounded-lg bg-white/[0.03] border border-white/5 p-2.5 space-y-1">
             <div className="flex items-center gap-2 text-[10px]">
               <span className="text-white/30 w-12">Tipo:</span>
@@ -188,7 +188,7 @@ function CustomDomainEditor({ isPremium }: { isPremium: boolean }) {
               <span className="text-white/60 font-mono">cname.vercel-dns.com</span>
             </div>
           </div>
-          <p className="text-[10px] text-white/20">Após configurar o DNS, adicione o domínio no painel do Vercel</p>
+          <p className="text-[10px] text-white/20">Salve e aguarde a propagação do DNS (pode levar até 24h)</p>
         </div>
       )}
     </div>
