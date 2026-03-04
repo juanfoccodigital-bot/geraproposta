@@ -7,7 +7,7 @@ import {
   X, ArrowLeft, ArrowRight, Sparkles, Loader2,
   Instagram, Target, Palette, Globe, Code, Megaphone,
   Briefcase, Camera, Heart, GraduationCap, Zap, MoreHorizontal,
-  Sun, Moon, User, Building2,
+  Sun, Moon, User, Building2, DollarSign, Phone, Plus, Trash2,
 } from "lucide-react";
 import { templates, getTemplate } from "@/lib/templates";
 import { getRecommendedTemplates } from "@/lib/niche-template-map";
@@ -39,7 +39,7 @@ const BUSINESS_TYPES = [
   { id: "outro", label: "Outro", icon: MoreHorizontal },
 ];
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 interface AiWizardModalProps {
   open: boolean;
@@ -56,6 +56,12 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   const [usageType, setUsageType] = useState<"personal" | "business">("business");
   const [clientName, setClientName] = useState("");
   const [objectives, setObjectives] = useState("");
+  const [priceCurrent, setPriceCurrent] = useState("");
+  const [priceOriginal, setPriceOriginal] = useState("");
+  const [pricePeriod, setPricePeriod] = useState("/mes");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [includedItems, setIncludedItems] = useState<string[]>([""]);
+  const [guarantee, setGuarantee] = useState("");
   const [colorPaletteId, setColorPaletteId] = useState("");
   const [stylePreference, setStylePreference] = useState<"light" | "dark">("light");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
@@ -75,6 +81,12 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
       setUsageType("business");
       setClientName("");
       setObjectives("");
+      setPriceCurrent("");
+      setPriceOriginal("");
+      setPricePeriod("/mes");
+      setWhatsappNumber("");
+      setIncludedItems([""]);
+      setGuarantee("");
       setColorPaletteId("");
       setStylePreference("light");
       setSelectedTemplateId("");
@@ -90,8 +102,9 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
     switch (step) {
       case 0: return companyName.trim().length >= 2 && businessType !== "";
       case 1: return usageType === "personal" || clientName.trim().length >= 2;
-      case 2: return colorPaletteId !== "";
-      case 3: return selectedTemplateId !== "";
+      case 2: return true; // pricing step is all optional
+      case 3: return colorPaletteId !== "";
+      case 4: return selectedTemplateId !== "";
       default: return false;
     }
   }, [step, companyName, businessType, usageType, clientName, colorPaletteId, selectedTemplateId]);
@@ -163,6 +176,12 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
         usageType,
         clientName: usageType === "personal" ? companyName.trim() : clientName.trim(),
         objectives: objectives.trim(),
+        priceCurrent: priceCurrent.trim(),
+        priceOriginal: priceOriginal.trim(),
+        pricePeriod,
+        whatsappNumber: whatsappNumber.trim(),
+        includedItems: includedItems.filter((i) => i.trim() !== ""),
+        guarantee: guarantee.trim(),
         colorPaletteId,
         stylePreference,
         selectedTemplateId,
@@ -272,6 +291,22 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
                   />
                 )}
                 {step === 2 && (
+                  <StepPricing
+                    priceCurrent={priceCurrent}
+                    setPriceCurrent={setPriceCurrent}
+                    priceOriginal={priceOriginal}
+                    setPriceOriginal={setPriceOriginal}
+                    pricePeriod={pricePeriod}
+                    setPricePeriod={setPricePeriod}
+                    whatsappNumber={whatsappNumber}
+                    setWhatsappNumber={setWhatsappNumber}
+                    includedItems={includedItems}
+                    setIncludedItems={setIncludedItems}
+                    guarantee={guarantee}
+                    setGuarantee={setGuarantee}
+                  />
+                )}
+                {step === 3 && (
                   <StepVisualStyle
                     colorPaletteId={colorPaletteId}
                     setColorPaletteId={setColorPaletteId}
@@ -279,7 +314,7 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
                     setStylePreference={setStylePreference}
                   />
                 )}
-                {step === 3 && (
+                {step === 4 && (
                   <StepTemplateSelect
                     recommended={getRecommended()}
                     selectedTemplateId={selectedTemplateId}
@@ -471,7 +506,139 @@ function StepAboutClient({
   );
 }
 
-/* ── Step 2: Estilo visual ── */
+/* ── Step 2: Precos & Contato ── */
+function StepPricing({
+  priceCurrent, setPriceCurrent, priceOriginal, setPriceOriginal,
+  pricePeriod, setPricePeriod, whatsappNumber, setWhatsappNumber,
+  includedItems, setIncludedItems, guarantee, setGuarantee,
+}: {
+  priceCurrent: string; setPriceCurrent: (v: string) => void;
+  priceOriginal: string; setPriceOriginal: (v: string) => void;
+  pricePeriod: string; setPricePeriod: (v: string) => void;
+  whatsappNumber: string; setWhatsappNumber: (v: string) => void;
+  includedItems: string[]; setIncludedItems: (v: string[]) => void;
+  guarantee: string; setGuarantee: (v: string) => void;
+}) {
+  const addItem = () => setIncludedItems([...includedItems, ""]);
+  const removeItem = (idx: number) => setIncludedItems(includedItems.filter((_, i) => i !== idx));
+  const updateItem = (idx: number, val: string) => {
+    const updated = [...includedItems];
+    updated[idx] = val;
+    setIncludedItems(updated);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-white mb-1 flex items-center gap-2">
+          <DollarSign size={18} className="text-[#F97316]" />
+          Precos & Contato
+        </h2>
+        <p className="text-xs text-white/40">Opcional — preencha para ja ter a secao de investimento pronta.</p>
+      </div>
+
+      {/* Prices row */}
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <label className="text-[10px] text-white/40 mb-1 block">Preco atual (R$)</label>
+          <input
+            type="text"
+            value={priceCurrent}
+            onChange={(e) => setPriceCurrent(e.target.value)}
+            placeholder="2.500"
+            className="w-full px-3 py-2 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-white/40 mb-1 block">Preco original</label>
+          <input
+            type="text"
+            value={priceOriginal}
+            onChange={(e) => setPriceOriginal(e.target.value)}
+            placeholder="3.500"
+            className="w-full px-3 py-2 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-white/40 mb-1 block">Periodo</label>
+          <select
+            value={pricePeriod}
+            onChange={(e) => setPricePeriod(e.target.value)}
+            className="w-full px-2 py-2 rounded-xl text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#F97316]/50"
+          >
+            <option value="/mes">/mes</option>
+            <option value="/projeto">/projeto</option>
+            <option value="/hora">/hora</option>
+            <option value="/trimestre">/trimestre</option>
+            <option value="/semestre">/semestre</option>
+            <option value="/ano">/ano</option>
+          </select>
+        </div>
+      </div>
+
+      {/* WhatsApp */}
+      <div>
+        <label className="text-[10px] text-white/40 mb-1 flex items-center gap-1">
+          <Phone size={10} />
+          WhatsApp (com DDD)
+        </label>
+        <input
+          type="text"
+          value={whatsappNumber}
+          onChange={(e) => setWhatsappNumber(e.target.value)}
+          placeholder="5511999999999"
+          className="w-full px-3 py-2 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+        />
+      </div>
+
+      {/* Included items */}
+      <div>
+        <label className="text-[10px] text-white/40 mb-1 block">O que esta incluso</label>
+        <div className="space-y-1.5">
+          {includedItems.map((item, idx) => (
+            <div key={idx} className="flex gap-1.5">
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => updateItem(idx, e.target.value)}
+                placeholder={`Item ${idx + 1}`}
+                className="flex-1 px-3 py-1.5 rounded-lg text-xs bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+              />
+              {includedItems.length > 1 && (
+                <button onClick={() => removeItem(idx)} className="text-white/20 hover:text-red-400 cursor-pointer p-1">
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </div>
+          ))}
+          {includedItems.length < 8 && (
+            <button
+              onClick={addItem}
+              className="flex items-center gap-1 text-[10px] text-white/30 hover:text-[#F97316] transition-colors cursor-pointer"
+            >
+              <Plus size={10} />
+              Adicionar item
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Guarantee */}
+      <div>
+        <label className="text-[10px] text-white/40 mb-1 block">Garantia (opcional)</label>
+        <input
+          type="text"
+          value={guarantee}
+          onChange={(e) => setGuarantee(e.target.value)}
+          placeholder="Ex: 30 dias de garantia ou seu dinheiro de volta"
+          className="w-full px-3 py-2 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#F97316]/50"
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Step 3: Estilo visual ── */
 function StepVisualStyle({
   colorPaletteId, setColorPaletteId, stylePreference, setStylePreference,
 }: {

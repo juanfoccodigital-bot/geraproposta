@@ -14,6 +14,14 @@ export interface WizardFormData {
   usageType: "personal" | "business";
   clientName: string;
   objectives: string;
+  // Pricing & contact
+  priceCurrent: string;
+  priceOriginal: string;
+  pricePeriod: string;
+  whatsappNumber: string;
+  includedItems: string[];
+  guarantee: string;
+  // Visual
   colorPaletteId: string;
   stylePreference: "light" | "dark";
   selectedTemplateId: string;
@@ -584,6 +592,36 @@ export function generateProposalConfig(
     footerClientName: formData.usageType === "personal" ? formData.companyName : formData.clientName,
     footerNote: "Proposta valida por 7 dias. Valores e condicoes sujeitos a alteracao apos este prazo.",
   });
+
+  // Investimento (pricing)
+  if (formData.priceCurrent) {
+    const investimentoData: Record<string, unknown> = {
+      priceCurrent: formData.priceCurrent,
+      priceCurrency: "R$",
+      pricePeriod: formData.pricePeriod || "/mes",
+      description: `Investimento para ${formData.usageType === "personal" ? "seu projeto" : formData.clientName}.`,
+    };
+    if (formData.priceOriginal) investimentoData.priceOriginal = formData.priceOriginal;
+    if (formData.includedItems.length > 0) investimentoData.includedItems = formData.includedItems;
+    if (formData.guarantee) investimentoData.guarantee = formData.guarantee;
+    if (formData.whatsappNumber) {
+      const cleanNumber = formData.whatsappNumber.replace(/\D/g, "");
+      investimentoData.ctaLabel = "Fechar Proposta";
+      investimentoData.ctaUrl = `https://wa.me/${cleanNumber}`;
+    }
+    replaceData("investimento", investimentoData);
+  }
+
+  // Hero CTA — WhatsApp
+  if (formData.whatsappNumber) {
+    const cleanNumber = formData.whatsappNumber.replace(/\D/g, "");
+    replaceData("hero", {
+      ctaSecondary: {
+        label: "Falar no WhatsApp",
+        url: `https://wa.me/${cleanNumber}`,
+      },
+    });
+  }
 
   // Meta
   config.meta.title = formData.usageType === "personal"
