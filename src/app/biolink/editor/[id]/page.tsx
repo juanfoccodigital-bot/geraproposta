@@ -58,7 +58,7 @@ function EditorContent() {
       body: JSON.stringify({
         title: state.title,
         slug: state.slug,
-        custom_domain: state.customDomain,
+        ...(state.customDomain ? { custom_domain: state.customDomain } : {}),
         config: state.config,
       }),
     });
