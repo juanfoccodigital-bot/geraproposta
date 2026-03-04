@@ -237,7 +237,7 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   if (!user) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={onClose}
       >
         <motion.div
@@ -265,7 +265,7 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   if (!hasAiAccess) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={onClose}
       >
         <motion.div
@@ -298,7 +298,7 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget && !generating) onClose(); }}
     >
       <motion.div
