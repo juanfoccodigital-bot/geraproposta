@@ -209,39 +209,46 @@ export default function Navbar({
                       <p className="text-xs font-medium text-white truncate">{user.full_name || "Usuario"}</p>
                       <p className="text-[10px] text-white/40 truncate">{user.email}</p>
                     </div>
-                    {usageStats && (
-                      <div className="px-3 py-2 border-b" style={{ borderColor: "#262626" }}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[10px] text-white/40">
-                            {usageStats.dailyLimit !== Infinity
-                              ? `${usageStats.dailyUsed}/${usageStats.dailyLimit} hoje`
-                              : usageStats.monthlyLimit !== Infinity
-                                ? `${usageStats.monthlyUsed}/${usageStats.monthlyLimit} este mes`
-                                : "Ilimitado"}
-                          </span>
+                    {usageStats && (() => {
+                      const isUnlimitedDaily = usageStats.dailyLimit === -1;
+                      const isUnlimitedMonthly = usageStats.monthlyLimit === -1;
+                      const isUnlimitedActive = usageStats.maxActive === -1;
+                      const isUnlimited = isUnlimitedDaily && isUnlimitedMonthly;
+
+                      const label = isUnlimited
+                        ? "Ilimitado"
+                        : !isUnlimitedDaily
+                          ? `${usageStats.dailyUsed}/${usageStats.dailyLimit} hoje`
+                          : `${usageStats.monthlyUsed}/${usageStats.monthlyLimit} este mes`;
+
+                      const pct = isUnlimited
+                        ? 5
+                        : !isUnlimitedDaily
+                          ? (usageStats.dailyUsed / usageStats.dailyLimit) * 100
+                          : (usageStats.monthlyUsed / usageStats.monthlyLimit) * 100;
+
+                      return (
+                        <div className="px-3 py-2 border-b" style={{ borderColor: "#262626" }}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] text-white/40">{label}</span>
+                          </div>
+                          <div className="h-1 rounded-full overflow-hidden" style={{ background: "#262626" }}>
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.min(100, pct)}%`,
+                                backgroundColor: "#F97316",
+                              }}
+                            />
+                          </div>
+                          {!isUnlimitedActive && (
+                            <p className="text-[10px] text-white/30 mt-1">
+                              {usageStats.activeProposals}/{usageStats.maxActive} propostas ativas
+                            </p>
+                          )}
                         </div>
-                        <div className="h-1 rounded-full overflow-hidden" style={{ background: "#262626" }}>
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{
-                              width: `${Math.min(100,
-                                usageStats.dailyLimit !== Infinity
-                                  ? (usageStats.dailyUsed / usageStats.dailyLimit) * 100
-                                  : usageStats.monthlyLimit !== Infinity
-                                    ? (usageStats.monthlyUsed / usageStats.monthlyLimit) * 100
-                                    : 5
-                              )}%`,
-                              backgroundColor: "#F97316",
-                            }}
-                          />
-                        </div>
-                        {usageStats.maxActive !== Infinity && (
-                          <p className="text-[10px] text-white/30 mt-1">
-                            {usageStats.activeProposals}/{usageStats.maxActive} propostas ativas
-                          </p>
-                        )}
-                      </div>
-                    )}
+                      );
+                    })()}
                     <Link
                       href="/dashboard"
                       onClick={() => setShowUserMenu(false)}

@@ -17,6 +17,8 @@ import {
   generateProposalConfig,
   type WizardFormData,
 } from "@/lib/ai-wizard-content";
+import { useAuth } from "@/contexts/AuthContext";
+import { PLAN_LIMITS, type PlanName } from "@/lib/plan-limits";
 
 /* ============================================
    AI WIZARD MODAL
@@ -48,7 +50,12 @@ interface AiWizardModalProps {
 
 export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
+
+  // Plan gate — only Pro and Plus
+  const userPlan = (user?.plan as PlanName) || "free";
+  const hasAiAccess = PLAN_LIMITS[userPlan]?.ai === true;
 
   // Form state
   const [companyName, setCompanyName] = useState("");
@@ -225,6 +232,69 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   };
 
   if (!open) return null;
+
+  // Not logged in → redirect to login
+  if (!user) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative w-full max-w-sm rounded-2xl bg-[#111111] border border-[#262626] shadow-2xl p-8 text-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Sparkles size={32} className="mx-auto mb-4 text-[#F97316]" />
+          <h3 className="text-lg font-semibold text-white mb-2">Gerar Proposta com IA</h3>
+          <p className="text-sm text-white/50 mb-6">Faca login para criar propostas personalizadas.</p>
+          <button
+            onClick={() => { onClose(); router.push("/login"); }}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#F97316" }}
+          >
+            Fazer Login
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Plan gate — Pro and Plus only
+  if (!hasAiAccess) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative w-full max-w-sm rounded-2xl bg-[#111111] border border-[#262626] shadow-2xl p-8 text-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Sparkles size={32} className="mx-auto mb-4 text-[#F97316]" />
+          <h3 className="text-lg font-semibold text-white mb-2">Gerar Proposta com IA</h3>
+          <p className="text-sm text-white/50 mb-2">Recurso exclusivo dos planos <span className="text-white font-medium">Pro</span> e <span className="text-white font-medium">Plus</span>.</p>
+          <p className="text-xs text-white/30 mb-6">Crie propostas personalizadas em segundos com conteudo inteligente baseado no seu nicho.</p>
+          <button
+            onClick={() => { onClose(); router.push("/pricing"); }}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#F97316" }}
+          >
+            Ver Planos
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full py-2 mt-2 text-xs text-white/40 hover:text-white/60 transition-colors cursor-pointer"
+          >
+            Fechar
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div

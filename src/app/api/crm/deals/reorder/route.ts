@@ -28,22 +28,28 @@ export async function PUT(request: NextRequest) {
     const { updates } = parsed.data;
 
     // Batch update each deal
-    const promises = updates.map((u) =>
-      supabase
-        .from("deals")
-        .update({
-          stage: u.stage,
-          position: u.position,
-          updated_at: new Date().toISOString(),
-          ...(u.stage === "fechado_ganho" || u.stage === "fechado_perdido"
-            ? { closed_at: new Date().toISOString() }
-            : {}),
-        })
-        .eq("id", u.dealId)
-        .eq("user_id", user.id)
+    const results = await Promise.all(
+      updates.map((u) =>
+        supabase
+          .from("deals")
+          .update({
+            stage: u.stage,
+            position: u.position,
+            updated_at: new Date().toISOString(),
+            ...(u.stage === "fechado_ganho" || u.stage === "fechado_perdido"
+              ? { closed_at: new Date().toISOString() }
+              : {}),
+          })
+          .eq("id", u.dealId)
+          .eq("user_id", user.id)
+      )
     );
 
-    await Promise.all(promises);
+    const failed = results.filter((r) => r.error);
+    if (failed.length > 0) {
+      console.error("Deal reorder errors:", failed.map((r) => r.error));
+      return NextResponse.json({ error: "Erro ao reordenar alguns deals" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch {

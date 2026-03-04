@@ -517,9 +517,175 @@ export const NICHE_CONTENT: Record<string, NicheContent> = {
   },
 };
 
+// ── Analise de contexto dos objetivos ──
+interface ContextSignals {
+  wantsMoreClients: boolean;
+  wantsBranding: boolean;
+  wantsAutomation: boolean;
+  wantsSales: boolean;
+  wantsPresence: boolean;
+  wantsAuthority: boolean;
+  wantsScale: boolean;
+  mentionedPlatforms: string[];
+  mentionedGoals: string[];
+  rawText: string;
+}
+
+function analyzeObjectives(text: string): ContextSignals {
+  const lower = (text || "").toLowerCase();
+  const signals: ContextSignals = {
+    wantsMoreClients: /cliente|lead|captacao|captar|atrair|prospectar|vend|faturamento|receita|paciente|aluno/.test(lower),
+    wantsBranding: /marca|identidade|visual|logo|branding|posicionamento|reconhec/.test(lower),
+    wantsAutomation: /automat|processo|eficien|fluxo|sistema|integra|zapier|crm/.test(lower),
+    wantsSales: /vend|convert|fatur|lucr|roi|retorno|resultado|fechar/.test(lower),
+    wantsPresence: /presenca|visibilidade|alcance|seguid|engaj|rede|social|instagram|tiktok|youtube/.test(lower),
+    wantsAuthority: /autoridade|referencia|expert|especialista|mentor|lider/.test(lower),
+    wantsScale: /escal|crescer|crescimento|expandir|ampliar|dobrar|triplicar/.test(lower),
+    mentionedPlatforms: [],
+    mentionedGoals: [],
+    rawText: text || "",
+  };
+
+  // Detect platforms
+  if (/instagram/i.test(lower)) signals.mentionedPlatforms.push("Instagram");
+  if (/tiktok/i.test(lower)) signals.mentionedPlatforms.push("TikTok");
+  if (/youtube/i.test(lower)) signals.mentionedPlatforms.push("YouTube");
+  if (/google/i.test(lower)) signals.mentionedPlatforms.push("Google");
+  if (/facebook|meta ads/i.test(lower)) signals.mentionedPlatforms.push("Facebook");
+  if (/linkedin/i.test(lower)) signals.mentionedPlatforms.push("LinkedIn");
+  if (/whatsapp/i.test(lower)) signals.mentionedPlatforms.push("WhatsApp");
+  if (/site|landing|pagina/i.test(lower)) signals.mentionedPlatforms.push("Site");
+
+  // Extract goals as short phrases
+  const goalPatterns = [
+    /quer(?:o|emos)?\s+(.{5,60}?)(?:\.|,|$)/gi,
+    /precis(?:o|amos)?\s+(?:de\s+)?(.{5,60}?)(?:\.|,|$)/gi,
+    /objetivo\s+(?:e|é)\s+(.{5,60}?)(?:\.|,|$)/gi,
+    /gostaria\s+(?:de\s+)?(.{5,60}?)(?:\.|,|$)/gi,
+  ];
+  for (const pattern of goalPatterns) {
+    let match;
+    while ((match = pattern.exec(lower)) !== null) {
+      if (match[1] && match[1].trim().length > 4) {
+        signals.mentionedGoals.push(match[1].trim());
+      }
+    }
+  }
+
+  return signals;
+}
+
+/** Build a personalized subtitle using objectives + niche */
+function buildPersonalizedSubtitle(
+  niche: NicheContent,
+  formData: WizardFormData,
+  signals: ContextSignals,
+): string {
+  const clientRef = formData.usageType === "personal" ? "voce" : formData.clientName;
+
+  // If user wrote specific objectives, weave them in
+  if (signals.rawText.length > 15) {
+    if (signals.wantsMoreClients && signals.wantsPresence) {
+      return `Estrategia personalizada para ${clientRef} atrair mais clientes e fortalecer a presenca digital com resultados mensuráveis.`;
+    }
+    if (signals.wantsMoreClients) {
+      return `Proposta sob medida para ${clientRef} aumentar a captacao de clientes e converter mais oportunidades em resultados reais.`;
+    }
+    if (signals.wantsBranding) {
+      return `Uma identidade visual e posicionamento estrategico para que ${clientRef} seja reconhecido como referencia no mercado.`;
+    }
+    if (signals.wantsAutomation) {
+      return `Automacoes inteligentes para que ${clientRef} ganhe eficiencia, elimine tarefas repetitivas e escale sem aumentar custos.`;
+    }
+    if (signals.wantsSales) {
+      return `Estrategia focada em resultados para ${clientRef} aumentar vendas, melhorar conversoes e maximizar o retorno sobre investimento.`;
+    }
+    if (signals.wantsScale) {
+      return `Plano estrategico para ${clientRef} escalar o negocio de forma sustentavel, com processos otimizados e previsibilidade.`;
+    }
+    if (signals.wantsAuthority) {
+      return `Posicionamento estrategico para ${clientRef} se consolidar como autoridade e referencia no mercado de atuacao.`;
+    }
+  }
+
+  // Fallback to niche default
+  return niche.hero.subtitle;
+}
+
+/** Reorder diagnostico cards based on what the user mentioned */
+function prioritizeDiagnosticoCards(
+  cards: NicheContent["diagnostico"]["cards"],
+  signals: ContextSignals,
+): NicheContent["diagnostico"]["cards"] {
+  if (!signals.rawText || signals.rawText.length < 10) return cards;
+
+  // Score each card based on relevance to objectives
+  const scored = cards.map((card) => {
+    let score = 0;
+    const text = `${card.title} ${card.description}`.toLowerCase();
+    if (signals.wantsMoreClients && /cliente|lead|captacao|conversao/.test(text)) score += 3;
+    if (signals.wantsSales && /vend|convert|roi|retorno|fatur/.test(text)) score += 3;
+    if (signals.wantsPresence && /presenca|visibilidade|alcance|engaj/.test(text)) score += 3;
+    if (signals.wantsBranding && /marca|visual|identidade|posicion/.test(text)) score += 3;
+    if (signals.wantsAutomation && /process|automat|eficien|manual/.test(text)) score += 3;
+    if (signals.wantsAuthority && /autoridade|referencia|expert/.test(text)) score += 3;
+    if (signals.wantsScale && /escal|cresc|ampliar/.test(text)) score += 2;
+    // Keep "positivo" cards at the end
+    if (card.severity === "positivo") score -= 10;
+    return { card, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.map((s) => s.card);
+}
+
+/** Add objective-specific items to estrategia cards */
+function enrichEstrategiaCards(
+  cards: NicheContent["estrategia"]["cards"],
+  signals: ContextSignals,
+): NicheContent["estrategia"]["cards"] {
+  if (!signals.rawText || signals.rawText.length < 10) return cards;
+
+  return cards.map((card, i) => {
+    const enrichedItems = [...card.items];
+    // Add platform-specific items to the first card
+    if (i === 0 && signals.mentionedPlatforms.length > 0) {
+      const platforms = signals.mentionedPlatforms.slice(0, 2).join(" e ");
+      enrichedItems.push(`Foco especial em ${platforms}`);
+    }
+    // Add goal-specific item to the second card
+    if (i === 1 && signals.mentionedGoals.length > 0) {
+      const goal = signals.mentionedGoals[0];
+      const capitalized = goal.charAt(0).toUpperCase() + goal.slice(1);
+      enrichedItems.push(capitalized);
+    }
+    return { ...card, items: enrichedItems.slice(0, 5) };
+  });
+}
+
+/** Build personalized visao subtitle */
+function buildVisaoSubtitle(formData: WizardFormData, signals: ContextSignals): string {
+  const clientRef = formData.usageType === "personal" ? "voce" : formData.clientName;
+
+  if (signals.wantsMoreClients) {
+    return `Imagine ${clientRef} com uma maquina previsivel de captacao de clientes.`;
+  }
+  if (signals.wantsSales) {
+    return `Imagine ${clientRef} batendo recordes de faturamento mes apos mes.`;
+  }
+  if (signals.wantsScale) {
+    return `Imagine ${clientRef} escalando o negocio de forma sustentavel e lucrativa.`;
+  }
+  if (signals.wantsBranding) {
+    return `Imagine ${clientRef} sendo reconhecido como a principal referencia do mercado.`;
+  }
+  return `Imagine ${clientRef} alcancando resultados extraordinarios.`;
+}
+
 // ── Mensagens da animacao ──
 export const GENERATION_MESSAGES = [
   "Analisando seu nicho de atuacao...",
+  "Processando seus objetivos...",
   "Selecionando o template ideal...",
   "Personalizando conteudo da proposta...",
   "Ajustando cores e identidade visual...",
@@ -534,6 +700,7 @@ export function generateProposalConfig(
   const config = structuredClone(baseConfig);
   const niche = NICHE_CONTENT[formData.businessType] || NICHE_CONTENT["outro"];
   const palette = COLOR_PALETTES.find((p) => p.id === formData.colorPaletteId);
+  const signals = analyzeObjectives(formData.objectives);
 
   // Helper: replace block/section data by type
   function replaceData(type: string, data: Record<string, unknown>) {
@@ -557,35 +724,40 @@ export function generateProposalConfig(
     }
   }
 
-  // Hero
+  // Hero — personalized subtitle based on objectives
+  const personalizedSubtitle = buildPersonalizedSubtitle(niche, formData, signals);
   replaceData("hero", {
     badge: niche.hero.badge,
     titleLine1: formData.companyName,
     titleHighlight: niche.hero.titleHighlight,
-    subtitle: niche.hero.subtitle,
+    subtitle: personalizedSubtitle,
     clientName: formData.usageType === "personal"
       ? formData.companyName
       : `${formData.clientName} — Proposta Comercial`,
   });
 
-  // Diagnostico
+  // Diagnostico — reorder cards by relevance to objectives
+  const prioritizedCards = prioritizeDiagnosticoCards(niche.diagnostico.cards, signals);
   replaceData("diagnostico", {
     title: niche.diagnostico.title,
-    subtitle: niche.diagnostico.subtitle,
-    cards: niche.diagnostico.cards,
+    subtitle: signals.rawText.length > 15
+      ? `Pontos identificados com base nos seus objetivos e no cenario atual.`
+      : niche.diagnostico.subtitle,
+    cards: prioritizedCards,
   });
 
-  // Estrategia
+  // Estrategia — enrich with platform/goal-specific items
+  const enrichedCards = enrichEstrategiaCards(niche.estrategia.cards, signals);
   replaceData("estrategia", {
     title: niche.estrategia.title,
     subtitle: niche.estrategia.subtitle,
-    cards: niche.estrategia.cards,
+    cards: enrichedCards,
   });
 
-  // Visao
+  // Visao — personalized subtitle
   replaceData("visao", {
     title: "O Futuro do Seu Negocio",
-    subtitle: `Imagine ${formData.usageType === "personal" ? "voce" : formData.clientName} alcancando resultados extraordinarios.`,
+    subtitle: buildVisaoSubtitle(formData, signals),
     items: niche.visao.items,
     quote: niche.visao.quote,
     quoteHighlight: niche.visao.quoteHighlight,
@@ -627,7 +799,7 @@ export function generateProposalConfig(
   config.meta.title = formData.usageType === "personal"
     ? `${formData.companyName} — Proposta`
     : `${formData.companyName} — Proposta para ${formData.clientName}`;
-  config.meta.description = niche.hero.subtitle;
+  config.meta.description = personalizedSubtitle;
 
   // Override theme colors if palette selected
   if (palette) {

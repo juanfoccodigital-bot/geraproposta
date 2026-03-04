@@ -14,7 +14,8 @@ import CtaSection from "@/components/landing/CtaSection";
 import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import LazySection from "@/components/ui/LazySection";
-import AiWizardModal from "@/components/proposal/AiWizardModal";
+import dynamic from "next/dynamic";
+const AiWizardModal = dynamic(() => import("@/components/proposal/AiWizardModal"), { ssr: false });
 
 /* ============================================
    HOME — Marketplace de Templates

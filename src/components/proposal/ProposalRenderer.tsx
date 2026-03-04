@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   ProposalConfig,
   BlockType,
@@ -81,6 +82,13 @@ export default function ProposalRenderer({ config: rawConfig, targetRef }: Propo
   const config = migrateConfig(rawConfig);
   const blocks = config.blocks || [];
 
+  const visibleBlocks = useMemo(() => blocks.filter((b) => b.visible), [blocks]);
+
+  const meta = useMemo(
+    () => ({ clientLogo: config.meta.clientLogo, companyLogo: config.meta.companyLogo }),
+    [config.meta.clientLogo, config.meta.companyLogo]
+  );
+
   return (
     <>
       <ThemeInjector theme={config.theme} targetRef={targetRef} />
@@ -91,16 +99,14 @@ export default function ProposalRenderer({ config: rawConfig, targetRef }: Propo
           color: config.theme.colors.foreground,
         }}
       >
-        {blocks
-          .filter((b) => b.visible)
-          .map((block) => {
-            const Component = blockComponents[block.type];
-            if (!Component) return null;
-            const extraProps = (block.type === "hero" || block.type === "visao")
-              ? { meta: { clientLogo: config.meta.clientLogo, companyLogo: config.meta.companyLogo } }
-              : {};
-            return <Component key={block.id} config={block.data} {...extraProps} />;
-          })}
+        {visibleBlocks.map((block) => {
+          const Component = blockComponents[block.type];
+          if (!Component) return null;
+          const extraProps = (block.type === "hero" || block.type === "visao")
+            ? { meta }
+            : {};
+          return <Component key={block.id} config={block.data} {...extraProps} />;
+        })}
       </main>
     </>
   );

@@ -62,7 +62,8 @@ export async function POST() {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Profile ensure error:", error.message);
+      return NextResponse.json({ error: "Erro ao criar perfil" }, { status: 500 });
     }
 
     return NextResponse.json({ created: true, profile: data }, { status: 201 });

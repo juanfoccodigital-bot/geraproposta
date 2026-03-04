@@ -199,15 +199,18 @@ export async function getUsageStats(userId: string) {
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId);
 
+  // Infinity → -1 for JSON serialization (Infinity becomes null in JSON)
+  const safe = (v: number) => (v === Infinity ? -1 : v);
+
   return {
     plan,
     dailyUsed: dailyCount,
-    dailyLimit: limits.dailyCreate,
+    dailyLimit: safe(limits.dailyCreate),
     monthlyUsed: monthlyCount,
-    monthlyLimit: limits.monthlyCreate,
+    monthlyLimit: safe(limits.monthlyCreate),
     editsUsed: editsCount,
-    editsLimit: limits.dailyEdits,
+    editsLimit: safe(limits.dailyEdits),
     activeProposals: count || 0,
-    maxActive: limits.maxActive,
+    maxActive: safe(limits.maxActive),
   };
 }

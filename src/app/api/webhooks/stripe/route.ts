@@ -25,18 +25,20 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     let event: Stripe.Event;
 
-    // Verificar assinatura do webhook (se secret configurado)
+    // Verificar assinatura do webhook
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (webhookSecret && signature) {
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      } catch (err) {
-        console.error("Stripe webhook signature verification failed:", err);
-        return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-      }
-    } else {
-      event = JSON.parse(body) as Stripe.Event;
-      console.warn("Stripe webhook: no STRIPE_WEBHOOK_SECRET configured");
+    if (!webhookSecret) {
+      console.error("Stripe webhook: STRIPE_WEBHOOK_SECRET not configured");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+    if (!signature) {
+      return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+    }
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      console.error("Stripe webhook signature verification failed:", err);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     console.log("Stripe webhook event:", event.type);

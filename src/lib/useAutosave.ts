@@ -11,16 +11,25 @@ export function useAutosave({ data, onSave, delay = 3000, enabled = true }: UseA
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState(false);
-  const previousData = useRef<string>("");
+  const previousData = useRef<string>(JSON.stringify(data));
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const onSaveRef = useRef(onSave);
+  const initialized = useRef(false);
   onSaveRef.current = onSave;
 
   // Detect changes
   useEffect(() => {
     if (!enabled) return;
     const serialized = JSON.stringify(data);
-    if (previousData.current && serialized !== previousData.current) {
+
+    // Skip the first render — just store the initial value
+    if (!initialized.current) {
+      previousData.current = serialized;
+      initialized.current = true;
+      return;
+    }
+
+    if (serialized !== previousData.current) {
       setIsDirty(true);
 
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -43,12 +52,6 @@ export function useAutosave({ data, onSave, delay = 3000, enabled = true }: UseA
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [data, delay, enabled]);
-
-  // Initialize previous data on first render
-  useEffect(() => {
-    previousData.current = JSON.stringify(data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const markClean = useCallback(() => {
     setIsDirty(false);

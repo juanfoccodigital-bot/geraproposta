@@ -9,7 +9,8 @@ import { useState, useEffect, useMemo } from "react";
 import { Sparkles, ArrowLeft, Plus, Lock, Crown, Search, Eye } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import TemplatePreviewThumbnail from "@/components/ui/TemplatePreviewThumbnail";
-import AiWizardModal from "@/components/proposal/AiWizardModal";
+import dynamic from "next/dynamic";
+const AiWizardModal = dynamic(() => import("@/components/proposal/AiWizardModal"), { ssr: false });
 import Link from "next/link";
 
 /* ============================================

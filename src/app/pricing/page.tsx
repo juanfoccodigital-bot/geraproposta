@@ -7,7 +7,8 @@ import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronDown, Shield } from "lucide-react";
-import CheckoutModal from "@/components/ui/CheckoutModal";
+import dynamic from "next/dynamic";
+const CheckoutModal = dynamic(() => import("@/components/ui/CheckoutModal"), { ssr: false });
 import { PLAN_LABELS, PLAN_PRICES } from "@/lib/stripe";
 
 /* ============================================

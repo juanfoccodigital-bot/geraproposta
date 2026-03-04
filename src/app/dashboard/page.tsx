@@ -4,13 +4,14 @@ import { ProposalRecord, ProposalStatus, statusLabels, statusColors, CategoryRec
 import { PlanTier } from "@/types/user";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { Plus, Search, Eye, Edit3, Copy, Trash2, ExternalLink, LayoutGrid, Clock, MessageCircle, Zap, ArrowUpRight, Sparkles, Tag } from "lucide-react";
 import CategoriesManager from "@/components/dashboard/CategoriesManager";
 import ConversionCards from "@/components/dashboard/ConversionCards";
 import UrgencyBanner from "@/components/dashboard/UrgencyBanner";
 import Navbar from "@/components/landing/Navbar";
-import AiWizardModal from "@/components/proposal/AiWizardModal";
+import dynamic from "next/dynamic";
+const AiWizardModal = dynamic(() => import("@/components/proposal/AiWizardModal"), { ssr: false });
 import { useAuth } from "@/contexts/AuthContext";
 
 /* ============================================
@@ -178,10 +179,12 @@ function DashboardContent() {
   };
 
   // -- Toast helper --
+  const toastTimer = useRef<NodeJS.Timeout | null>(null);
   const showToast = useCallback((message: string) => {
     setToastMessage(message);
     setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 2000);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToastVisible(false), 2000);
   }, []);
 
   // -- Actions --

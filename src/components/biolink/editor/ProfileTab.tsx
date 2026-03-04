@@ -188,7 +188,7 @@ function CustomDomainEditor({ isPremium }: { isPremium: boolean }) {
               <span className="text-white/60 font-mono">cname.vercel-dns.com</span>
             </div>
           </div>
-          <p className="text-[10px] text-white/20">Salve e aguarde a propagação do DNS (pode levar até 24h)</p>
+          <p className="text-[10px] text-green-400/60">Ao salvar, o domínio é configurado automaticamente. Aguarde a propagação do DNS (até 24h).</p>
         </div>
       )}
     </div>

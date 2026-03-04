@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { checkRateLimit, READ_LIMIT, WRITE_LIMIT } from "@/lib/rate-limit";
 import { updateBiolinkSchema, parseBody } from "@/lib/validations";
+import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel-domains";
 
 // ============================================
 // GET /api/biolinks/[id]
@@ -43,10 +44,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const rl2 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl2.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    // Verify ownership
+    // Verify ownership + get current custom_domain
     const { data: existing } = await supabase
       .from("biolinks")
-      .select("id")
+      .select("id, custom_domain")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -106,8 +107,27 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     if (error) {
       console.error("Biolink update error:", error.message, error.code, error.details);
-      return NextResponse.json({ error: `Erro ao atualizar biolink: ${error.message}` }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao atualizar biolink" }, { status: 500 });
     }
+
+    // Auto-add/remove custom domain on Vercel (non-blocking)
+    const oldDomain = (existing as { custom_domain?: string | null }).custom_domain;
+    const newDomain = updates.custom_domain as string | null | undefined;
+    if (newDomain !== undefined) {
+      // Remove old domain if it changed
+      if (oldDomain && oldDomain !== newDomain) {
+        removeDomainFromVercel(oldDomain).catch(() => {});
+      }
+      // Add new domain
+      if (newDomain) {
+        const result = await addDomainToVercel(newDomain);
+        if (!result.success) {
+          console.error(`[vercel-domains] Could not add ${newDomain}: ${result.error}`);
+          // Don't fail the save — domain was saved in DB, Vercel add can be retried
+        }
+      }
+    }
+
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -127,6 +147,14 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const rl3 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl3.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
+    // Get custom_domain before deleting so we can remove from Vercel
+    const { data: biolink } = await supabase
+      .from("biolinks")
+      .select("custom_domain")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
     const { error } = await supabase
       .from("biolinks")
       .delete()
@@ -134,6 +162,12 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       .eq("user_id", user.id);
 
     if (error) return NextResponse.json({ error: "Erro ao deletar biolink" }, { status: 500 });
+
+    // Remove custom domain from Vercel if it had one
+    if (biolink?.custom_domain) {
+      removeDomainFromVercel(biolink.custom_domain).catch(() => {});
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
