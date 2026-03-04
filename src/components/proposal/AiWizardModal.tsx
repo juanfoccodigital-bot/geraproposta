@@ -247,7 +247,10 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
           onClick={(e) => e.stopPropagation()}
         >
           <Sparkles size={32} className="mx-auto mb-4 text-[#F97316]" />
-          <h3 className="text-lg font-semibold text-white mb-2">Gerar Proposta com IA</h3>
+          <h3 className="text-lg font-semibold text-white mb-2 flex items-center justify-center gap-2">
+            Gerar Proposta com IA
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30">Beta</span>
+          </h3>
           <p className="text-sm text-white/50 mb-6">Faca login para criar propostas personalizadas.</p>
           <button
             onClick={() => { onClose(); router.push("/login"); }}
@@ -275,7 +278,10 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
           onClick={(e) => e.stopPropagation()}
         >
           <Sparkles size={32} className="mx-auto mb-4 text-[#F97316]" />
-          <h3 className="text-lg font-semibold text-white mb-2">Gerar Proposta com IA</h3>
+          <h3 className="text-lg font-semibold text-white mb-2 flex items-center justify-center gap-2">
+            Gerar Proposta com IA
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30">Beta</span>
+          </h3>
           <p className="text-sm text-white/50 mb-2">Recurso exclusivo dos planos <span className="text-white font-medium">Pro</span> e <span className="text-white font-medium">Plus</span>.</p>
           <p className="text-xs text-white/30 mb-6">Crie propostas personalizadas em segundos com conteudo inteligente baseado no seu nicho.</p>
           <button
@@ -317,8 +323,15 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
           </button>
         )}
 
+        {/* Header */}
+        <div className="flex items-center gap-2 px-6 pt-5 pb-1">
+          <Sparkles size={14} className="text-[#F97316]" />
+          <span className="text-xs font-medium text-white/50">Gerar com IA</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30">Beta</span>
+        </div>
+
         {/* Progress bar */}
-        <div className="flex gap-1 px-6 pt-5">
+        <div className="flex gap-1 px-6 pt-2">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <div
               key={i}

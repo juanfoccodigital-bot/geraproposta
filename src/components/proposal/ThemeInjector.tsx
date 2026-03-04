@@ -15,6 +15,14 @@ interface ThemeInjectorProps {
   targetRef?: React.RefObject<HTMLElement | null>;
 }
 
+const CSS_VARS = [
+  "--gold", "--gold-light", "--gold-dark",
+  "--background", "--foreground", "--beige", "--nude", "--cream",
+  "--color-foreground", "--color-gold", "--color-gold-light", "--color-gold-dark",
+  "--color-background", "--color-beige", "--color-nude", "--color-cream",
+  "--font-heading", "--font-body", "--font-sans", "--font-serif",
+] as const;
+
 export default function ThemeInjector({ theme, targetRef }: ThemeInjectorProps) {
   useEffect(() => {
     const root = targetRef?.current || document.documentElement;
@@ -50,6 +58,14 @@ export default function ThemeInjector({ theme, targetRef }: ThemeInjectorProps) 
     // Carregar Google Fonts
     loadGoogleFont(theme.fonts.heading);
     loadGoogleFont(theme.fonts.body);
+
+    // Cleanup: remove CSS variables when unmounting so they don't
+    // leak into other pages (e.g. navigating from /p/slug back to home)
+    return () => {
+      for (const v of CSS_VARS) {
+        root.style.removeProperty(v);
+      }
+    };
   }, [theme, targetRef]);
 
   return null;
