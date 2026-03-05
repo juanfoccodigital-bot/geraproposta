@@ -26,7 +26,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .eq("user_id", user.id)
       .single();
 
-    if (error || !data) return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+    if (error || !data) {
+      console.error("[biolink-get] 404 debug:", { id, userId: user.id, error: error?.message, code: error?.code });
+      // Check if biolink exists at all (without user filter)
+      const { data: exists } = await admin.from("biolinks").select("id, user_id").eq("id", id).maybeSingle();
+      if (exists) {
+        console.error("[biolink-get] Biolink exists but user_id mismatch:", { biolinkUserId: exists.user_id, authUserId: user.id });
+      } else {
+        console.error("[biolink-get] Biolink does not exist in DB at all");
+      }
+      return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+    }
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
