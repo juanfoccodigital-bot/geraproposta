@@ -2,12 +2,7 @@
 
 import type { CardsGridData } from "@/types/proposal";
 import { motion } from "framer-motion";
-import * as LucideIcons from "lucide-react";
-
-function getIcon(name: string) {
-  const icons = LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>;
-  return icons[name] || icons["Star"];
-}
+import { resolveIcon } from "@/lib/icons";
 
 export default function CardsGridBlock({ config }: { config: CardsGridData }) {
   const colsClass =
@@ -47,7 +42,7 @@ export default function CardsGridBlock({ config }: { config: CardsGridData }) {
 
         <div className={`grid grid-cols-1 ${colsClass} gap-6`}>
           {config.cards.map((card, i) => {
-            const Icon = getIcon(card.icon);
+            const Icon = resolveIcon(card.icon);
             return (
               <motion.div
                 key={i}
@@ -66,11 +61,9 @@ export default function CardsGridBlock({ config }: { config: CardsGridData }) {
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: "var(--color-gold)", opacity: 0.15 }}
+                  style={{ backgroundColor: "color-mix(in srgb, var(--color-gold) 15%, transparent)" }}
                 >
-                  <span style={{ color: "var(--color-gold)" }}>
-                    <Icon className="w-6 h-6" />
-                  </span>
+                  <Icon className="w-6 h-6" style={{ color: "var(--color-gold)" }} />
                 </div>
                 <h3 className="text-lg font-bold mb-2" style={{ color: "var(--color-foreground)" }}>
                   {card.title}

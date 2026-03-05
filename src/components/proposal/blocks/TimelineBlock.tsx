@@ -2,12 +2,7 @@
 
 import type { TimelineData } from "@/types/proposal";
 import { motion } from "framer-motion";
-import * as LucideIcons from "lucide-react";
-
-function getIcon(name: string) {
-  const icons = LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>;
-  return icons[name] || icons["Circle"];
-}
+import { resolveIcon } from "@/lib/icons";
 
 export default function TimelineBlock({ config }: { config: TimelineData }) {
   const isAlternating = config.layout === "alternating";
@@ -57,7 +52,7 @@ export default function TimelineBlock({ config }: { config: TimelineData }) {
 
           <div className="space-y-12">
             {config.items.map((item, i) => {
-              const Icon = getIcon(item.icon);
+              const Icon = resolveIcon(item.icon);
               const isRight = isAlternating && i % 2 === 1;
 
               return (
@@ -97,11 +92,9 @@ export default function TimelineBlock({ config }: { config: TimelineData }) {
                     <div className={`flex items-center gap-3 mb-3 ${isRight ? "md:flex-row-reverse" : ""}`}>
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: "var(--color-gold)", opacity: 0.15 }}
+                        style={{ backgroundColor: "color-mix(in srgb, var(--color-gold) 15%, transparent)" }}
                       >
-                        <span style={{ color: "var(--color-gold)" }}>
-                          <Icon className="w-5 h-5" />
-                        </span>
+                        <Icon className="w-5 h-5" style={{ color: "var(--color-gold)" }} />
                       </div>
                       <span
                         className="text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full"
