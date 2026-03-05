@@ -21,7 +21,7 @@ export default function HeroSection({ config, meta }: Props) {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pattern-bg">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pattern-bg">
       {/* Decorativos de fundo */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-20 right-20 w-72 h-72 bg-gold/5 rounded-full blur-3xl" />
@@ -31,7 +31,7 @@ export default function HeroSection({ config, meta }: Props) {
       {/* Linha dourada no topo */}
       <div className="absolute top-0 left-0 w-full h-[2px] gold-gradient" />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pb-20">
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -125,7 +125,7 @@ export default function HeroSection({ config, meta }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-0"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
