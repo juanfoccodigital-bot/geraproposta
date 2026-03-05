@@ -225,6 +225,7 @@ export async function POST(request: NextRequest) {
       .insert({
         title: config.meta?.title || `Proposta para ${clientName}`,
         client_name: clientName,
+        template_id: "ai-generated",
         slug,
         category: null,
         config,
@@ -236,7 +237,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      return NextResponse.json({ error: "Erro ao salvar proposta" }, { status: 500 });
+      console.error("[AI Prompt] Insert error:", insertError.message);
+      return NextResponse.json({ error: "Erro ao salvar proposta: " + insertError.message }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -244,7 +246,9 @@ export async function POST(request: NextRequest) {
       slug: proposal.slug,
       config,
     });
-  } catch {
-    return NextResponse.json({ error: "Erro interno ao gerar proposta" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    console.error("[AI Prompt] Erro:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -225,6 +225,7 @@ Gere a proposta completa em JSON.`,
       .insert({
         title: config.meta?.title || `Proposta para ${clientName}`,
         client_name: clientName,
+        template_id: "ai-generated",
         slug,
         category: null,
         config,
