@@ -157,7 +157,7 @@ export const aiGenerateSchema = z.object({
 });
 
 export const aiPromptSchema = z.object({
-  prompt: safeString(2000).min(10, "Descreva com mais detalhes o que voce precisa (minimo 10 caracteres)"),
+  prompt: safeString(5000).min(10, "Descreva com mais detalhes o que voce precisa (minimo 10 caracteres)"),
 });
 
 // ---- Utility: Parse body with Zod ----
