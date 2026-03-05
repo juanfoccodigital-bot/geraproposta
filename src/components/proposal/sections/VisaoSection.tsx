@@ -70,19 +70,19 @@ export default function VisaoSection({ config, meta }: Props) {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 bg-foreground border-t border-white/5">
+      <footer className="py-10 bg-foreground border-t border-background/5">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {meta?.companyLogo && (
               <img src={meta.companyLogo} alt="Logo" className="h-8 object-contain opacity-40" />
             )}
-            <p className="text-white/25 text-sm">
+            <p className="text-background/25 text-sm">
               Proposta exclusiva para{" "}
               <span className="text-gold/60 font-medium">
                 {config.footerClientName}
               </span>
             </p>
-            <p className="text-white/15 text-xs">
+            <p className="text-background/15 text-xs">
               {new Date().getFullYear()} — {config.footerNote}
             </p>
           </div>

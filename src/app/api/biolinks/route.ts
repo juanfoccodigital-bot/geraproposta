@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSupabase } from "@/lib/supabase-server";
+import { getServerSupabase, getAdminSupabase } from "@/lib/supabase-server";
 import { PLAN_LIMITS, PlanName } from "@/lib/plan-limits";
 import { getBiolinkTemplate } from "@/lib/biolink-templates";
 import { FREE_BIOLINK_TEMPLATE_IDS } from "@/lib/biolink-templates";
@@ -18,7 +18,8 @@ export async function GET() {
     const rl = checkRateLimit(`biolinks:read:${user.id}`, READ_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const { data, error } = await supabase
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
       .from("biolinks")
       .select("id, title, slug, template_id, config, views, is_active, created_at, updated_at")
       .eq("user_id", user.id)
@@ -43,13 +44,14 @@ export async function POST(request: NextRequest) {
     const rl = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const { data: profile } = await supabase.from("profiles").select("plan, full_name").eq("id", user.id).single();
+    const admin = getAdminSupabase();
+    const { data: profile } = await admin.from("profiles").select("plan, full_name").eq("id", user.id).single();
     const plan = (profile?.plan || "free") as PlanName;
     const userName = profile?.full_name || "";
     const limits = PLAN_LIMITS[plan];
 
     // Check biolink limit
-    const { count } = await supabase
+    const { count } = await admin
       .from("biolinks")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check slug uniqueness
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("biolinks")
       .select("id")
       .eq("slug", finalSlug)
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("biolinks")
       .insert({
         user_id: user.id,

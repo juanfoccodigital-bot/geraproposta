@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSupabase } from "@/lib/supabase-server";
+import { getServerSupabase, getAdminSupabase } from "@/lib/supabase-server";
 import { checkRateLimit, READ_LIMIT } from "@/lib/rate-limit";
 
 // ============================================
@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ available: false, reason: "Slug deve ter pelo menos 3 caracteres" });
     }
 
-    const { data } = await supabase
+    const admin = getAdminSupabase();
+    const { data } = await admin
       .from("biolinks")
       .select("id")
       .eq("slug", cleanSlug)

@@ -102,7 +102,7 @@ export default function HeroSection({ config, meta }: Props) {
         >
           <button
             onClick={scrollToTarget}
-            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-foreground text-white font-medium text-base tracking-wide transition-all duration-300 hover:bg-foreground/90 hover:shadow-lg hover:shadow-gold/10 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-foreground text-background font-medium text-base tracking-wide transition-all duration-300 hover:bg-foreground/90 hover:shadow-lg hover:shadow-gold/10 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             {config.ctaPrimary.label}
             <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />

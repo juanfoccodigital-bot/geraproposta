@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /* ============================================
@@ -30,5 +31,13 @@ export async function getServerSupabase() {
         },
       },
     }
+  );
+}
+
+/** Admin client com service role — bypassa RLS. Use para queries server-side autorizadas em código. */
+export function getAdminSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 }

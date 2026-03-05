@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSupabase } from "@/lib/supabase-server";
+import { getServerSupabase, getAdminSupabase } from "@/lib/supabase-server";
 import { checkRateLimit, READ_LIMIT, WRITE_LIMIT } from "@/lib/rate-limit";
 import { updateBiolinkSchema, parseBody } from "@/lib/validations";
 import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel-domains";
@@ -17,7 +17,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const rl = checkRateLimit(`biolinks:read:${user.id}`, READ_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const { data, error } = await supabase
+    // Usa admin client para evitar bloqueio por RLS com token expirado
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
       .from("biolinks")
       .select("*")
       .eq("id", id)
@@ -44,8 +46,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const rl2 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl2.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
+    const admin = getAdminSupabase();
+
     // Verify ownership + get current custom_domain
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("biolinks")
       .select("id, custom_domain")
       .eq("id", id)
@@ -67,8 +71,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (parsed.data.slug !== undefined) {
       const newSlug = parsed.data.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
       if (newSlug) {
-        // Check uniqueness
-        const { data: slugExists } = await supabase
+        const { data: slugExists } = await admin
           .from("biolinks")
           .select("id")
           .eq("slug", newSlug)
@@ -80,11 +83,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     if (parsed.data.custom_domain !== undefined) {
       if (parsed.data.custom_domain) {
-        // Clean and validate domain
         const domain = parsed.data.custom_domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
         if (domain) {
-          // Check uniqueness
-          const { data: domainExists } = await supabase
+          const { data: domainExists } = await admin
             .from("biolinks")
             .select("id")
             .eq("custom_domain", domain)
@@ -98,10 +99,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("biolinks")
       .update(updates)
       .eq("id", id)
+      .eq("user_id", user.id)
       .select()
       .single();
 
@@ -147,15 +149,17 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const rl3 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl3.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
+    const admin = getAdminSupabase();
+
     // Get custom_domain before deleting so we can remove from Vercel
-    const { data: biolink } = await supabase
+    const { data: biolink } = await admin
       .from("biolinks")
       .select("custom_domain")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
-    const { error } = await supabase
+    const { error } = await admin
       .from("biolinks")
       .delete()
       .eq("id", id)

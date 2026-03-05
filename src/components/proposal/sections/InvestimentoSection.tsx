@@ -24,11 +24,11 @@ export default function InvestimentoSection({ config }: Props) {
           <span className="text-sm font-medium text-gold tracking-[0.2em] uppercase">
             {config.sectionLabel}
           </span>
-          <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl sm:text-4xl md:text-5xl font-bold text-background mt-3 mb-4">
             {config.title}
           </h2>
           <div className="divider mb-6" />
-          <p className="text-white/40 max-w-xl mx-auto text-base leading-relaxed">
+          <p className="text-background/40 max-w-xl mx-auto text-base leading-relaxed">
             {config.subtitle}
           </p>
         </ScrollReveal>
@@ -38,7 +38,7 @@ export default function InvestimentoSection({ config }: Props) {
           <div className="max-w-2xl mx-auto">
             <div className="relative rounded-3xl overflow-hidden">
               <div className="absolute inset-0 rounded-3xl border border-gold/20" />
-              <div className="relative bg-white/5 backdrop-blur-sm p-10 sm:p-14">
+              <div className="relative bg-background/5 backdrop-blur-sm p-10 sm:p-14">
                 {/* Badge */}
                 <div className="flex justify-center mb-8">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20">
@@ -51,35 +51,35 @@ export default function InvestimentoSection({ config }: Props) {
 
                 {/* Preço */}
                 <div className="text-center mb-8">
-                  <p className="text-white/30 text-lg line-through mb-2">
+                  <p className="text-background/30 text-lg line-through mb-2">
                     {config.priceOriginal}
                   </p>
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-sm text-white/50 font-medium">
+                    <span className="text-sm text-background/50 font-medium">
                       {config.priceCurrency}
                     </span>
-                    <span className="font-[family-name:var(--font-heading)] text-6xl sm:text-7xl font-bold text-white">
+                    <span className="font-[family-name:var(--font-heading)] text-6xl sm:text-7xl font-bold text-background">
                       {config.priceCurrent}
                     </span>
-                    <span className="text-white/50 text-base">
+                    <span className="text-background/50 text-base">
                       {config.pricePeriod}
                     </span>
                   </div>
                 </div>
 
                 {/* Descrição */}
-                <p className="text-center text-white/40 text-sm leading-relaxed max-w-md mx-auto mb-10">
+                <p className="text-center text-background/40 text-sm leading-relaxed max-w-md mx-auto mb-10">
                   {config.description}
                 </p>
 
-                <div className="w-full h-[1px] bg-white/10 mb-8" />
+                <div className="w-full h-[1px] bg-background/10 mb-8" />
 
                 {/* Itens inclusos */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                   {config.includedItems.map((item, index) => (
                     <div key={index} className="flex items-start gap-3">
                       <CheckCircle2 className="w-4 h-4 text-gold mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-white/60">{item}</span>
+                      <span className="text-sm text-background/60">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -99,8 +99,8 @@ export default function InvestimentoSection({ config }: Props) {
 
                 {/* Garantia */}
                 <div className="flex items-center justify-center gap-2 mt-6">
-                  <Shield className="w-3.5 h-3.5 text-white/20" />
-                  <span className="text-xs text-white/20">{config.guarantee}</span>
+                  <Shield className="w-3.5 h-3.5 text-background/20" />
+                  <span className="text-xs text-background/20">{config.guarantee}</span>
                 </div>
               </div>
             </div>
