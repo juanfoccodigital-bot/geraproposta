@@ -423,7 +423,7 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
         )}
 
         {/* Content */}
-        <div className="px-6 py-5">
+        <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
           {generating ? (
             <GeneratingScreen progress={progress} messageIndex={messageIndex} error={error} onRetry={() => { setGenerating(false); setError(""); }} />
           ) : mode === "prompt" ? (
