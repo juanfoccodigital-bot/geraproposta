@@ -141,7 +141,7 @@ const comparisonRows = [
   { label: "Propostas por mes", free: "15", lite: "30", pro: "100", plus: "Ilimitado", category: "Propostas" },
   { label: "Propostas ativas", free: "5", lite: "50", pro: "200", plus: "Ilimitado", category: "Propostas" },
   { label: "Alteracoes por dia", free: "3", lite: "20", pro: "Ilimitado", plus: "Ilimitado", category: "Edicao", highlight: true },
-  { label: "Compartilhamentos/mes", free: "3", lite: "30", pro: "100", plus: "Ilimitado", category: "Edicao" },
+  { label: "Compartilhamentos / mes", free: "3", lite: "30", pro: "100", plus: "Ilimitado", category: "Edicao" },
   { label: "Todos os templates", free: false, lite: true, pro: true, plus: true, category: "Features" },
   { label: "Blocos premium", free: false, lite: true, pro: true, plus: true, category: "Features" },
   { label: "Logo personalizada", free: false, lite: true, pro: true, plus: true, category: "Features" },
@@ -161,7 +161,7 @@ function ComparisonCell({ value }: { value: string | boolean }) {
     );
   }
   return (
-    <span className="text-sm text-white">{value}</span>
+    <span className="text-xs sm:text-sm text-white">{value}</span>
   );
 }
 
@@ -365,46 +365,50 @@ export default function PricingSection({
             </h3>
 
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "#1F1F1F", background: "#111111" }}>
-              {/* Table header */}
-              <div className="grid grid-cols-5 gap-0 py-4 px-4 border-b" style={{ borderColor: "#1F1F1F" }}>
-                <div className="text-sm font-medium" style={{ color: "#737373" }}>Recurso</div>
-                {["Free", "Lite", "Pro", "Plus"].map((name) => (
-                  <div key={name} className="text-sm font-bold text-white text-center">{name}</div>
-                ))}
-              </div>
-
-              {/* Table body */}
-              {comparisonRows.map((row, idx) => {
-                const prevRow = comparisonRows[idx - 1];
-                const showCategory = !prevRow || prevRow.category !== row.category;
-
-                return (
-                  <div key={row.label}>
-                    {showCategory && (
-                      <div className="px-4 py-2.5 border-b" style={{ borderColor: "#1F1F1F", background: "#0D0D0D" }}>
-                        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#F97316" }}>
-                          {row.category}
-                        </span>
-                      </div>
-                    )}
-                    <div
-                      className={`grid grid-cols-5 gap-0 py-3 px-4 border-b items-center ${row.highlight ? "bg-[#F9731608]" : ""}`}
-                      style={{ borderColor: "#1A1A1A" }}
-                    >
-                      <div
-                        className={`text-sm ${row.highlight ? "font-semibold" : ""}`}
-                        style={{ color: row.highlight ? "#F97316" : "#A3A3A3" }}
-                      >
-                        {row.label}
-                      </div>
-                      <div className="text-center"><ComparisonCell value={row.free} /></div>
-                      <div className="text-center"><ComparisonCell value={row.lite} /></div>
-                      <div className="text-center"><ComparisonCell value={row.pro} /></div>
-                      <div className="text-center"><ComparisonCell value={row.plus} /></div>
-                    </div>
+              <div className="overflow-x-auto">
+                <div className="min-w-[540px]">
+                  {/* Table header */}
+                  <div className="grid grid-cols-[minmax(140px,1.5fr)_repeat(4,1fr)] py-4 px-4 border-b" style={{ borderColor: "#1F1F1F" }}>
+                    <div className="text-xs sm:text-sm font-medium" style={{ color: "#737373" }}>Recurso</div>
+                    {["Free", "Lite", "Pro", "Plus"].map((name) => (
+                      <div key={name} className="text-xs sm:text-sm font-bold text-white text-center">{name}</div>
+                    ))}
                   </div>
-                );
-              })}
+
+                  {/* Table body */}
+                  {comparisonRows.map((row, idx) => {
+                    const prevRow = comparisonRows[idx - 1];
+                    const showCategory = !prevRow || prevRow.category !== row.category;
+
+                    return (
+                      <div key={row.label}>
+                        {showCategory && (
+                          <div className="px-4 py-2.5 border-b" style={{ borderColor: "#1F1F1F", background: "#0D0D0D" }}>
+                            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#F97316" }}>
+                              {row.category}
+                            </span>
+                          </div>
+                        )}
+                        <div
+                          className={`grid grid-cols-[minmax(140px,1.5fr)_repeat(4,1fr)] py-3 px-4 border-b items-center ${row.highlight ? "bg-[#F9731608]" : ""}`}
+                          style={{ borderColor: "#1A1A1A" }}
+                        >
+                          <div
+                            className={`text-xs sm:text-sm pr-2 ${row.highlight ? "font-semibold" : ""}`}
+                            style={{ color: row.highlight ? "#F97316" : "#A3A3A3" }}
+                          >
+                            {row.label}
+                          </div>
+                          <div className="text-center"><ComparisonCell value={row.free} /></div>
+                          <div className="text-center"><ComparisonCell value={row.lite} /></div>
+                          <div className="text-center"><ComparisonCell value={row.pro} /></div>
+                          <div className="text-center"><ComparisonCell value={row.plus} /></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
