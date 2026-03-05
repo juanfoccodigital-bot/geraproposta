@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
 
     step = "insert-db";
     const clientName = config.sections?.[0]?.data?.clientName || "Cliente";
-    const slug = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const slug = Math.random().toString(36).substring(2, 10);
     const { data: proposal, error: insertError } = await supabase
       .from("proposals")
       .insert({

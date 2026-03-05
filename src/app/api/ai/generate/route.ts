@@ -219,7 +219,7 @@ Gere a proposta completa em JSON.`,
     }
 
     // Create proposal in database
-    const slug = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const slug = Math.random().toString(36).substring(2, 10);
     const { data: proposal, error: insertError } = await supabase
       .from("proposals")
       .insert({
