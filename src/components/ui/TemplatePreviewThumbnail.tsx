@@ -26,9 +26,12 @@ export default function TemplatePreviewThumbnail({
   const themeRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [scale, setScale] = useState(0.25);
+  const [isMobile, setIsMobile] = useState(false);
 
-  /* ── Lazy render: only mount ProposalRenderer when near viewport ── */
+  useEffect(() => { setIsMobile(window.innerWidth < 768); }, []);
+
   useEffect(() => {
+    if (isMobile) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -44,10 +47,10 @@ export default function TemplatePreviewThumbnail({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile]);
 
-  /* ── Scale factor based on container width ── */
   useEffect(() => {
+    if (isMobile) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -60,7 +63,25 @@ export default function TemplatePreviewThumbnail({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [isMobile]);
+
+  const bg = config.theme.colors.background;
+  const accent = config.theme.colors.gold || config.theme.colors.foreground;
+
+  if (isMobile) {
+    return (
+      <div className="relative w-full overflow-hidden" style={{ height, background: bg }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          <div className="w-28 h-2 rounded-full" style={{ background: accent, opacity: 0.2 }} />
+          <div className="w-20 h-1.5 rounded-full" style={{ background: accent, opacity: 0.1 }} />
+          <div className="flex gap-2 mt-1">
+            <div className="w-14 h-14 rounded-lg" style={{ background: accent, opacity: 0.08 }} />
+            <div className="w-14 h-14 rounded-lg" style={{ background: accent, opacity: 0.08 }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -81,10 +102,9 @@ export default function TemplatePreviewThumbnail({
           <ProposalRenderer config={config} targetRef={themeRef} />
         </div>
       ) : (
-        /* Placeholder with template bg color while loading */
         <div
           className="absolute inset-0"
-          style={{ background: config.theme.colors.background }}
+          style={{ background: bg }}
         />
       )}
     </div>
