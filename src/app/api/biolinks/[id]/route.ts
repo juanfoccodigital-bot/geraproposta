@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!rl2.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
     // Verify ownership
-    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "id, user_id, custom_domain");
+    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
 
     if (ownership.error === "db_error") {
       return NextResponse.json({ error: "Erro ao acessar banco de dados", _debug: ownership.debug }, { status: 500 });
@@ -116,7 +116,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Biolink não encontrado", _debug: ownership.debug }, { status: 404 });
     }
 
-    const existing = ownership.data;
+    const existing = ownership.data as { id: string; custom_domain?: string | null; [key: string]: unknown };
     const body = await request.json();
     const parsed = parseBody(updateBiolinkSchema, body);
     if (!parsed.success) return parsed.response;
@@ -187,17 +187,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Auto-add/remove custom domain on Vercel (non-blocking)
-    const oldDomain = existing.custom_domain;
+    const oldDomain = existing.custom_domain ?? null;
     const newDomain = updates.custom_domain as string | null | undefined;
     if (newDomain !== undefined) {
       if (oldDomain && oldDomain !== newDomain) {
         removeDomainFromVercel(oldDomain).catch(() => {});
       }
       if (newDomain) {
-        const result = await addDomainToVercel(newDomain);
-        if (!result.success) {
-          console.error(`[vercel-domains] Could not add ${newDomain}: ${result.error}`);
-        }
+        addDomainToVercel(newDomain).catch((e) => {
+          console.error(`[vercel-domains] Could not add ${newDomain}:`, e);
+        });
       }
     }
 
@@ -221,8 +220,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const rl3 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl3.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    // Verify ownership & get custom_domain
-    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "id, user_id, custom_domain");
+    // Verify ownership
+    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
     if (ownership.error) {
       return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
     }
