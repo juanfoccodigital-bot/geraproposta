@@ -39,7 +39,7 @@ export default function VisaoSection({ config, meta }: Props) {
               const Icon = resolveIcon(item.icon);
               return (
                 <ScrollReveal key={index} delay={index * 0.1}>
-                  <div className="group flex flex-col items-center gap-4 p-6 rounded-2xl bg-white border border-foreground/5 hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
+                  <div className="group flex flex-col items-center gap-4 p-6 rounded-2xl bg-background border border-foreground/5 hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
                     <div className="w-12 h-12 rounded-full bg-beige flex items-center justify-center group-hover:bg-gold/10 transition-colors duration-300">
                       <Icon className="w-5 h-5 text-gold" />
                     </div>

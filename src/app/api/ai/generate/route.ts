@@ -60,8 +60,14 @@ ICONES (USE SOMENTE ESTES, escrita exata): TrendingUp, BarChart3, Target, Rocket
 REGRAS:
 - Gere propostas RICAS com 8 a 12 blocos. Inclua marquee, timeline, counter e cards-grid alem dos basicos
 - Cada bloco DEVE ter "id" unico ("b1","b2"...)
-- severity: "alto", "medio" ou "positivo" (escolha um)
-- Adapte cores ao nicho. Default: dourado #C9A96E
+- severity: varie entre "alto", "medio" e "positivo" — NAO coloque todos iguais
+- CONTRASTE DE CORES — OBRIGATORIO:
+  * "foreground" DEVE contrastar com "background" (claro vs escuro)
+  * "cream", "beige", "nude" devem ser PROXIMOS de "background" (todos claros ou todos escuros)
+  * DARK: background="#0A0A0A", foreground="#F5F5F5", beige="#1A1A1A", nude="#262626", cream="#111111"
+  * LIGHT: background="#FFFFFF", foreground="#1A1A1A", beige="#FFF7ED", nude="#FFEDD5", cream="#FFFBF5"
+  * NUNCA misture fundo claro com texto claro ou fundo escuro com texto escuro
+- Adapte a cor "gold" ao nicho (saude=verde, tech=azul, gastronomia=vermelho). Default: dourado #C9A96E
 - Textos ESPECIFICOS para o nicho, NUNCA genericos
 - Valor realista para o mercado brasileiro
 - Retorne APENAS o JSON, sem texto adicional`;

@@ -14,7 +14,7 @@ interface Props {
 
 export default function DiferenciaisSection({ config }: Props) {
   return (
-    <section className="py-24 sm:py-32 bg-white">
+    <section className="py-24 sm:py-32 bg-background">
       <div className="max-w-6xl mx-auto px-6">
         {/* Cabeçalho */}
         <ScrollReveal className="text-center mb-16">
@@ -36,8 +36,8 @@ export default function DiferenciaisSection({ config }: Props) {
             const Icon = resolveIcon(item.icon);
             return (
               <ScrollReveal key={index} delay={index * 0.08}>
-                <div className="group relative h-full p-7 sm:p-8 rounded-2xl bg-cream/50 border border-foreground/5 hover:bg-white hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
-                  <div className="w-12 h-12 rounded-xl bg-white border border-gold/10 flex items-center justify-center mb-5 group-hover:border-gold/30 group-hover:bg-gold/5 transition-all duration-300">
+                <div className="group relative h-full p-7 sm:p-8 rounded-2xl bg-cream/50 border border-foreground/5 hover:bg-background hover:border-gold/20 hover:shadow-lg hover:shadow-gold/5 transition-all duration-500">
+                  <div className="w-12 h-12 rounded-xl bg-background border border-gold/10 flex items-center justify-center mb-5 group-hover:border-gold/30 group-hover:bg-gold/5 transition-all duration-300">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
                   <h3 className="text-base font-semibold text-foreground mb-2">

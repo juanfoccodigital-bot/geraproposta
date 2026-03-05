@@ -119,10 +119,16 @@ REGRAS CRITICAS:
 - Se o usuario pedir "faixa animada" ou "faixa", use bloco "marquee"
 - Se o usuario pedir "tabela de precos" ou multiplos planos, use "pricing-table"
 - Se o usuario pedir "cronograma" ou "etapas", use "timeline"
-- Se o usuario pedir cores escuras/preto/dark, ajuste theme.colors: background="#0A0A0A", foreground="#FFFFFF", beige="#1A1A1A", nude="#262626", cream="#111111"
-- Se o usuario pedir cores claras/branco/light, use background="#FFFFFF", foreground="#1A1A1A"
+- CONTRASTE DE CORES — REGRAS OBRIGATORIAS:
+  * "foreground" DEVE contrastar com "background" (claro vs escuro, NUNCA ambos claros ou ambos escuros)
+  * "cream" deve ser PROXIMO de "background" (e usado como fundo de cards, entao texto "foreground" precisa ser legivel sobre cream)
+  * "beige" e "nude" devem ser proximos de "background" (tons intermediarios do mesmo espectro claro ou escuro)
+  * DARK/ESCURO: background="#0A0A0A", foreground="#F5F5F5", beige="#1A1A1A", nude="#262626", cream="#111111"
+  * LIGHT/CLARO: background="#FFFFFF", foreground="#1A1A1A", beige="#FFF7ED", nude="#FFEDD5", cream="#FFFBF5"
+  * Para QUALQUER tema personalizado, SEMPRE: fundo claro+texto escuro OU fundo escuro+texto claro
 - Cada bloco DEVE ter um "id" unico (use "b1", "b2", "b3"...)
-- Adapte cores ao nicho (saude=verde, moda=rosa, tech=azul, gastronomia=vermelho). Default: dourado #C9A96E
+- Adapte a cor "gold" ao nicho (saude=verde, moda=rosa, tech=azul, gastronomia=vermelho). Default: dourado #C9A96E
+- MANTENHA background/foreground/cream/beige/nude sempre no mesmo espectro (todos claros ou todos escuros para fundos, foreground sempre no oposto)
 - Textos em portugues brasileiro, naturais e profissionais
 - TODOS os textos devem ser ESPECIFICOS para o nicho, NUNCA genericos
 - Os blocos "texto" devem ter o campo "body" com pelo menos 2-3 paragrafos ricos e detalhados, NAO apenas 1 frase curta
