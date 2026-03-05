@@ -7,7 +7,7 @@ import { aiGenerateSchema, parseBody } from "@/lib/validations";
 import OpenAI from "openai";
 
 /* ============================================
-   AI PROPOSAL GENERATION
+   AI PROPOSAL GENERATION (V2 blocks)
    Gera proposta completa via GPT-4o-mini
    Gate: apenas planos Pro e Plus
    ============================================ */
@@ -20,127 +20,50 @@ function getOpenAI() {
   return new OpenAI({ apiKey });
 }
 
-const SYSTEM_PROMPT = `Você é um assistente especializado em criar propostas comerciais profissionais em português brasileiro.
-Dado o nome do negócio, tipo de serviço, nome do cliente e objetivos, gere uma proposta completa no formato JSON.
+const SYSTEM_PROMPT = `Voce e um assistente especializado em criar propostas comerciais COMPLETAS e PROFISSIONAIS em portugues brasileiro.
+Dado o nome do negocio, tipo de servico, nome do cliente e objetivos, gere uma proposta RICA e DETALHADA no formato JSON V2 com blocos.
 
-A proposta deve ter a seguinte estrutura:
+FORMATO JSON — use "blocks" (NAO "sections"):
 {
   "version": 2,
   "templateId": "ai-generated",
-  "meta": {
-    "title": "Título da proposta",
-    "description": "Descrição breve"
-  },
+  "meta": { "title": "Proposta [Tipo] — [Cliente]", "description": "Descricao breve" },
   "theme": {
-    "colors": {
-      "gold": "#F97316",
-      "goldLight": "#FB923C",
-      "goldDark": "#EA580C",
-      "background": "#FFFFFF",
-      "foreground": "#1A1A1A",
-      "beige": "#FFF7ED",
-      "nude": "#FFEDD5",
-      "cream": "#FFFBF5"
-    },
-    "fonts": {
-      "heading": "Playfair Display",
-      "body": "Poppins"
-    }
+    "colors": { "gold": "#C9A96E", "goldLight": "#F5ECD7", "goldDark": "#8B7340", "background": "#FFFFFF", "foreground": "#1A1A1A", "beige": "#FFF7ED", "nude": "#FFEDD5", "cream": "#FFFBF5" },
+    "fonts": { "heading": "Playfair Display", "body": "Poppins" }
   },
-  "sections": [
-    {
-      "type": "hero",
-      "visible": true,
-      "data": {
-        "badge": "Proposta Exclusiva",
-        "titleLine1": "Primeira linha do título",
-        "titleHighlight": "Parte destacada do título",
-        "subtitle": "Subtítulo descritivo com 1-2 frases",
-        "clientName": "Nome do Cliente",
-        "ctaPrimary": { "label": "Ver Diagnóstico", "scrollTo": "diagnostico" },
-        "ctaSecondary": { "label": "Falar com Especialista", "url": "https://wa.me/" }
-      }
-    },
-    {
-      "type": "diagnostico",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Diagnóstico",
-        "title": "Título da seção",
-        "subtitle": "Descrição da análise",
-        "showImages": false,
-        "imagesLabel": "",
-        "images": [],
-        "cards": [
-          {
-            "icon": "Eye",
-            "title": "Título do ponto",
-            "description": "Descrição detalhada do ponto diagnósticado",
-            "severity": "alto|medio|positivo"
-          }
-        ]
-      }
-    },
-    {
-      "type": "estrategia",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Estratégia",
-        "title": "Título da estratégia",
-        "subtitle": "Descrição geral",
-        "cards": [
-          {
-            "icon": "TrendingUp",
-            "title": "Nome da estratégia",
-            "description": "Descrição do que será feito",
-            "items": ["Entrega 1", "Entrega 2", "Entrega 3"]
-          }
-        ]
-      }
-    },
-    {
-      "type": "investimento",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Investimento",
-        "title": "Investimento Mensal",
-        "subtitle": "Tudo que está incluso no plano",
-        "badge": "Mais Popular",
-        "priceOriginal": "R$ X.XXX",
-        "priceCurrent": "X.XXX",
-        "priceCurrency": "R$",
-        "pricePeriod": "/mês",
-        "description": "Contrato mínimo de 3 meses",
-        "includedItems": ["Item incluso 1", "Item incluso 2", "Item incluso 3", "Item incluso 4"],
-        "ctaLabel": "Aceitar Proposta",
-        "ctaUrl": "https://wa.me/",
-        "guarantee": "7 dias de garantia"
-      }
-    },
-    {
-      "type": "cta",
-      "visible": true,
-      "data": {
-        "title": "Vamos começar?",
-        "subtitle": "Descrição de chamada para ação",
-        "buttonLabel": "Aceitar Proposta",
-        "buttonUrl": "https://wa.me/"
-      }
-    }
+  "blocks": [
+    { "id": "b1", "type": "...", "visible": true, "data": { ... } }
   ]
 }
 
+BLOCOS DISPONIVEIS:
+
+1. "hero" — data: { badge, titleLine1, titleHighlight, subtitle, clientName, ctaPrimary: { label, scrollTo }, ctaSecondary: { label, url } }
+2. "marquee" — Faixa animada. data: { items: ["Texto1","Texto2"], speed: "normal", direction: "left", variant: "solid"|"outline"|"gradient", separator: "star"|"dot"|"diamond", size: "md", repeat: 3, pauseOnHover: true }
+3. "diagnostico" — data: { sectionLabel, title, subtitle, showImages: false, imagesLabel: "", images: [], cards: [{ icon, title, description, severity: "alto"|"medio"|"positivo" }] }
+4. "texto" — data: { title, body, alignment: "left"|"center" }
+5. "estrategia" — data: { sectionLabel, title, subtitle, cards: [{ icon, title, description, items: ["entrega1"] }] }
+6. "cards-grid" — data: { sectionLabel, title, subtitle, columns: 3, cards: [{ icon, title, description }] }
+7. "counter" — data: { sectionLabel, title, subtitle, items: [{ value: 500, prefix: "+", suffix: "", label: "Clientes" }], columns: 3, duration: 2000, style: "card" }
+8. "timeline" — data: { sectionLabel, title, subtitle, items: [{ icon, title, description, period: "Semana 1" }], layout: "alternating", connectorStyle: "solid" }
+9. "pricing-table" — data: { sectionLabel, title, subtitle, plans: [{ name, badge, highlighted, price, currency: "R$", period, description, features: [], ctaLabel, ctaUrl }] }
+10. "investimento" — data: { sectionLabel, title, subtitle, badge, priceOriginal, priceCurrent, priceCurrency: "R$", pricePeriod, description, includedItems: [], ctaLabel, ctaUrl, guarantee }
+11. "diferenciais" — data: { sectionLabel, title, subtitle, cards: [{ icon, title, description }] }
+12. "depoimentos" — data: { sectionLabel, title, items: [{ name, role, text, avatar: "" }] }
+13. "divider" — data: { style: "line", spacing: "md" }
+14. "cta" — data: { title, subtitle, buttonLabel, buttonUrl }
+15. "visao" — data: { sectionLabel, title, subtitle, items: [{ icon, label }], quote, quoteHighlight, footerClientName, footerNote }
+
+ICONES: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock, CheckCircle, Rocket, Briefcase, FileText, PieChart, Settings, Lightbulb, Calendar, MapPin
+
 REGRAS:
-- Gere exatamente 5 seções: hero, diagnostico (3-5 cards), estrategia (3-4 cards com 3 items string cada), investimento (4-6 includedItems como strings simples), cta
-- ATENÇÃO na estrutura exata: estrategia usa "cards" (NÃO "items") e cada card tem "items" (array de strings, NÃO "deliverables")
-- Investimento usa campos separados: badge, priceOriginal, priceCurrent, priceCurrency, pricePeriod, description, includedItems (array de strings), ctaLabel, ctaUrl, guarantee. NÃO use "pricing" nem "items"
-- CTA usa "buttonLabel" e "buttonUrl" (strings). NÃO use "primaryButton" nem "secondaryButton"
-- severity do diagnostico deve ser exatamente: "alto", "medio" ou "positivo" (escolha um, não use pipe)
-- Os ícones devem ser do Lucide React: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award
-- O diagnóstico deve conter pontos reais e relevantes para o tipo de negócio
-- A estratégia deve ter ações concretas e entregas específicas
-- O investimento deve ter um valor realista para o mercado brasileiro
-- Textos em português brasileiro, sem acentos incorretos
+- Gere propostas RICAS com 8 a 12 blocos. Inclua marquee, timeline, counter e cards-grid alem dos basicos
+- Cada bloco DEVE ter "id" unico ("b1","b2"...)
+- severity: "alto", "medio" ou "positivo" (escolha um)
+- Adapte cores ao nicho. Default: dourado #C9A96E
+- Textos ESPECIFICOS para o nicho, NUNCA genericos
+- Valor realista para o mercado brasileiro
 - Retorne APENAS o JSON, sem texto adicional`;
 
 export async function POST(request: NextRequest) {
@@ -149,15 +72,14 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
     }
 
     const rl = checkRateLimit(`ai:${user.id}`, AI_LIMIT);
     if (!rl.allowed) {
-      return NextResponse.json({ error: "Limite de requisições de IA atingido. Aguarde um momento." }, { status: 429 });
+      return NextResponse.json({ error: "Limite de requisicoes de IA atingido. Aguarde um momento." }, { status: 429 });
     }
 
-    // Check plan allows AI
     const { data: profile } = await supabase
       .from("profiles")
       .select("plan")
@@ -165,7 +87,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!profile) {
-      return NextResponse.json({ error: "Perfil não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Perfil nao encontrado" }, { status: 404 });
     }
 
     const plan = profile.plan as PlanName;
@@ -173,12 +95,11 @@ export async function POST(request: NextRequest) {
 
     if (!limits.ai) {
       return NextResponse.json(
-        { error: "Geração com IA disponível apenas nos planos Pro e Plus. Faça upgrade para usar este recurso." },
+        { error: "Geracao com IA disponivel apenas nos planos Pro e Plus. Faca upgrade para usar este recurso." },
         { status: 403 }
       );
     }
 
-    // Check usage limits
     const usage = await checkAndIncrementUsage(user.id);
     if (!usage.allowed) {
       return NextResponse.json({ error: usage.error }, { status: 429 });
@@ -189,7 +110,6 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return parsed.response;
     const { businessName, serviceType, clientName, objectives } = parsed.data;
 
-    // Generate with OpenAI
     const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -197,16 +117,16 @@ export async function POST(request: NextRequest) {
         {
           role: "user",
           content: `Crie uma proposta comercial com os seguintes dados:
-- Nome do negócio: ${businessName}
-- Tipo de serviço: ${serviceType}
+- Nome do negocio: ${businessName}
+- Tipo de servico: ${serviceType}
 - Nome do cliente: ${clientName}
-- Objetivos: ${objectives || "Não especificados"}
+- Objetivos: ${objectives || "Nao especificados"}
 
-Gere a proposta completa em JSON.`,
+Gere a proposta completa em JSON com blocos ricos (marquee, timeline, counter, etc).`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 8000,
     });
 
     const content = completion.choices[0]?.message?.content;
@@ -214,7 +134,6 @@ Gere a proposta completa em JSON.`,
       return NextResponse.json({ error: "Falha ao gerar proposta" }, { status: 500 });
     }
 
-    // Parse JSON (remove markdown code block if present)
     const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     let config;
     try {
@@ -223,13 +142,15 @@ Gere a proposta completa em JSON.`,
       return NextResponse.json({ error: "Erro ao processar resposta da IA" }, { status: 500 });
     }
 
-    // Create proposal in database
     const slug = Math.random().toString(36).substring(2, 10);
+    const heroBlock = config.blocks?.find((b: { type: string }) => b.type === "hero");
+    const resolvedClientName = heroBlock?.data?.clientName || clientName;
+
     const { data: proposal, error: insertError } = await supabase
       .from("proposals")
       .insert({
-        title: config.meta?.title || `Proposta para ${clientName}`,
-        client_name: clientName,
+        title: config.meta?.title || `Proposta para ${resolvedClientName}`,
+        client_name: resolvedClientName,
         template_id: "ai-generated",
         slug,
         category: null,

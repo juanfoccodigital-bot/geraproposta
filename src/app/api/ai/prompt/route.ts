@@ -7,30 +7,23 @@ import { aiPromptSchema, parseBody } from "@/lib/validations";
 import OpenAI from "openai";
 
 /* ============================================
-   AI PROMPT — FREE-FORM GENERATION
+   AI PROMPT — FREE-FORM GENERATION (V2 blocks)
    O usuario digita livremente o que quer
    e a OpenAI entende o contexto e gera
-   a proposta completa.
+   a proposta completa com blocos ricos.
    ============================================ */
 
-const SYSTEM_PROMPT = `Voce e um assistente especializado em criar propostas comerciais profissionais em portugues brasileiro.
+const SYSTEM_PROMPT = `Voce e um assistente especializado em criar propostas comerciais COMPLETAS e PROFISSIONAIS em portugues brasileiro.
 
-O usuario vai descrever livremente o que precisa — pode ser algo como:
-- "Preciso de uma proposta de social media para a clinica Bella Vida, valor R$2.500/mes"
-- "Faz uma proposta de trafego pago pra empresa do Joao, focado em gerar leads"
-- "Proposta de criacao de site para restaurante italiano, R$4.000"
+O usuario vai descrever livremente o que precisa. Voce deve ENTENDER o contexto e gerar uma proposta RICA e DETALHADA no formato JSON V2 com blocos.
 
-Voce deve ENTENDER o contexto e gerar uma proposta completa no formato JSON abaixo.
-Extraia do texto: nome do negocio, tipo de servico, nome do cliente, objetivos, precos, etc.
-Se algo nao for mencionado, use valores padroes realistas para o mercado brasileiro.
-
-FORMATO JSON OBRIGATORIO:
+FORMATO JSON — use "blocks" (NAO "sections"):
 {
   "version": 2,
   "templateId": "ai-generated",
   "meta": {
-    "title": "Proposta [Tipo de Servico] — [Nome do Cliente]",
-    "description": "Descricao breve da proposta"
+    "title": "Proposta [Tipo] — [Cliente]",
+    "description": "Descricao breve"
   },
   "theme": {
     "colors": {
@@ -43,111 +36,92 @@ FORMATO JSON OBRIGATORIO:
       "nude": "#FFEDD5",
       "cream": "#FFFBF5"
     },
-    "fonts": {
-      "heading": "Playfair Display",
-      "body": "Poppins"
-    }
+    "fonts": { "heading": "Playfair Display", "body": "Poppins" }
   },
-  "sections": [
-    {
-      "type": "hero",
-      "visible": true,
-      "data": {
-        "badge": "Proposta Exclusiva",
-        "titleLine1": "Primeira linha do titulo",
-        "titleHighlight": "Parte destacada",
-        "subtitle": "Subtitulo descritivo com 1-2 frases sobre o servico",
-        "clientName": "Nome do Cliente",
-        "ctaPrimary": { "label": "Ver Estrategia", "scrollTo": "estrategia" },
-        "ctaSecondary": { "label": "Falar no WhatsApp", "url": "https://wa.me/" }
-      }
-    },
-    {
-      "type": "diagnostico",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Diagnostico",
-        "title": "Titulo da secao de diagnostico",
-        "subtitle": "O que analisamos e identificamos",
-        "showImages": false,
-        "imagesLabel": "",
-        "images": [],
-        "cards": [
-          {
-            "icon": "Eye",
-            "title": "Titulo do ponto",
-            "description": "Descricao detalhada e relevante para o nicho do cliente",
-            "severity": "alto|medio|positivo"
-          }
-        ]
-      }
-    },
-    {
-      "type": "estrategia",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Estrategia",
-        "title": "Titulo da estrategia proposta",
-        "subtitle": "Como vamos resolver os desafios identificados",
-        "cards": [
-          {
-            "icon": "TrendingUp",
-            "title": "Nome da estrategia",
-            "description": "O que sera feito de forma pratica",
-            "items": ["Entrega 1", "Entrega 2", "Entrega 3"]
-          }
-        ]
-      }
-    },
-    {
-      "type": "investimento",
-      "visible": true,
-      "data": {
-        "sectionLabel": "Investimento",
-        "title": "Investimento",
-        "subtitle": "Tudo que esta incluso",
-        "badge": "Mais Popular",
-        "priceOriginal": "R$ X.XXX",
-        "priceCurrent": "X.XXX",
-        "priceCurrency": "R$",
-        "pricePeriod": "/mes",
-        "description": "Contrato minimo de 3 meses",
-        "includedItems": ["Item incluso 1", "Item incluso 2", "Item incluso 3", "Item incluso 4"],
-        "ctaLabel": "Aceitar Proposta",
-        "ctaUrl": "https://wa.me/",
-        "guarantee": "7 dias de garantia"
-      }
-    },
-    {
-      "type": "cta",
-      "visible": true,
-      "data": {
-        "title": "Vamos comecar?",
-        "subtitle": "Chamada para acao convincente",
-        "buttonLabel": "Aceitar Proposta",
-        "buttonUrl": "https://wa.me/"
-      }
-    }
+  "blocks": [
+    { "id": "b1", "type": "...", "visible": true, "data": { ... } }
   ]
 }
 
-REGRAS IMPORTANTES:
-- Gere EXATAMENTE 5 secoes: hero, diagnostico (3-5 cards), estrategia (3-4 cards com 3 items string cada), investimento (4-6 includedItems como strings simples), cta
-- ATENCAO na estrutura exata: estrategia usa "cards" (NAO "items") e cada card tem "items" (array de strings, NAO "deliverables")
-- Investimento usa campos separados: badge, priceOriginal, priceCurrent, priceCurrency, pricePeriod, description, includedItems (array de strings), ctaLabel, ctaUrl, guarantee. NAO use "pricing" nem "items"
-- CTA usa "buttonLabel" e "buttonUrl" (strings). NAO use "primaryButton" nem "secondaryButton"
-- severity do diagnostico deve ser exatamente: "alto", "medio" ou "positivo" (escolha um, nao use pipe)
-- Icones Lucide React validos: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock
-- O diagnostico deve ter pontos REAIS e RELEVANTES para o tipo de negocio mencionado
-- A estrategia deve ter acoes CONCRETAS e ESPECIFICAS para o nicho
-- Se o usuario mencionar um preco, use-o. Se nao, use um valor realista para o mercado brasileiro
-- Se o usuario mencionar WhatsApp, use o numero nos CTAs
-- Adapte as cores ao tipo de negocio (saude=verde, moda=rosa, tech=azul, etc). Se nao houver indicacao, use dourado (#C9A96E)
-- Textos em portugues brasileiro natural e profissional
-- Retorne APENAS o JSON, sem texto adicional, sem markdown`;
+BLOCOS DISPONIVEIS (use o maximo possivel para criar propostas ricas):
+
+1. "hero" — Secao principal com titulo grande
+   data: { badge, titleLine1, titleHighlight, subtitle, clientName, ctaPrimary: { label, scrollTo }, ctaSecondary: { label, url } }
+
+2. "marquee" — Faixa animada com texto rolando (da muito impacto visual!)
+   data: { items: ["Texto 1", "Texto 2", "Texto 3"], speed: "normal", direction: "left", variant: "solid"|"outline"|"gradient", separator: "star"|"dot"|"diamond", size: "sm"|"md"|"lg", repeat: 3, pauseOnHover: true }
+
+3. "diagnostico" — Cards de diagnostico com severidade
+   data: { sectionLabel, title, subtitle, showImages: false, imagesLabel: "", images: [], cards: [{ icon, title, description, severity: "alto"|"medio"|"positivo" }] }
+
+4. "texto" — Bloco de texto livre (otimo para contexto, apresentacao, metodologia)
+   data: { title, body, alignment: "left"|"center" }
+
+5. "estrategia" — Cards de estrategia com entregas
+   data: { sectionLabel, title, subtitle, cards: [{ icon, title, description, items: ["entrega1", "entrega2"] }] }
+
+6. "cards-grid" — Grid generico de cards (diferenciais, entregaveis, beneficios)
+   data: { sectionLabel, title, subtitle, columns: 2|3|4, cards: [{ icon, title, description }] }
+
+7. "counter" — Contadores animados (numeros de impacto)
+   data: { sectionLabel, title, subtitle, items: [{ value: 500, prefix: "+", suffix: "", label: "Clientes" }], columns: 3, duration: 2000, style: "card"|"simple"|"bordered" }
+
+8. "timeline" — Cronograma / etapas do projeto
+   data: { sectionLabel, title, subtitle, items: [{ icon, title, description, period: "Semana 1" }], layout: "alternating"|"vertical", connectorStyle: "solid"|"dashed" }
+
+9. "pricing-table" — Tabela comparativa de planos/precos
+   data: { sectionLabel, title, subtitle, plans: [{ name, badge, highlighted: true|false, price, currency: "R$", period: "/mes", description, features: ["item1"], ctaLabel, ctaUrl }] }
+
+10. "investimento" — Secao unica de investimento com preco destacado
+    data: { sectionLabel, title, subtitle, badge, priceOriginal, priceCurrent, priceCurrency: "R$", pricePeriod, description, includedItems: ["item1"], ctaLabel, ctaUrl, guarantee }
+
+11. "diferenciais" — Cards de diferenciais
+    data: { sectionLabel, title, subtitle, cards: [{ icon, title, description }] }
+
+12. "depoimentos" — Depoimentos de clientes (invente nomes realistas)
+    data: { sectionLabel, title, items: [{ name, role, text, avatar: "" }] }
+
+13. "divider" — Separador visual
+    data: { style: "line"|"dots"|"space", spacing: "sm"|"md"|"lg" }
+
+14. "cta" — Chamada para acao final
+    data: { title, subtitle, buttonLabel, buttonUrl }
+
+15. "visao" — Visao de futuro / encerramento
+    data: { sectionLabel, title, subtitle, items: [{ icon, label }], quote, quoteHighlight, footerClientName, footerNote }
+
+ICONES LUCIDE VALIDOS: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock, CheckCircle, Rocket, Briefcase, FileText, PieChart, Settings, Lightbulb, ArrowRight, Calendar, MapPin
+
+REGRAS CRITICAS:
+- Gere propostas RICAS com 8 a 15 blocos. NAO faca propostas curtas de 5 blocos apenas
+- ESTRUTURA RECOMENDADA para proposta completa:
+  1. hero (apresentacao)
+  2. marquee (faixa de impacto)
+  3. texto (apresentacao/contexto da empresa)
+  4. diagnostico (3-5 cards de analise)
+  5. estrategia (3-4 cards com entregas)
+  6. timeline (etapas do projeto)
+  7. counter (numeros de impacto)
+  8. cards-grid ou diferenciais (3-6 cards)
+  9. investimento OU pricing-table (se tiver multiplos planos)
+  10. depoimentos (2-3 depoimentos fictícios realistas)
+  11. cta (chamada para acao final)
+- Se o usuario pedir "faixa animada" ou "faixa", use bloco "marquee"
+- Se o usuario pedir "tabela de precos" ou multiplos planos, use "pricing-table"
+- Se o usuario pedir "cronograma" ou "etapas", use "timeline"
+- Se o usuario pedir cores escuras/preto/dark, ajuste theme.colors: background="#0A0A0A", foreground="#FFFFFF", beige="#1A1A1A", nude="#262626", cream="#111111"
+- Se o usuario pedir cores claras/branco/light, use background="#FFFFFF", foreground="#1A1A1A"
+- Cada bloco DEVE ter um "id" unico (use "b1", "b2", "b3"...)
+- Adapte cores ao nicho (saude=verde, moda=rosa, tech=azul, gastronomia=vermelho). Default: dourado #C9A96E
+- Textos em portugues brasileiro, naturais e profissionais
+- TODOS os textos devem ser ESPECIFICOS para o nicho, NUNCA genericos
+- Os blocos de texto devem ter conteudo RICO e DETALHADO, nao apenas 1 frase
+- Se o usuario mencionar preco, use-o. Se nao, use valor realista para o mercado BR
+- Se mencionar WhatsApp, use o numero nos CTAs (formato https://wa.me/NUMERO)
+- severity do diagnostico: "alto", "medio" ou "positivo"
+- Retorne APENAS o JSON, sem texto adicional, sem markdown, sem code blocks`;
 
 export async function POST(request: NextRequest) {
-  // Step tracker for debugging
   let step = "init";
   try {
     step = "supabase";
@@ -209,7 +183,7 @@ export async function POST(request: NextRequest) {
         { role: "user", content: prompt },
       ],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 8000,
     });
 
     step = "parse-response";
@@ -232,7 +206,9 @@ export async function POST(request: NextRequest) {
     }
 
     step = "insert-db";
-    const clientName = config.sections?.[0]?.data?.clientName || "Cliente";
+    // Extract client name from hero block
+    const heroBlock = config.blocks?.find((b: { type: string }) => b.type === "hero");
+    const clientName = heroBlock?.data?.clientName || config.sections?.[0]?.data?.clientName || "Cliente";
     const slug = Math.random().toString(36).substring(2, 10);
     const { data: proposal, error: insertError } = await supabase
       .from("proposals")
