@@ -4,64 +4,29 @@ import { checkRateLimit, READ_LIMIT, WRITE_LIMIT } from "@/lib/rate-limit";
 import { updateBiolinkSchema, parseBody } from "@/lib/validations";
 import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel-domains";
 
-/**
- * Get a DB client that works. Tries admin (bypasses RLS), falls back to regular supabase.
- * Also returns the regular supabase for auth.
- */
+/** Get admin client (bypasses RLS), falls back to regular supabase. */
 async function getClients() {
   const supabase = await getServerSupabase();
   let db;
-  let usingAdmin = false;
-  try {
-    db = getAdminSupabase();
-    usingAdmin = true;
-  } catch {
-    db = supabase;
-  }
-  return { supabase, db, usingAdmin };
+  try { db = getAdminSupabase(); } catch { db = supabase; }
+  return { supabase, db };
 }
 
-/**
- * Fetch biolink by ID, then verify ownership in code.
- * This avoids combined SQL filters that may silently fail.
- */
+/** Fetch biolink by ID, verify ownership in code. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchBiolinkWithOwnership(db: any, supabase: any, id: string, userId: string, select: string) {
-  const debug: string[] = [];
-  const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const keyLen = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim().length || 0;
-  debug.push(`serviceKey: exists=${hasServiceKey}, len=${keyLen}, dbIsSupa=${db === supabase}`);
-
-  // First try with db (admin or supabase)
+async function fetchOwnedBiolink(db: any, supabase: any, id: string, userId: string, select: string) {
   let { data, error } = await db.from("biolinks").select(select).eq("id", id).maybeSingle();
-  debug.push(`query1: data=${!!data}, error=${error?.message || "none"}, code=${error?.code || "none"}`);
 
-  // If admin failed, fallback to regular supabase
   if (error && db !== supabase) {
-    debug.push("falling back to regular supabase...");
     const retry = await supabase.from("biolinks").select(select).eq("id", id).maybeSingle();
     data = retry.data;
     error = retry.error;
-    debug.push(`query2: data=${!!data}, error=${error?.message || "none"}, code=${error?.code || "none"}`);
   }
 
-  if (error) {
-    console.error("[biolink] DB error:", debug.join(" | "));
-    return { data: null, error: "db_error" as const, debug };
-  }
-
-  if (!data) {
-    debug.push("no row found for this id");
-    return { data: null, error: "not_found" as const, debug };
-  }
-
-  // Check ownership in code
-  if (data.user_id !== userId) {
-    debug.push(`ownership: biolink.user_id=${data.user_id}, auth.user_id=${userId}`);
-    return { data: null, error: "forbidden" as const, debug };
-  }
-
-  return { data, error: null, debug };
+  if (error) return { data: null, status: 500 as const };
+  if (!data) return { data: null, status: 404 as const };
+  if (data.user_id !== userId) return { data: null, status: 404 as const };
+  return { data, status: 200 as const };
 }
 
 // ============================================
@@ -77,18 +42,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const rl = checkRateLimit(`biolinks:read:${user.id}`, READ_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const result = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
-
-    if (result.error === "db_error") {
-      return NextResponse.json({ error: "Erro ao acessar banco de dados", _debug: result.debug }, { status: 500 });
-    }
-    if (result.error) {
-      return NextResponse.json({ error: "Biolink não encontrado", _debug: result.debug }, { status: 404 });
-    }
+    const result = await fetchOwnedBiolink(db, supabase, id, user.id, "*");
+    if (result.status === 500) return NextResponse.json({ error: "Erro ao acessar banco de dados" }, { status: 500 });
+    if (result.status === 404) return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
 
     return NextResponse.json(result.data);
-  } catch (e) {
-    console.error("[biolink-get] Exception:", e);
+  } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
@@ -106,17 +65,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const rl2 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl2.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    // Verify ownership
-    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
+    const ownership = await fetchOwnedBiolink(db, supabase, id, user.id, "*");
+    if (ownership.status === 500) return NextResponse.json({ error: "Erro ao acessar banco de dados" }, { status: 500 });
+    if (ownership.status === 404) return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
 
-    if (ownership.error === "db_error") {
-      return NextResponse.json({ error: "Erro ao acessar banco de dados", _debug: ownership.debug }, { status: 500 });
-    }
-    if (ownership.error) {
-      return NextResponse.json({ error: "Biolink não encontrado", _debug: ownership.debug }, { status: 404 });
-    }
-
-    const existing = ownership.data as { id: string; custom_domain?: string | null; [key: string]: unknown };
+    const existing = ownership.data;
     const body = await request.json();
     const parsed = parseBody(updateBiolinkSchema, body);
     if (!parsed.success) return parsed.response;
@@ -158,7 +111,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
-    // Use db (admin preferred) for the update, with user_id guard
     const { data, error } = await db
       .from("biolinks")
       .update(updates)
@@ -168,41 +120,23 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       .single();
 
     if (error) {
-      console.error("[biolink-put] update error:", error.message, error.code);
-      // Fallback to regular supabase for update
-      if (db !== supabase) {
-        const { data: retryData, error: retryErr } = await supabase
-          .from("biolinks")
-          .update(updates)
-          .eq("id", id)
-          .eq("user_id", user.id)
-          .select()
-          .single();
-        if (!retryErr && retryData) {
-          console.error("[biolink-put] Update succeeded with regular client");
-          return NextResponse.json(retryData);
-        }
-      }
       return NextResponse.json({ error: "Erro ao atualizar biolink" }, { status: 500 });
     }
 
     // Auto-add/remove custom domain on Vercel (non-blocking)
-    const oldDomain = existing.custom_domain ?? null;
+    const oldDomain = existing?.custom_domain ?? null;
     const newDomain = updates.custom_domain as string | null | undefined;
     if (newDomain !== undefined) {
       if (oldDomain && oldDomain !== newDomain) {
         removeDomainFromVercel(oldDomain).catch(() => {});
       }
       if (newDomain) {
-        addDomainToVercel(newDomain).catch((e) => {
-          console.error(`[vercel-domains] Could not add ${newDomain}:`, e);
-        });
+        addDomainToVercel(newDomain).catch(() => {});
       }
     }
 
     return NextResponse.json(data);
-  } catch (e) {
-    console.error("[biolink-put] Exception:", e);
+  } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
@@ -220,9 +154,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const rl3 = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl3.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    // Verify ownership
-    const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
-    if (ownership.error) {
+    const ownership = await fetchOwnedBiolink(db, supabase, id, user.id, "*");
+    if (ownership.status !== 200) {
       return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
     }
 
@@ -239,8 +172,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
 
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("[biolink-delete] Exception:", e);
+  } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
