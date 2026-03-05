@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .single();
 
     if (error || !data) {
-      console.error("[biolink-get] 404 debug:", { id, userId: user.id, error: error?.message, code: error?.code });
+      console.error("[biolink-get] 404 debug:", { id, userId: user.id, userEmail: user.email, error: error?.message, code: error?.code });
       // Check if biolink exists at all (without user filter)
       const { data: exists } = await admin.from("biolinks").select("id, user_id").eq("id", id).maybeSingle();
       if (exists) {
@@ -66,7 +66,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       .eq("user_id", user.id)
       .single();
 
-    if (!existing) return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+    if (!existing) {
+      console.error("[biolink-put] 404 debug:", { id, authUserId: user.id, authEmail: user.email });
+      // Check if biolink exists without user filter
+      const { data: raw } = await admin.from("biolinks").select("id, user_id").eq("id", id).maybeSingle();
+      if (raw) {
+        console.error("[biolink-put] Biolink exists but user_id mismatch:", { biolinkUserId: raw.user_id, authUserId: user.id });
+      } else {
+        console.error("[biolink-put] Biolink does not exist in DB at all");
+      }
+      return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+    }
 
     const body = await request.json();
     const parsed = parseBody(updateBiolinkSchema, body);
