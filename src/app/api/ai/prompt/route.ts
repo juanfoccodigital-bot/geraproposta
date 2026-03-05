@@ -13,12 +13,6 @@ import OpenAI from "openai";
    a proposta completa.
    ============================================ */
 
-function getOpenAI() {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY nao configurada");
-  return new OpenAI({ apiKey });
-}
-
 const SYSTEM_PROMPT = `Voce e um assistente especializado em criar propostas comerciais profissionais em portugues brasileiro.
 
 O usuario vai descrever livremente o que precisa — pode ser algo como:
@@ -148,50 +142,62 @@ REGRAS IMPORTANTES:
 - Retorne APENAS o JSON, sem texto adicional, sem markdown`;
 
 export async function POST(request: NextRequest) {
+  // Step tracker for debugging
+  let step = "init";
   try {
+    step = "supabase";
     const supabase = await getServerSupabase();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Nao autorizado", step }, { status: 401 });
     }
 
+    step = "rate-limit";
     const rl = checkRateLimit(`ai:${user.id}`, AI_LIMIT);
     if (!rl.allowed) {
-      return NextResponse.json({ error: "Limite de requisicoes de IA atingido. Aguarde um momento." }, { status: 429 });
+      return NextResponse.json({ error: "Limite de requisicoes de IA atingido. Aguarde um momento.", step }, { status: 429 });
     }
 
-    // Check plan allows AI
-    const { data: profile } = await supabase
+    step = "check-plan";
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("plan")
       .eq("id", user.id)
       .single();
 
     if (!profile) {
-      return NextResponse.json({ error: "Perfil nao encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Perfil nao encontrado", step, detail: profileError?.message }, { status: 404 });
     }
 
     const plan = profile.plan as PlanName;
     if (!PLAN_LIMITS[plan].ai) {
       return NextResponse.json(
-        { error: "Geracao com IA disponivel apenas nos planos Pro e Plus." },
+        { error: `Geracao com IA disponivel apenas nos planos Pro e Plus. Seu plano: ${plan}`, step },
         { status: 403 }
       );
     }
 
+    step = "check-usage";
     const usage = await checkAndIncrementUsage(user.id);
     if (!usage.allowed) {
-      return NextResponse.json({ error: usage.error }, { status: 429 });
+      return NextResponse.json({ error: usage.error, step }, { status: 429 });
     }
 
+    step = "parse-body";
     const body = await request.json();
     const parsed = parseBody(aiPromptSchema, body);
     if (!parsed.success) return parsed.response;
     const { prompt } = parsed.data;
 
-    // Generate with OpenAI
-    const completion = await getOpenAI().chat.completions.create({
+    step = "openai-call";
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "OPENAI_API_KEY nao configurada no servidor", step }, { status: 500 });
+    }
+
+    const openai = new OpenAI({ apiKey });
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -201,9 +207,10 @@ export async function POST(request: NextRequest) {
       max_tokens: 4000,
     });
 
+    step = "parse-response";
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      return NextResponse.json({ error: "Falha ao gerar proposta" }, { status: 500 });
+      return NextResponse.json({ error: "OpenAI retornou resposta vazia", step }, { status: 500 });
     }
 
     // Parse JSON
@@ -211,14 +218,16 @@ export async function POST(request: NextRequest) {
     let config;
     try {
       config = JSON.parse(jsonStr);
-    } catch {
-      return NextResponse.json({ error: "Erro ao processar resposta da IA" }, { status: 500 });
+    } catch (parseErr) {
+      return NextResponse.json({
+        error: "Erro ao processar JSON da IA",
+        step,
+        raw: jsonStr.substring(0, 300),
+      }, { status: 500 });
     }
 
-    // Extract client name from config
+    step = "insert-db";
     const clientName = config.sections?.[0]?.data?.clientName || "Cliente";
-
-    // Save to database
     const slug = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const { data: proposal, error: insertError } = await supabase
       .from("proposals")
@@ -237,8 +246,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error("[AI Prompt] Insert error:", insertError.message);
-      return NextResponse.json({ error: "Erro ao salvar proposta: " + insertError.message }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao salvar: " + insertError.message, step, code: insertError.code }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -247,8 +255,9 @@ export async function POST(request: NextRequest) {
       config,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro desconhecido";
-    console.error("[AI Prompt] Erro:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack?.split("\n").slice(0, 3).join(" | ") : undefined;
+    console.error(`[AI Prompt] step=${step} error:`, message);
+    return NextResponse.json({ error: message, step, stack }, { status: 500 });
   }
 }
