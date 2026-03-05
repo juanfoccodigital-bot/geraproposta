@@ -20,7 +20,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("biolinks")
-      .select("id, title, slug, template_id, views, created_at, updated_at")
+      .select("id, title, slug, template_id, config, views, is_active, created_at, updated_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 

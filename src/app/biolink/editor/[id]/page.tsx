@@ -30,7 +30,12 @@ function EditorContent() {
       try {
         setLoading(true);
         const res = await fetch(`/api/biolinks/${id}`);
-        if (!res.ok) throw new Error("Biolink não encontrado");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          if (res.status === 401) throw new Error("Sessão expirada. Faça login novamente.");
+          if (res.status === 429) throw new Error("Muitas requisições. Aguarde um momento.");
+          throw new Error(err.error || "Biolink não encontrado");
+        }
         const record: BiolinkRecord = await res.json();
         dispatch({ type: "SET_CONFIG", payload: record.config });
         dispatch({ type: "SET_META", payload: { biolinkId: record.id, slug: record.slug, title: record.title, customDomain: record.custom_domain } });
@@ -136,9 +141,16 @@ function EditorContent() {
             <span className="text-2xl text-red-400">!</span>
           </div>
           <h2 className="text-lg font-semibold text-white">{error}</h2>
-          <a href="/biolink" className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors">
-            Voltar
-          </a>
+          <div className="flex gap-3">
+            {error.includes("Sessão") && (
+              <a href="/login" className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white text-sm rounded-lg transition-colors">
+                Fazer Login
+              </a>
+            )}
+            <a href="/biolink" className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors">
+              Voltar
+            </a>
+          </div>
         </div>
       </div>
     );
