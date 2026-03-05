@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { HelpCircle, X, Play, ChevronRight, FileText, Link2, Globe, Sparkles, Palette, Share2, BarChart3, Layers } from "lucide-react";
 
 const lessons = [
@@ -95,8 +96,13 @@ const lessons = [
 ];
 
 export default function HowToUseButton() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
+
+  // Esconde nas páginas de editor para não sobrepor botões flutuantes
+  const isEditorPage = pathname.includes("/editor/") || pathname.includes("/preview/");
+  if (isEditorPage) return null;
 
   return (
     <>

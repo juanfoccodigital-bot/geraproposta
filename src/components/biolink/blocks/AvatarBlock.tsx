@@ -37,7 +37,7 @@ export default function AvatarBlock({ data, theme }: { data: AvatarData; theme?:
             src={data.image}
             alt={data.name}
             className="w-24 h-24 rounded-full object-cover border-2"
-            style={{ borderColor: "currentColor", opacity: 0.3 }}
+            style={{ borderColor: "color-mix(in srgb, currentColor 30%, transparent)" }}
           />
         )
       ) : (

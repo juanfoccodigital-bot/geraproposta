@@ -43,8 +43,9 @@ export async function POST(request: NextRequest) {
     const rl = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
+    const { data: profile } = await supabase.from("profiles").select("plan, full_name").eq("id", user.id).single();
     const plan = (profile?.plan || "free") as PlanName;
+    const userName = profile?.full_name || "";
     const limits = PLAN_LIMITS[plan];
 
     // Check biolink limit
@@ -93,14 +94,23 @@ export async function POST(request: NextRequest) {
       finalSlug = `${finalSlug}-${Math.random().toString(36).slice(2, 6)}`;
     }
 
+    // Substituir "Seu Nome" pelo nome real do usuário
+    const config = JSON.parse(JSON.stringify(template.config));
+    if (userName) {
+      const avatarBlock = config.blocks?.find((b: { type: string }) => b.type === "avatar");
+      if (avatarBlock?.data?.name === "Seu Nome") {
+        avatarBlock.data.name = userName;
+      }
+    }
+
     const { data, error } = await supabase
       .from("biolinks")
       .insert({
         user_id: user.id,
-        title: title || "Meu Link",
+        title: title || userName || "Meu Link",
         slug: finalSlug,
         template_id: templateId,
-        config: template.config,
+        config,
       })
       .select()
       .single();
