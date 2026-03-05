@@ -225,7 +225,7 @@ function EditorContent() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-6 md:left-auto md:right-6 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-[#111] border border-[#262626] shadow-xl animate-[slideUp_0.3s_ease]">
+        <div className="fixed bottom-20 left-6 md:bottom-6 md:left-auto md:right-6 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-[#111] border border-[#262626] shadow-xl animate-[slideUp_0.3s_ease] z-50">
           {toast}
         </div>
       )}

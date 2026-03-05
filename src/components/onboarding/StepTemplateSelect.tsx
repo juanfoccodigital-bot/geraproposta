@@ -313,9 +313,9 @@ function TemplateCard({
           )}
         </div>
 
-        {/* Hover overlay */}
+        {/* Hover overlay (hidden on touch/mobile to avoid double-tap issue) */}
         {hasAccess && (
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center z-10 pointer-events-none">
             <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-semibold text-white" style={{ background: "#F97316" }}>
               <Eye size={10} />
               Usar
