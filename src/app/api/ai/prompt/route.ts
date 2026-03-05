@@ -90,7 +90,17 @@ BLOCOS DISPONIVEIS (use o maximo possivel para criar propostas ricas):
 15. "visao" — Visao de futuro / encerramento
     data: { sectionLabel, title, subtitle, items: [{ icon, label }], quote, quoteHighlight, footerClientName, footerNote }
 
-ICONES LUCIDE VALIDOS: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock, CheckCircle, Rocket, Briefcase, FileText, PieChart, Settings, Lightbulb, ArrowRight, Calendar, MapPin
+ICONES LUCIDE VALIDOS (USE SOMENTE ESTES, escrita exata):
+TrendingUp, BarChart3, Target, Rocket, Zap, Award, Crown, Star, Sparkles, Gem,
+MessageCircle, Phone, Mail, Send, Megaphone, Bell,
+Users, UserCheck, Heart, HeartPulse, Activity, Shield, ShieldCheck,
+Eye, AlertCircle, CheckCircle2, Search,
+Palette, Camera, Globe, Smartphone,
+Calendar, Clock, Timer,
+DollarSign, CreditCard, Wallet,
+Settings, Lightbulb, BookOpen, GraduationCap,
+ArrowRight, ArrowUpRight,
+Briefcase, Building2, FileText, Link
 
 REGRAS CRITICAS:
 - Gere propostas RICAS com 8 a 15 blocos. NAO faca propostas curtas de 5 blocos apenas
@@ -115,7 +125,8 @@ REGRAS CRITICAS:
 - Adapte cores ao nicho (saude=verde, moda=rosa, tech=azul, gastronomia=vermelho). Default: dourado #C9A96E
 - Textos em portugues brasileiro, naturais e profissionais
 - TODOS os textos devem ser ESPECIFICOS para o nicho, NUNCA genericos
-- Os blocos de texto devem ter conteudo RICO e DETALHADO, nao apenas 1 frase
+- Os blocos "texto" devem ter o campo "body" com pelo menos 2-3 paragrafos ricos e detalhados, NAO apenas 1 frase curta
+- diagnostico: varie a severity entre "alto", "medio" e "positivo" — NAO coloque todos como "alto"
 - Se o usuario mencionar preco, use-o. Se nao, use valor realista para o mercado BR
 - Se mencionar WhatsApp, use o numero nos CTAs (formato https://wa.me/NUMERO)
 - severity do diagnostico: "alto", "medio" ou "positivo"

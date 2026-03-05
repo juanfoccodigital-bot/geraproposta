@@ -55,7 +55,7 @@ BLOCOS DISPONIVEIS:
 14. "cta" — data: { title, subtitle, buttonLabel, buttonUrl }
 15. "visao" — data: { sectionLabel, title, subtitle, items: [{ icon, label }], quote, quoteHighlight, footerClientName, footerNote }
 
-ICONES: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock, CheckCircle, Rocket, Briefcase, FileText, PieChart, Settings, Lightbulb, Calendar, MapPin
+ICONES (USE SOMENTE ESTES, escrita exata): TrendingUp, BarChart3, Target, Rocket, Zap, Award, Crown, Star, Sparkles, Gem, MessageCircle, Phone, Mail, Send, Megaphone, Bell, Users, UserCheck, Heart, HeartPulse, Activity, Shield, ShieldCheck, Eye, AlertCircle, CheckCircle2, Search, Palette, Camera, Globe, Smartphone, Calendar, Clock, Timer, DollarSign, CreditCard, Wallet, Settings, Lightbulb, BookOpen, GraduationCap, ArrowRight, ArrowUpRight, Briefcase, Building2, FileText, Link
 
 REGRAS:
 - Gere propostas RICAS com 8 a 12 blocos. Inclua marquee, timeline, counter e cards-grid alem dos basicos
