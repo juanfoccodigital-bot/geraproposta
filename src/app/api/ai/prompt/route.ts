@@ -89,12 +89,12 @@ FORMATO JSON OBRIGATORIO:
         "sectionLabel": "Estrategia",
         "title": "Titulo da estrategia proposta",
         "subtitle": "Como vamos resolver os desafios identificados",
-        "items": [
+        "cards": [
           {
             "icon": "TrendingUp",
             "title": "Nome da estrategia",
             "description": "O que sera feito de forma pratica",
-            "deliverables": ["Entrega 1", "Entrega 2", "Entrega 3"]
+            "items": ["Entrega 1", "Entrega 2", "Entrega 3"]
           }
         ]
       }
@@ -106,15 +106,16 @@ FORMATO JSON OBRIGATORIO:
         "sectionLabel": "Investimento",
         "title": "Investimento",
         "subtitle": "Tudo que esta incluso",
-        "pricing": {
-          "amount": "R$ X.XXX",
-          "period": "/mes",
-          "note": "Contrato minimo de 3 meses"
-        },
-        "items": [
-          { "text": "Item incluso 1" },
-          { "text": "Item incluso 2" }
-        ]
+        "badge": "Mais Popular",
+        "priceOriginal": "R$ X.XXX",
+        "priceCurrent": "X.XXX",
+        "priceCurrency": "R$",
+        "pricePeriod": "/mes",
+        "description": "Contrato minimo de 3 meses",
+        "includedItems": ["Item incluso 1", "Item incluso 2", "Item incluso 3", "Item incluso 4"],
+        "ctaLabel": "Aceitar Proposta",
+        "ctaUrl": "https://wa.me/",
+        "guarantee": "7 dias de garantia"
       }
     },
     {
@@ -123,15 +124,19 @@ FORMATO JSON OBRIGATORIO:
       "data": {
         "title": "Vamos comecar?",
         "subtitle": "Chamada para acao convincente",
-        "primaryButton": { "label": "Aceitar Proposta", "url": "https://wa.me/" },
-        "secondaryButton": { "label": "Tenho Duvidas", "url": "https://wa.me/" }
+        "buttonLabel": "Aceitar Proposta",
+        "buttonUrl": "https://wa.me/"
       }
     }
   ]
 }
 
 REGRAS IMPORTANTES:
-- Gere EXATAMENTE 5 secoes: hero, diagnostico (3-5 cards), estrategia (3-4 itens com 3 deliverables cada), investimento (4-6 itens), cta
+- Gere EXATAMENTE 5 secoes: hero, diagnostico (3-5 cards), estrategia (3-4 cards com 3 items string cada), investimento (4-6 includedItems como strings simples), cta
+- ATENCAO na estrutura exata: estrategia usa "cards" (NAO "items") e cada card tem "items" (array de strings, NAO "deliverables")
+- Investimento usa campos separados: badge, priceOriginal, priceCurrent, priceCurrency, pricePeriod, description, includedItems (array de strings), ctaLabel, ctaUrl, guarantee. NAO use "pricing" nem "items"
+- CTA usa "buttonLabel" e "buttonUrl" (strings). NAO use "primaryButton" nem "secondaryButton"
+- severity do diagnostico deve ser exatamente: "alto", "medio" ou "positivo" (escolha um, nao use pipe)
 - Icones Lucide React validos: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award, Search, MessageCircle, Camera, Layout, Code, Smartphone, Mail, Clock
 - O diagnostico deve ter pontos REAIS e RELEVANTES para o tipo de negocio mencionado
 - A estrategia deve ter acoes CONCRETAS e ESPECIFICAS para o nicho

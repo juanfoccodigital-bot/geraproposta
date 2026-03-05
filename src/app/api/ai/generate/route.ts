@@ -88,12 +88,12 @@ A proposta deve ter a seguinte estrutura:
         "sectionLabel": "Estratégia",
         "title": "Título da estratégia",
         "subtitle": "Descrição geral",
-        "items": [
+        "cards": [
           {
             "icon": "TrendingUp",
             "title": "Nome da estratégia",
             "description": "Descrição do que será feito",
-            "deliverables": ["Entrega 1", "Entrega 2", "Entrega 3"]
+            "items": ["Entrega 1", "Entrega 2", "Entrega 3"]
           }
         ]
       }
@@ -105,15 +105,16 @@ A proposta deve ter a seguinte estrutura:
         "sectionLabel": "Investimento",
         "title": "Investimento Mensal",
         "subtitle": "Tudo que está incluso no plano",
-        "pricing": {
-          "amount": "R$ X.XXX",
-          "period": "/mês",
-          "note": "Contrato mínimo de 3 meses"
-        },
-        "items": [
-          { "text": "Item incluso 1" },
-          { "text": "Item incluso 2" }
-        ]
+        "badge": "Mais Popular",
+        "priceOriginal": "R$ X.XXX",
+        "priceCurrent": "X.XXX",
+        "priceCurrency": "R$",
+        "pricePeriod": "/mês",
+        "description": "Contrato mínimo de 3 meses",
+        "includedItems": ["Item incluso 1", "Item incluso 2", "Item incluso 3", "Item incluso 4"],
+        "ctaLabel": "Aceitar Proposta",
+        "ctaUrl": "https://wa.me/",
+        "guarantee": "7 dias de garantia"
       }
     },
     {
@@ -122,15 +123,19 @@ A proposta deve ter a seguinte estrutura:
       "data": {
         "title": "Vamos começar?",
         "subtitle": "Descrição de chamada para ação",
-        "primaryButton": { "label": "Aceitar Proposta", "url": "https://wa.me/" },
-        "secondaryButton": { "label": "Tenho Dúvidas", "url": "https://wa.me/" }
+        "buttonLabel": "Aceitar Proposta",
+        "buttonUrl": "https://wa.me/"
       }
     }
   ]
 }
 
 REGRAS:
-- Gere exatamente 5 seções: hero, diagnostico (3-5 cards), estrategia (3-4 itens), investimento (4-6 itens), cta
+- Gere exatamente 5 seções: hero, diagnostico (3-5 cards), estrategia (3-4 cards com 3 items string cada), investimento (4-6 includedItems como strings simples), cta
+- ATENÇÃO na estrutura exata: estrategia usa "cards" (NÃO "items") e cada card tem "items" (array de strings, NÃO "deliverables")
+- Investimento usa campos separados: badge, priceOriginal, priceCurrent, priceCurrency, pricePeriod, description, includedItems (array de strings), ctaLabel, ctaUrl, guarantee. NÃO use "pricing" nem "items"
+- CTA usa "buttonLabel" e "buttonUrl" (strings). NÃO use "primaryButton" nem "secondaryButton"
+- severity do diagnostico deve ser exatamente: "alto", "medio" ou "positivo" (escolha um, não use pipe)
 - Os ícones devem ser do Lucide React: Eye, Target, Users, Palette, Star, TrendingUp, BarChart, Globe, Zap, Shield, Heart, Award
 - O diagnóstico deve conter pontos reais e relevantes para o tipo de negócio
 - A estratégia deve ter ações concretas e entregas específicas
