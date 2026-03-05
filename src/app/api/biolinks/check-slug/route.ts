@@ -22,8 +22,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ available: false, reason: "Slug deve ter pelo menos 3 caracteres" });
     }
 
-    const admin = getAdminSupabase();
-    const { data } = await admin
+    let db;
+    try { db = getAdminSupabase(); } catch { db = supabase; }
+    const { data } = await db
       .from("biolinks")
       .select("id")
       .eq("slug", cleanSlug)

@@ -18,14 +18,25 @@ export async function GET() {
     const rl = checkRateLimit(`biolinks:read:${user.id}`, READ_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const admin = getAdminSupabase();
-    const { data, error } = await admin
+    let db;
+    try { db = getAdminSupabase(); } catch { db = supabase; }
+    const { data, error } = await db
       .from("biolinks")
       .select("id, title, slug, template_id, config, views, is_active, created_at, updated_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) return NextResponse.json({ error: "Erro ao buscar biolinks" }, { status: 500 });
+    if (error) {
+      console.error("[biolinks-list] error:", error.message, error.code);
+      // Fallback to regular supabase if admin failed
+      const { data: fallback, error: fbErr } = await supabase
+        .from("biolinks")
+        .select("id, title, slug, template_id, config, views, is_active, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (!fbErr && fallback) return NextResponse.json(fallback);
+      return NextResponse.json({ error: "Erro ao buscar biolinks" }, { status: 500 });
+    }
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -44,7 +55,8 @@ export async function POST(request: NextRequest) {
     const rl = checkRateLimit(`biolinks:write:${user.id}`, WRITE_LIMIT);
     if (!rl.allowed) return NextResponse.json({ error: "Muitas requisições. Tente novamente em breve." }, { status: 429 });
 
-    const admin = getAdminSupabase();
+    let admin;
+    try { admin = getAdminSupabase(); } catch { admin = supabase; }
     const { data: profile } = await admin.from("profiles").select("plan, full_name").eq("id", user.id).single();
     const plan = (profile?.plan || "free") as PlanName;
     const userName = profile?.full_name || "";
