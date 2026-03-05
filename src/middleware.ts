@@ -70,8 +70,8 @@ function getCustomDomain(host: string): string | null {
 /** Admin supabase for public lookups (no auth needed) */
 function getAdminSupabase() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
+    process.env.SUPABASE_SERVICE_ROLE_KEY!.trim(),
   );
 }
 
