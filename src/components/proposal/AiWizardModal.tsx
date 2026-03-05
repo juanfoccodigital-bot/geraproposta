@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, ArrowLeft, ArrowRight, Sparkles, Loader2,
+  X, ArrowLeft, ArrowRight, Sparkles, Send, MessageSquare, List,
   Instagram, Target, Palette, Globe, Code, Megaphone,
   Briefcase, Camera, Heart, GraduationCap, Zap, MoreHorizontal,
   Sun, Moon, User, Building2, DollarSign, Phone, Plus, Trash2,
@@ -52,6 +52,8 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<"prompt" | "steps">("prompt");
+  const [promptText, setPromptText] = useState("");
 
   // Plan gate — only Pro and Plus
   const userPlan = (user?.plan as PlanName) || "free";
@@ -83,6 +85,8 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
   useEffect(() => {
     if (!open) {
       setStep(0);
+      setMode("prompt");
+      setPromptText("");
       setCompanyName("");
       setBusinessType("");
       setUsageType("business");
@@ -231,6 +235,53 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
     }
   };
 
+  // Handle prompt-based generation (OpenAI)
+  const handlePromptGenerate = async () => {
+    if (promptText.trim().length < 10) return;
+    setGenerating(true);
+    setProgress(0);
+    setMessageIndex(0);
+    setError("");
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 88) { clearInterval(progressInterval); return 88; }
+        return prev + Math.random() * 6 + 2;
+      });
+    }, 600);
+
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => Math.min(prev + 1, GENERATION_MESSAGES.length - 1));
+    }, 800);
+
+    try {
+      const res = await fetch("/api/ai/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: promptText.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erro ao gerar proposta");
+      }
+
+      clearInterval(progressInterval);
+      clearInterval(messageInterval);
+      setProgress(100);
+      setMessageIndex(GENERATION_MESSAGES.length - 1);
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      router.push(`/editor/${data.id}`);
+    } catch (err) {
+      clearInterval(progressInterval);
+      clearInterval(messageInterval);
+      setGenerating(false);
+      setError(err instanceof Error ? err.message : "Erro ao gerar proposta");
+    }
+  };
+
   if (!open) return null;
 
   // Not logged in → redirect to login
@@ -330,22 +381,79 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
           <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30">Beta</span>
         </div>
 
-        {/* Progress bar */}
-        <div className="flex gap-1 px-6 pt-2">
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <div
-              key={i}
-              className="flex-1 h-1 rounded-full transition-colors duration-300"
-              style={{ background: i <= step ? "#F97316" : "#262626" }}
-            />
-          ))}
-        </div>
+        {/* Mode tabs */}
+        {!generating && (
+          <div className="flex gap-1 mx-6 mt-3 p-1 rounded-xl bg-white/5">
+            <button
+              onClick={() => setMode("prompt")}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+              style={{
+                background: mode === "prompt" ? "rgba(249,115,22,0.15)" : "transparent",
+                color: mode === "prompt" ? "#F97316" : "rgba(255,255,255,0.35)",
+              }}
+            >
+              <MessageSquare size={13} />
+              Descrever com texto
+            </button>
+            <button
+              onClick={() => setMode("steps")}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+              style={{
+                background: mode === "steps" ? "rgba(249,115,22,0.15)" : "transparent",
+                color: mode === "steps" ? "#F97316" : "rgba(255,255,255,0.35)",
+              }}
+            >
+              <List size={13} />
+              Passo a passo
+            </button>
+          </div>
+        )}
+
+        {/* Progress bar (steps mode only) */}
+        {mode === "steps" && !generating && (
+          <div className="flex gap-1 px-6 pt-3">
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+              <div
+                key={i}
+                className="flex-1 h-1 rounded-full transition-colors duration-300"
+                style={{ background: i <= step ? "#F97316" : "#262626" }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         <div className="px-6 py-5">
           {generating ? (
             <GeneratingScreen progress={progress} messageIndex={messageIndex} error={error} onRetry={() => { setGenerating(false); setError(""); }} />
+          ) : mode === "prompt" ? (
+            /* ── Prompt mode: single textarea ── */
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white mb-1 flex items-center gap-2">
+                  <Sparkles size={18} className="text-[#F97316]" />
+                  Descreva sua proposta
+                </h2>
+                <p className="text-xs text-white/40">
+                  Digite o que voce precisa e a IA vai entender e criar a proposta completa.
+                </p>
+              </div>
+
+              <textarea
+                value={promptText}
+                onChange={(e) => setPromptText(e.target.value)}
+                placeholder={"Ex: Preciso de uma proposta de social media para a Clinica Bella Vida, com gestao de Instagram e criacao de conteudo, valor R$2.500/mes\n\nOu: Faz uma proposta de trafego pago para o Joao da imobiliaria, foco em gerar leads qualificados, investimento de R$3.000\n\nOu: Proposta de criacao de site para restaurante italiano, preco R$4.000, incluir cardapio digital e reservas online"}
+                rows={6}
+                className="w-full px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/15 focus:outline-none focus:border-[#F97316]/50 resize-none leading-relaxed"
+              />
+
+              <div className="flex items-center gap-2 text-[10px] text-white/25">
+                <Sparkles size={10} />
+                <span>A IA vai extrair automaticamente: cliente, servico, preco, nicho e gerar tudo.</span>
+              </div>
+            </div>
           ) : (
+            /* ── Steps mode: existing multi-step flow ── */
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -412,34 +520,57 @@ export default function AiWizardModal({ open, onClose }: AiWizardModalProps) {
         {/* Navigation */}
         {!generating && (
           <div className="flex items-center justify-between px-6 pb-5">
-            <button
-              onClick={() => step > 0 ? setStep(step - 1) : onClose()}
-              className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/60 transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={14} />
-              {step > 0 ? "Voltar" : "Cancelar"}
-            </button>
-
-            {step < TOTAL_STEPS - 1 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                disabled={!canContinue()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{ background: "#F97316", color: "#fff" }}
-              >
-                Continuar
-                <ArrowRight size={14} />
-              </button>
+            {mode === "prompt" ? (
+              <>
+                <button
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/60 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft size={14} />
+                  Cancelar
+                </button>
+                <button
+                  onClick={handlePromptGenerate}
+                  disabled={promptText.trim().length < 10}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ background: "#F97316", color: "#fff" }}
+                >
+                  <Send size={14} />
+                  Gerar com IA
+                </button>
+              </>
             ) : (
-              <button
-                onClick={handleGenerate}
-                disabled={!canContinue()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{ background: "#F97316", color: "#fff" }}
-              >
-                <Sparkles size={14} />
-                Gerar Proposta
-              </button>
+              <>
+                <button
+                  onClick={() => step > 0 ? setStep(step - 1) : onClose()}
+                  className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/60 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft size={14} />
+                  {step > 0 ? "Voltar" : "Cancelar"}
+                </button>
+
+                {step < TOTAL_STEPS - 1 ? (
+                  <button
+                    onClick={() => setStep(step + 1)}
+                    disabled={!canContinue()}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    style={{ background: "#F97316", color: "#fff" }}
+                  >
+                    Continuar
+                    <ArrowRight size={14} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGenerate}
+                    disabled={!canContinue()}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    style={{ background: "#F97316", color: "#fff" }}
+                  >
+                    <Sparkles size={14} />
+                    Gerar Proposta
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}

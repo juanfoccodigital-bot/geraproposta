@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import HowToUseButton from "@/components/ui/HowToUseButton";
 
 /* ============================================
    ROOT LAYOUT
@@ -33,7 +34,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${inter.variable} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <HowToUseButton />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -155,14 +155,20 @@ export default function BiolinkPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {biolinks.map((bl) => (
               <div key={bl.id} className="rounded-xl border border-[#1A1A1A] bg-[#111] overflow-hidden hover:border-[#262626] transition-colors">
-                {/* Preview bar */}
-                <div
-                  className="h-20 flex items-center justify-center"
-                  style={{ background: bl.config?.theme?.backgroundType === "gradient" ? bl.config.theme.backgroundValue : bl.config?.theme?.background || "#FFFFFF" }}
-                >
-                  <span className="text-2xl font-bold" style={{ color: bl.config?.theme?.textColor || "#000" }}>
-                    {bl.title?.charAt(0)?.toUpperCase()}
-                  </span>
+                {/* Preview */}
+                <div className="rounded-t-xl overflow-hidden">
+                  {bl.config ? (
+                    <BiolinkPreviewThumbnail config={bl.config} height={140} />
+                  ) : (
+                    <div
+                      className="h-[140px] flex items-center justify-center"
+                      style={{ background: "#FFFFFF" }}
+                    >
+                      <span className="text-2xl font-bold text-black/30">
+                        {bl.title?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {/* Info */}
                 <div className="p-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Zap, FileText, Link2, Globe, LayoutTemplate, Paintbrush, Sparkles, Share2, MessageCircle, Palette } from "lucide-react";
+import { FileText, Link2, Globe, LayoutTemplate, Paintbrush, Sparkles, Share2, MessageCircle, Palette } from "lucide-react";
 
 const marqueeFeatures = [
   { icon: LayoutTemplate, title: "Templates Prontos" },
@@ -82,24 +82,6 @@ export default function HeroSection({ onOpenAiWizard }: HeroSectionProps) {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
-          {[
-            { label: "Templates", value: "+100", icon: Star },
-            { label: "Nichos", value: "+12", icon: Zap },
-            { label: "Usuarios", value: "+2 mil" },
-            { label: "Projetos criados", value: "+10 mil" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-xl border"
-              style={{ background: "#111111", borderColor: "#262626" }}
-            >
-              <span className="text-xs md:text-sm font-bold text-white">{stat.value}</span>
-              <span className="text-[11px] md:text-xs" style={{ color: "#737373" }}>{stat.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Orange animated marquee bar */}
