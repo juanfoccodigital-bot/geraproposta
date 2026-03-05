@@ -27,33 +27,41 @@ async function getClients() {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchBiolinkWithOwnership(db: any, supabase: any, id: string, userId: string, select: string) {
+  const debug: string[] = [];
+  const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const keyLen = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim().length || 0;
+  debug.push(`serviceKey: exists=${hasServiceKey}, len=${keyLen}, dbIsSupa=${db === supabase}`);
+
   // First try with db (admin or supabase)
   let { data, error } = await db.from("biolinks").select(select).eq("id", id).maybeSingle();
+  debug.push(`query1: data=${!!data}, error=${error?.message || "none"}, code=${error?.code || "none"}`);
 
   // If admin failed, fallback to regular supabase
   if (error && db !== supabase) {
-    console.error("[biolink] Admin query failed, trying regular client:", error.message);
+    debug.push("falling back to regular supabase...");
     const retry = await supabase.from("biolinks").select(select).eq("id", id).maybeSingle();
     data = retry.data;
     error = retry.error;
+    debug.push(`query2: data=${!!data}, error=${error?.message || "none"}, code=${error?.code || "none"}`);
   }
 
   if (error) {
-    console.error("[biolink] DB error:", error.message, error.code);
-    return { data: null, error: "db_error" as const };
+    console.error("[biolink] DB error:", debug.join(" | "));
+    return { data: null, error: "db_error" as const, debug };
   }
 
   if (!data) {
-    return { data: null, error: "not_found" as const };
+    debug.push("no row found for this id");
+    return { data: null, error: "not_found" as const, debug };
   }
 
   // Check ownership in code
   if (data.user_id !== userId) {
-    console.error("[biolink] Ownership mismatch:", { biolinkUserId: data.user_id, authUserId: userId });
-    return { data: null, error: "forbidden" as const };
+    debug.push(`ownership: biolink.user_id=${data.user_id}, auth.user_id=${userId}`);
+    return { data: null, error: "forbidden" as const, debug };
   }
 
-  return { data, error: null };
+  return { data, error: null, debug };
 }
 
 // ============================================
@@ -72,10 +80,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const result = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "*");
 
     if (result.error === "db_error") {
-      return NextResponse.json({ error: "Erro ao acessar banco de dados" }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao acessar banco de dados", _debug: result.debug }, { status: 500 });
     }
     if (result.error) {
-      return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Biolink não encontrado", _debug: result.debug }, { status: 404 });
     }
 
     return NextResponse.json(result.data);
@@ -102,10 +110,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const ownership = await fetchBiolinkWithOwnership(db, supabase, id, user.id, "id, user_id, custom_domain");
 
     if (ownership.error === "db_error") {
-      return NextResponse.json({ error: "Erro ao acessar banco de dados" }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao acessar banco de dados", _debug: ownership.debug }, { status: 500 });
     }
     if (ownership.error) {
-      return NextResponse.json({ error: "Biolink não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Biolink não encontrado", _debug: ownership.debug }, { status: 404 });
     }
 
     const existing = ownership.data;
