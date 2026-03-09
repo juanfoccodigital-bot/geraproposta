@@ -59,7 +59,7 @@ export default function Footer() {
             <h4 className="text-xs font-semibold text-white mb-3 uppercase tracking-wider">Legal</h4>
             <ul className="space-y-2">
               <li><span className="text-xs" style={{ color: "#737373" }}>Termos de Uso</span></li>
-              <li><span className="text-xs" style={{ color: "#737373" }}>Privacidade</span></li>
+              <li><Link href="/privacidade" className="text-xs transition-colors hover:text-white" style={{ color: "#737373" }}>Privacidade</Link></li>
             </ul>
           </div>
         </div>

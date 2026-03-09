@@ -24,6 +24,19 @@ const nextConfig: NextConfig = {
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pay.hub.la https://*.vercel-scripts.com https://*.vercel-analytics.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
+              "connect-src 'self' https://*.supabase.co https://pay.hub.la https://*.vercel-analytics.com https://*.vercel-insights.com",
+              "frame-src 'self' https://pay.hub.la",
+              "frame-ancestors 'self'",
+            ].join("; "),
+          },
         ],
       },
     ];
