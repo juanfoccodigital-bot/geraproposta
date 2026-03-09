@@ -282,7 +282,7 @@ export default function AssinaturaPage() {
 
         {/* Info text */}
         <p className="text-xs text-white/30 mt-6 text-center">
-          Pagamentos processados via PIX (AbacatePay) e Cartao (Stripe). Duvidas? Acesse nosso{" "}
+          Pagamentos processados via Hubla. Duvidas? Acesse nosso{" "}
           <a href="/suporte" className="text-[#F97316] hover:underline">suporte</a>.
         </p>
       </div>

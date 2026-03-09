@@ -28,8 +28,8 @@ const faqs = [
     a: "Sim! Acesse 'Minha Assinatura' no menu do usuario e clique em 'Cancelar'. Voce continuara com acesso ao plano pago ate o final do periodo. Apos isso, seu plano volta para Free.",
   },
   {
-    q: "Como funciona o pagamento via PIX?",
-    a: "Ao escolher um plano pago, voce sera redirecionado para a pagina de pagamento do AbacatePay. La, voce pode pagar via PIX (QR Code ou copia-e-cola). A confirmacao e instantanea.",
+    q: "Como funciona o pagamento?",
+    a: "Ao escolher um plano pago, voce sera redirecionado para a pagina de pagamento do Hubla. La, voce pode pagar via PIX ou cartao de credito. A confirmacao e instantanea.",
   },
   {
     q: "Meu pagamento foi confirmado mas o plano nao mudou",

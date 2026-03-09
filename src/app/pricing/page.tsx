@@ -7,9 +7,7 @@ import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronDown, Shield } from "lucide-react";
-import dynamic from "next/dynamic";
-const CheckoutModal = dynamic(() => import("@/components/ui/CheckoutModal"), { ssr: false });
-import { PLAN_LABELS, PLAN_PRICES } from "@/lib/stripe";
+import { HUBLA_OFFERS } from "@/lib/hubla";
 
 /* ============================================
    PRICING PAGE
@@ -71,73 +69,32 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-interface PixData {
-  billingId: string;
-  brCode: string;
-  qrCodeImage: string;
-  plan: string;
-  amount: number;
-}
-
 export default function PricingPage() {
   const { user: userProfile } = useAuth();
   const router = useRouter();
   const [checkingOutPlan, setCheckingOutPlan] = useState<string | null>(null);
-  const [pixData, setPixData] = useState<PixData | null>(null);
 
-  const handleCheckout = async (plan: string) => {
+  const handleCheckout = (plan: string) => {
     if (!userProfile) {
       router.push("/signup");
       return;
     }
+
+    const offer = HUBLA_OFFERS[plan];
+    if (!offer) return;
+
     setCheckingOutPlan(plan);
-    try {
-      // Gerar PIX QR Code diretamente (sem redirect para pagina hosted)
-      const res = await fetch("/api/checkout/pix", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-      const data = await res.json();
 
-      if (data.billingId && (data.brCode || data.qrCodeImage)) {
-        setPixData({
-          billingId: data.billingId,
-          brCode: data.brCode,
-          qrCodeImage: data.qrCodeImage,
-          plan,
-          amount: data.amount ?? PLAN_PRICES[plan],
-        });
-      } else {
-        alert(data.error || "Erro ao processar pagamento");
-      }
-    } catch {
-      alert("Erro ao processar pagamento. Tente novamente.");
-    } finally {
-      setCheckingOutPlan(null);
-    }
-  };
+    // Redirecionar para checkout do Hubla com email do usuario
+    const email = userProfile.email || "";
+    const checkoutUrl = `${offer.url}?email=${encodeURIComponent(email)}`;
+    window.open(checkoutUrl, "_blank");
 
-  const handlePaymentSuccess = () => {
-    setPixData(null);
-    router.push(`/dashboard?payment=success&plan=${pixData?.plan ?? ""}`);
+    setTimeout(() => setCheckingOutPlan(null), 2000);
   };
 
   return (
-    <>
-      {pixData && (
-        <CheckoutModal
-          plan={pixData.plan}
-          planLabel={PLAN_LABELS[pixData.plan] ?? pixData.plan}
-          amount={pixData.amount}
-          billingId={pixData.billingId}
-          brCode={pixData.brCode}
-          qrCodeImage={pixData.qrCodeImage}
-          onClose={() => setPixData(null)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
-      <main className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
+    <main className="relative overflow-hidden" style={{ background: "#0A0A0A" }}>
         {/* Background glow — spans header + cards */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[160px] opacity-[0.07] pointer-events-none"
@@ -207,6 +164,5 @@ export default function PricingPage() {
 
         <Footer />
       </main>
-    </>
   );
 }
