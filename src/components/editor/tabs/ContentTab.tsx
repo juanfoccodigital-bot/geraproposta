@@ -474,6 +474,7 @@ function InvestimentoFields({ data, update }: { data: InvestimentoConfig; update
     <>
       <Field label="Label" value={data.sectionLabel} onChange={(v) => update({ sectionLabel: v })} />
       <Field label="Título" value={data.title} onChange={(v) => update({ title: v })} />
+      <Field label="Subtítulo" value={data.subtitle} onChange={(v) => update({ subtitle: v })} />
       <Field label="Badge" value={data.badge} onChange={(v) => update({ badge: v })} />
       <Field label="Preço Original (riscado)" value={data.priceOriginal} onChange={(v) => update({ priceOriginal: v })} />
       <div className="grid grid-cols-3 gap-2">
