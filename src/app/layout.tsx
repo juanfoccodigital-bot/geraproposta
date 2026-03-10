@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import HowToUseButton from "@/components/ui/HowToUseButton";
+import PromoBanner from "@/components/ui/PromoBanner";
+import PromoPopup from "@/components/ui/PromoPopup";
 
 /* ============================================
    ROOT LAYOUT
@@ -35,8 +37,10 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} antialiased`}>
         <AuthProvider>
+          <PromoBanner />
           {children}
           <HowToUseButton />
+          <PromoPopup />
         </AuthProvider>
       </body>
     </html>

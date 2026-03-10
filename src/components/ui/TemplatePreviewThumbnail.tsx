@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, memo } from "react";
 import { ProposalConfig } from "@/types/proposal";
 import ProposalRenderer from "@/components/proposal/ProposalRenderer";
 
@@ -17,6 +17,17 @@ interface TemplatePreviewThumbnailProps {
 }
 
 const RENDER_WIDTH = 1200;
+
+/* Memoized inner renderer to prevent re-renders on scroll */
+const MemoRenderer = memo(function MemoRenderer({
+  config,
+  targetRef,
+}: {
+  config: ProposalConfig;
+  targetRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return <ProposalRenderer config={config} targetRef={targetRef} />;
+});
 
 export default function TemplatePreviewThumbnail({
   config,
@@ -56,7 +67,10 @@ export default function TemplatePreviewThumbnail({
 
     const update = () => {
       const w = el.offsetWidth;
-      if (w > 0) setScale(w / RENDER_WIDTH);
+      if (w > 0) {
+        const newScale = w / RENDER_WIDTH;
+        setScale((prev) => Math.abs(prev - newScale) > 0.001 ? newScale : prev);
+      }
     };
 
     update();
@@ -99,7 +113,7 @@ export default function TemplatePreviewThumbnail({
             pointerEvents: "none",
           }}
         >
-          <ProposalRenderer config={config} targetRef={themeRef} />
+          <MemoRenderer config={config} targetRef={themeRef} />
         </div>
       ) : (
         <div
