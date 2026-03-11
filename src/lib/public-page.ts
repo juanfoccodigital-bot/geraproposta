@@ -1,8 +1,9 @@
 /**
  * Detecta se estamos em uma pagina publica (proposta, biolink, site compartilhado)
  * ou em um subdominio (slug.geraproposta.com).
- * Funciona tanto no server quanto no client.
  */
+
+import { useState, useEffect } from "react";
 
 const APP_DOMAIN = "geraproposta.com";
 
@@ -23,4 +24,19 @@ export function isPublicPage(pathname: string): boolean {
     pathname.startsWith("/link/") ||
     pathname.startsWith("/site/")
   );
+}
+
+/**
+ * Hook que retorna true se estamos em pagina publica.
+ * Funciona corretamente com SSR — começa true (escondido) e
+ * so mostra apos confirmar que NAO e pagina publica no client.
+ */
+export function useIsPublicPage(pathname: string): boolean {
+  const [isPublic, setIsPublic] = useState(true); // default: escondido (safe)
+
+  useEffect(() => {
+    setIsPublic(isPublicPage(pathname));
+  }, [pathname]);
+
+  return isPublic;
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { X, Flame, Zap, Crown, ArrowRight, Check } from "lucide-react";
-import { isPublicPage as checkPublicPage } from "@/lib/public-page";
+import { useIsPublicPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO POPUP — Aparece apos 5 segundos na
@@ -19,8 +19,10 @@ export default function PromoPopup() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const isPublic = useIsPublicPage(pathname);
+
   useEffect(() => {
-    if (checkPublicPage(pathname)) return;
+    if (isPublic) return;
     const shown = localStorage.getItem(STORAGE_KEY);
     if (shown) return;
 
@@ -30,7 +32,7 @@ export default function PromoPopup() {
     }, DELAY_MS);
 
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [isPublic]);
 
   const close = () => setVisible(false);
 

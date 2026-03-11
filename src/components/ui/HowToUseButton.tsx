@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { isPublicPage } from "@/lib/public-page";
+import { useIsPublicPage } from "@/lib/public-page";
 import { HelpCircle, X, Play, ChevronRight, FileText, Link2, Globe, Sparkles, Palette, Share2, BarChart3, Layers } from "lucide-react";
 
 const lessons = [
@@ -102,7 +102,8 @@ export default function HowToUseButton() {
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
 
   // Esconde no editor, preview e paginas publicas (proposta/biolink/site compartilhados)
-  const isHidden = isPublicPage(pathname) || pathname.includes("/editor/") || pathname.includes("/preview/");
+  const isPublic = useIsPublicPage(pathname);
+  const isHidden = isPublic || pathname.includes("/editor/") || pathname.includes("/preview/");
   if (isHidden) return null;
 
   return (

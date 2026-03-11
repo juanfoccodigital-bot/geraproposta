@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, Flame, ArrowRight } from "lucide-react";
-import { isPublicPage } from "@/lib/public-page";
+import { useIsPublicPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO BANNER — Faixa vermelha no topo
@@ -18,15 +18,15 @@ const STORAGE_KEY = "promo-banner-dismissed";
 export default function PromoBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
+  const isPublic = useIsPublicPage(pathname);
 
   useEffect(() => {
-    if (isPublicPage(pathname)) return;
+    if (isPublic) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) setVisible(true);
-  }, [pathname]);
+  }, [isPublic]);
 
-  // Hide reactively if page becomes public (e.g. client navigation)
-  if (isPublicPage(pathname)) return null;
+  if (isPublic) return null;
 
   const dismiss = () => {
     setVisible(false);
