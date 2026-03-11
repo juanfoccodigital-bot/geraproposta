@@ -37,7 +37,7 @@ export default function PromoBanner() {
 
   return (
     <div
-      className="fixed top-0 left-0 z-[60] w-full py-2.5 px-4 text-center"
+      className="relative z-[60] w-full py-2.5 px-4 text-center"
       style={{
         background: "linear-gradient(90deg, #DC2626, #B91C1C, #DC2626)",
       }}
