@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { X, Flame, Zap, Crown, ArrowRight, Check } from "lucide-react";
+import { isPublicPage as checkPublicPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO POPUP — Aparece apos 5 segundos na
@@ -18,23 +19,8 @@ export default function PromoPopup() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [isSubdomain, setIsSubdomain] = useState(false);
-
   useEffect(() => {
-    const host = window.location.hostname;
-    const appDomain = "geraproposta.com";
-    const isSub = host.endsWith(`.${appDomain}`) && host !== `www.${appDomain}` && host !== appDomain;
-    if (isSub) setIsSubdomain(true);
-  }, []);
-
-  const isPublicPage =
-    isSubdomain ||
-    pathname.startsWith("/p/") ||
-    pathname.startsWith("/link/") ||
-    pathname.startsWith("/site/");
-
-  useEffect(() => {
-    if (isPublicPage) return;
+    if (checkPublicPage(pathname)) return;
     const shown = localStorage.getItem(STORAGE_KEY);
     if (shown) return;
 
@@ -44,7 +30,7 @@ export default function PromoPopup() {
     }, DELAY_MS);
 
     return () => clearTimeout(timer);
-  }, [isPublicPage]);
+  }, [pathname]);
 
   const close = () => setVisible(false);
 

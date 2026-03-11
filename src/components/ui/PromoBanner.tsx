@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, Flame, ArrowRight } from "lucide-react";
+import { isPublicPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO BANNER — Faixa vermelha no topo
@@ -18,27 +19,14 @@ export default function PromoBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
-  // Esconde em paginas publicas (proposta, biolink, site compartilhados) e subdomínios
-  const [isSubdomain, setIsSubdomain] = useState(false);
-
   useEffect(() => {
-    const host = window.location.hostname;
-    const appDomain = "geraproposta.com";
-    const isSub = host.endsWith(`.${appDomain}`) && host !== `www.${appDomain}` && host !== appDomain;
-    if (isSub) setIsSubdomain(true);
-  }, []);
-
-  const isPublicPage =
-    isSubdomain ||
-    pathname.startsWith("/p/") ||
-    pathname.startsWith("/link/") ||
-    pathname.startsWith("/site/");
-
-  useEffect(() => {
-    if (isPublicPage) return;
+    if (isPublicPage(pathname)) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) setVisible(true);
-  }, [isPublicPage]);
+  }, [pathname]);
+
+  // Hide reactively if page becomes public (e.g. client navigation)
+  if (isPublicPage(pathname)) return null;
 
   const dismiss = () => {
     setVisible(false);
