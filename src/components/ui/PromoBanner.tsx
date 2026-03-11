@@ -18,8 +18,21 @@ export default function PromoBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
-  // Esconde em paginas publicas (proposta compartilhada, biolink, site)
-  const isPublicPage = pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
+  // Esconde em paginas publicas (proposta, biolink, site compartilhados) e subdomínios
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    const appDomain = "geraproposta.com";
+    const isSub = host.endsWith(`.${appDomain}`) && host !== `www.${appDomain}` && host !== appDomain;
+    if (isSub) setIsSubdomain(true);
+  }, []);
+
+  const isPublicPage =
+    isSubdomain ||
+    pathname.startsWith("/p/") ||
+    pathname.startsWith("/link/") ||
+    pathname.startsWith("/site/");
 
   useEffect(() => {
     if (isPublicPage) return;

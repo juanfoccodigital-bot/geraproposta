@@ -18,7 +18,20 @@ export default function PromoPopup() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPublicPage = pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    const appDomain = "geraproposta.com";
+    const isSub = host.endsWith(`.${appDomain}`) && host !== `www.${appDomain}` && host !== appDomain;
+    if (isSub) setIsSubdomain(true);
+  }, []);
+
+  const isPublicPage =
+    isSubdomain ||
+    pathname.startsWith("/p/") ||
+    pathname.startsWith("/link/") ||
+    pathname.startsWith("/site/");
 
   useEffect(() => {
     if (isPublicPage) return;

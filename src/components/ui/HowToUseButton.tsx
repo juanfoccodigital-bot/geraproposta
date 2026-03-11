@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { HelpCircle, X, Play, ChevronRight, FileText, Link2, Globe, Sparkles, Palette, Share2, BarChart3, Layers } from "lucide-react";
 
@@ -99,9 +99,18 @@ export default function HowToUseButton() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  // Detecta subdominio (slug.geraproposta.com) — rewrite muda path no server mas usePathname retorna "/"
+  useEffect(() => {
+    const host = window.location.hostname;
+    const appDomain = "geraproposta.com";
+    const isSub = host.endsWith(`.${appDomain}`) && host !== `www.${appDomain}` && host !== appDomain;
+    if (isSub) setIsSubdomain(true);
+  }, []);
 
   // Esconde no editor, preview e paginas publicas (proposta/biolink/site compartilhados)
-  const isHidden = pathname.includes("/editor/") || pathname.includes("/preview/") || pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
+  const isHidden = isSubdomain || pathname.includes("/editor/") || pathname.includes("/preview/") || pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
   if (isHidden) return null;
 
   return (
