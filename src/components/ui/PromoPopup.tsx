@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { X, Flame, Zap, Crown, ArrowRight, Check } from "lucide-react";
 
 /* ============================================
@@ -16,8 +16,12 @@ const DELAY_MS = 5000;
 export default function PromoPopup() {
   const [visible, setVisible] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isPublicPage = pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
 
   useEffect(() => {
+    if (isPublicPage) return;
     const shown = localStorage.getItem(STORAGE_KEY);
     if (shown) return;
 
@@ -27,7 +31,7 @@ export default function PromoPopup() {
     }, DELAY_MS);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isPublicPage]);
 
   const close = () => setVisible(false);
 

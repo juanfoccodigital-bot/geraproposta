@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, Flame, ArrowRight } from "lucide-react";
 
@@ -14,12 +15,17 @@ import { X, Flame, ArrowRight } from "lucide-react";
 const STORAGE_KEY = "promo-banner-dismissed";
 
 export default function PromoBanner() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
+  // Esconde em paginas publicas (proposta compartilhada, biolink, site)
+  const isPublicPage = pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
+
   useEffect(() => {
+    if (isPublicPage) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) setVisible(true);
-  }, []);
+  }, [isPublicPage]);
 
   const dismiss = () => {
     setVisible(false);
@@ -30,7 +36,7 @@ export default function PromoBanner() {
 
   return (
     <div
-      className="relative z-[60] w-full py-2.5 px-4 text-center"
+      className="sticky top-0 z-[60] w-full py-2.5 px-4 text-center"
       style={{
         background: "linear-gradient(90deg, #DC2626, #B91C1C, #DC2626)",
       }}

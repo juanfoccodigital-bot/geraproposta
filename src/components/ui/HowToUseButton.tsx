@@ -100,9 +100,9 @@ export default function HowToUseButton() {
   const [open, setOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
 
-  // Esconde nas páginas de editor para não sobrepor botões flutuantes
-  const isEditorPage = pathname.includes("/editor/") || pathname.includes("/preview/");
-  if (isEditorPage) return null;
+  // Esconde no editor, preview e paginas publicas (proposta/biolink/site compartilhados)
+  const isHidden = pathname.includes("/editor/") || pathname.includes("/preview/") || pathname.startsWith("/p/") || pathname.startsWith("/link/") || pathname.startsWith("/site/");
+  if (isHidden) return null;
 
   return (
     <>
