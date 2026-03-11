@@ -11,6 +11,7 @@ import type {
   BiolinkMarqueeData,
   BiolinkVideoData,
   FeaturedData,
+  LinksData,
   ImageLinkData,
   CtaData,
   BannerData,
@@ -46,6 +47,7 @@ import CtaEditor from "./blocks/CtaEditor";
 import BannerEditor from "./blocks/BannerEditor";
 import CountdownEditor from "./blocks/CountdownEditor";
 import CarouselEditor from "./blocks/CarouselEditor";
+import LinksEditor from "./blocks/LinksEditor";
 
 const addableBlocks: { type: BiolinkBlockType; label: string; premium: boolean }[] = [
   { type: "social", label: "Redes Sociais", premium: true },
@@ -63,6 +65,8 @@ const addableBlocks: { type: BiolinkBlockType; label: string; premium: boolean }
 
 function BlockEditor({ block }: { block: BiolinkBlock }) {
   switch (block.type) {
+    case "links":
+      return <LinksEditor blockId={block.id} data={block.data as LinksData} />;
     case "social":
       return <SocialEditor blockId={block.id} data={block.data as SocialData} />;
     case "text":
@@ -93,7 +97,7 @@ function BlockEditor({ block }: { block: BiolinkBlock }) {
 function SortableBiolinkBlock({ block }: { block: BiolinkBlock }) {
   const { state, dispatch } = useBiolinkEditor();
   const isActive = state.activeBlockId === block.id;
-  const hasEditor = !["avatar", "links"].includes(block.type);
+  const hasEditor = !["avatar"].includes(block.type);
 
   const {
     attributes,
