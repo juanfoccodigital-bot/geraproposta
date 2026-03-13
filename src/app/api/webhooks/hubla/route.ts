@@ -77,23 +77,25 @@ export async function POST(request: NextRequest) {
       ""
     );
 
-    console.log("[hubla-webhook] Parsed:", { email, offerId, event });
-
     if (!email) {
       console.error("[hubla-webhook] No email found in payload");
       return NextResponse.json({ error: "No email in payload" }, { status: 400 });
     }
+
+    // Extrair valor real pago (pode ser diferente do preco cheio se usou cupom)
+    const rawAmount = purchase.amount || purchase.price || purchase.value || 0;
+    const paidAmountCents = rawAmount > 100 ? rawAmount : Math.round(rawAmount * 100); // normalizar pra centavos
+
+    console.log("[hubla-webhook] Parsed:", { email, offerId, event, paidAmountCents });
 
     // Determinar plano pela offer ID
     let plan = offerId ? OFFER_ID_TO_PLAN[offerId] : null;
 
     // Fallback: tentar pelo preco
     if (!plan) {
-      const amount = purchase.amount || purchase.price || purchase.value || 0;
-      const amountCents = amount > 100 ? amount : amount * 100; // normalizar
-      if (amountCents === 2900) plan = "lite";
-      else if (amountCents === 4900) plan = "pro";
-      else if (amountCents === 9900) plan = "plus";
+      if (paidAmountCents === 2900) plan = "lite";
+      else if (paidAmountCents === 4900) plan = "pro";
+      else if (paidAmountCents === 9900) plan = "plus";
     }
 
     if (!plan) {
@@ -128,6 +130,7 @@ export async function POST(request: NextRequest) {
         subscription_status: "active",
         subscription_expires_at: expiresAt.toISOString(),
         last_payment_at: now.toISOString(),
+        paid_amount: paidAmountCents || null,
         updated_at: now.toISOString(),
       })
       .eq("id", profile.id);

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   // All profiles
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, plan, subscription_status, last_payment_at, created_at, updated_at");
+    .select("id, plan, subscription_status, last_payment_at, paid_amount, created_at, updated_at");
 
   const allUsers = profiles || [];
   const totalUsers = allUsers.length;
@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // MRR in cents (only real paying users)
-  const mrr = Object.entries(activePlanCounts).reduce(
-    (sum, [plan, count]) => sum + (PLAN_PRICES[plan] || 0) * count,
+  // MRR in cents (only real paying users) — use paid_amount when available, fallback to plan price
+  const mrr = paidSubscribers.reduce(
+    (sum, p) => sum + (p.paid_amount || PLAN_PRICES[p.plan] || 0),
     0
   );
 
