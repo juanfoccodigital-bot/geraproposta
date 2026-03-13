@@ -5,21 +5,30 @@
 
 import { useState, useEffect } from "react";
 
-const APP_DOMAIN = "geraproposta.com";
+/**
+ * Dominios que sao o app principal (nao subdominio/custom domain).
+ * Tudo que NAO estiver aqui e tratado como pagina publica externa.
+ */
+const MAIN_HOSTS = [
+  "geraproposta.com",
+  "www.geraproposta.com",
+  "localhost",
+];
 
-function isSubdomain(): boolean {
+function isMainApp(): boolean {
   if (typeof window === "undefined") return false;
   const host = window.location.hostname;
-  return (
-    host.endsWith(`.${APP_DOMAIN}`) &&
-    host !== `www.${APP_DOMAIN}` &&
-    host !== APP_DOMAIN
-  );
+  return MAIN_HOSTS.includes(host);
+}
+
+function isExternalDomain(): boolean {
+  if (typeof window === "undefined") return true; // safe default: hide promo
+  return !isMainApp();
 }
 
 export function isPublicPage(pathname: string): boolean {
   return (
-    isSubdomain() ||
+    isExternalDomain() ||
     pathname.startsWith("/p/") ||
     pathname.startsWith("/link/") ||
     pathname.startsWith("/site/")
@@ -44,7 +53,7 @@ const PROMO_ALLOWED_PATHS = [
 ];
 
 export function isPromoPage(pathname: string): boolean {
-  if (isSubdomain()) return false;
+  if (isExternalDomain()) return false;
   return PROMO_ALLOWED_PATHS.some(
     (p) => pathname === p || pathname.startsWith(p + "/")
   );
