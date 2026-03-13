@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const receivedToken = token || headerToken || queryToken;
 
-    if (!expectedToken || (receivedToken && receivedToken !== expectedToken)) {
+    if (!expectedToken || !receivedToken || receivedToken !== expectedToken) {
       console.error("[hubla-webhook] Invalid token");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -101,19 +101,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unknown offer/plan" }, { status: 400 });
     }
 
-    // Buscar usuario pelo email no Supabase Auth
+    // Buscar usuario pelo email diretamente na tabela profiles
+    // (listUsers() sem paginacao retorna max 50 users — causa falha com +50 usuarios)
     const admin = getAdminClient();
-    const { data: { users }, error: authError } = await admin.auth.admin.listUsers();
 
-    if (authError) {
-      console.error("[hubla-webhook] Auth error:", authError.message);
-      return NextResponse.json({ error: "Auth error" }, { status: 500 });
-    }
+    const { data: profile, error: profileError } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single();
 
-    const user = users.find((u) => u.email?.toLowerCase() === email);
-
-    if (!user) {
-      console.error("[hubla-webhook] No user found for email:", email);
+    if (profileError || !profile) {
+      console.error("[hubla-webhook] No user found for email:", email, profileError?.message);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -131,14 +130,14 @@ export async function POST(request: NextRequest) {
         last_payment_at: now.toISOString(),
         updated_at: now.toISOString(),
       })
-      .eq("id", user.id);
+      .eq("id", profile.id);
 
     if (updateError) {
       console.error("[hubla-webhook] Update error:", updateError.message);
       return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
 
-    console.log("[hubla-webhook] Success:", { email, plan, userId: user.id });
+    console.log("[hubla-webhook] Success:", { email, plan, userId: profile.id });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[hubla-webhook] Exception:", err);
