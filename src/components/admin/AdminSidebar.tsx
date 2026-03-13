@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, DollarSign, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, DollarSign, Trophy, ArrowLeft } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "Usuarios", icon: Users },
   { href: "/admin/revenue", label: "Faturamento", icon: DollarSign },
+  { href: "/admin/ranking", label: "Ranking", icon: Trophy },
 ];
 
 export default function AdminSidebar() {
