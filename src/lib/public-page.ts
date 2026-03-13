@@ -27,6 +27,44 @@ export function isPublicPage(pathname: string): boolean {
 }
 
 /**
+ * Paginas onde o banner/popup/botao de promo devem aparecer.
+ * Tudo que NAO estiver aqui fica limpo (editores, propostas, biolinks, etc).
+ */
+const PROMO_ALLOWED_PATHS = [
+  "/",
+  "/pricing",
+  "/promo",
+  "/login",
+  "/signup",
+  "/suporte",
+  "/privacidade",
+  "/dashboard",
+  "/templates",
+  "/nicho",
+];
+
+export function isPromoPage(pathname: string): boolean {
+  if (isSubdomain()) return false;
+  return PROMO_ALLOWED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+}
+
+/**
+ * Hook para promo visibility. Começa false (escondido) e
+ * so mostra apos confirmar no client que e pagina de promo.
+ */
+export function useIsPromoPage(pathname: string): boolean {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    setShow(isPromoPage(pathname));
+  }, [pathname]);
+
+  return show;
+}
+
+/**
  * Hook que retorna true se estamos em pagina publica.
  * Funciona corretamente com SSR — começa true (escondido) e
  * so mostra apos confirmar que NAO e pagina publica no client.

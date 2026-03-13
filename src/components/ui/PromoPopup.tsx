@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { X, Flame, Zap, Crown, ArrowRight, Check } from "lucide-react";
-import { useIsPublicPage } from "@/lib/public-page";
+import { useIsPromoPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO POPUP — Aparece apos 5 segundos na
    primeira visita. Oferece Lite/Pro com desconto.
    Salva no localStorage para nao repetir.
+   So em paginas de marketing (landing, pricing, etc).
    ============================================ */
 
 const STORAGE_KEY = "promo-popup-shown";
@@ -19,10 +20,10 @@ export default function PromoPopup() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPublic = useIsPublicPage(pathname);
+  const showPromo = useIsPromoPage(pathname);
 
   useEffect(() => {
-    if (isPublic) return;
+    if (!showPromo) return;
     const shown = localStorage.getItem(STORAGE_KEY);
     if (shown) return;
 
@@ -32,7 +33,7 @@ export default function PromoPopup() {
     }, DELAY_MS);
 
     return () => clearTimeout(timer);
-  }, [isPublic]);
+  }, [showPromo]);
 
   const close = () => setVisible(false);
 

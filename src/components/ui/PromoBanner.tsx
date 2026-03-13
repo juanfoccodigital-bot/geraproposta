@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, Flame, ArrowRight } from "lucide-react";
-import { useIsPublicPage } from "@/lib/public-page";
+import { useIsPromoPage } from "@/lib/public-page";
 
 /* ============================================
    PROMO BANNER — Faixa vermelha no topo
    "Mes do Consumidor" com link para /promo.
-   Aparece em todas as paginas. Pode ser fechada.
+   Aparece apenas em paginas de marketing/landing.
    Salva no localStorage para nao incomodar.
    ============================================ */
 
@@ -18,15 +18,15 @@ const STORAGE_KEY = "promo-banner-dismissed";
 export default function PromoBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const isPublic = useIsPublicPage(pathname);
+  const showPromo = useIsPromoPage(pathname);
 
   useEffect(() => {
-    if (isPublic) return;
+    if (!showPromo) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) setVisible(true);
-  }, [isPublic]);
+  }, [showPromo]);
 
-  if (isPublic) return null;
+  if (!showPromo) return null;
 
   const dismiss = () => {
     setVisible(false);

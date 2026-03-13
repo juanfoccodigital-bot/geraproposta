@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useIsPublicPage } from "@/lib/public-page";
+import { useIsPromoPage } from "@/lib/public-page";
 import { HelpCircle, X, Play, ChevronRight, FileText, Link2, Globe, Sparkles, Palette, Share2, BarChart3, Layers } from "lucide-react";
 
 const lessons = [
@@ -101,10 +101,9 @@ export default function HowToUseButton() {
   const [open, setOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
 
-  // Esconde no editor, preview e paginas publicas (proposta/biolink/site compartilhados)
-  const isPublic = useIsPublicPage(pathname);
-  const isHidden = isPublic || pathname.includes("/editor/") || pathname.includes("/preview/");
-  if (isHidden) return null;
+  // So mostra em paginas de marketing/landing (mesmas do banner/popup)
+  const showOnPage = useIsPromoPage(pathname);
+  if (!showOnPage) return null;
 
   return (
     <>
