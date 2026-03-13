@@ -13,27 +13,41 @@ export async function GET(request: NextRequest) {
   // All profiles
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, plan, subscription_status, created_at, updated_at");
+    .select("id, plan, subscription_status, last_payment_at, created_at, updated_at");
 
   const allUsers = profiles || [];
   const totalUsers = allUsers.length;
-  const activeSubscribers = allUsers.filter((p) => p.subscription_status === "active").length;
+
+  // Only users who actually paid (last_payment_at set by webhook) are real subscribers
+  const paidSubscribers = allUsers.filter(
+    (p) => p.subscription_status === "active" && p.last_payment_at && p.plan !== "free"
+  );
+  const activeSubscribers = paidSubscribers.length;
+
+  // Users with access given manually (active but never paid)
+  const giftedUsers = allUsers.filter(
+    (p) => p.subscription_status === "active" && !p.last_payment_at && p.plan !== "free"
+  ).length;
 
   // Plan breakdown
   const planCounts: Record<string, number> = { free: 0, lite: 0, pro: 0, plus: 0 };
   const activePlanCounts: Record<string, number> = { lite: 0, pro: 0, plus: 0 };
   for (const p of allUsers) {
     planCounts[p.plan] = (planCounts[p.plan] || 0) + 1;
-    if (p.subscription_status === "active" && p.plan !== "free") {
+    // Only count paid subscribers for MRR
+    if (p.subscription_status === "active" && p.last_payment_at && p.plan !== "free") {
       activePlanCounts[p.plan] = (activePlanCounts[p.plan] || 0) + 1;
     }
   }
 
-  // MRR in cents
+  // MRR in cents (only real paying users)
   const mrr = Object.entries(activePlanCounts).reduce(
     (sum, [plan, count]) => sum + (PLAN_PRICES[plan] || 0) * count,
     0
   );
+
+  // Ticket medio
+  const ticketMedio = activeSubscribers > 0 ? mrr / activeSubscribers : 0;
 
   // Count proposals, biolinks, sites
   const { count: totalProposals } = await admin.from("proposals").select("id", { count: "exact", head: true });
@@ -85,7 +99,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     totalUsers,
     activeSubscribers,
+    giftedUsers,
     mrr,
+    ticketMedio,
     planCounts,
     activePlanCounts,
     totalProposals: totalProposals || 0,

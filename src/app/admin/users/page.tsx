@@ -8,8 +8,10 @@ interface User {
   id: string;
   full_name: string | null;
   email: string;
+  phone: string | null;
   plan: string;
   subscription_status: string | null;
+  last_payment_at: string | null;
   created_at: string;
   proposals_count: number;
   biolinks_count: number;
@@ -22,6 +24,14 @@ const PLAN_COLORS: Record<string, string> = {
   pro: "#3B82F6",
   plus: "#A855F7",
 };
+
+function formatPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+  return phone;
+}
 
 const INPUT_STYLE = {
   background: "#0A0A0A",
@@ -137,7 +147,7 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: "#0A0A0A" }}>
-                  {["Nome", "Email", "Plano", "Status", "Propostas", "Biolinks", "Sites", "Desde"].map(
+                  {["Nome", "Email", "WhatsApp", "Plano", "Status", "Propostas", "Biolinks", "Sites", "Desde"].map(
                     (h) => (
                       <th
                         key={h}
@@ -163,6 +173,9 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3" style={{ color: "#A3A3A3" }}>
                       {u.email}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color: "#A3A3A3" }}>
+                      {u.phone ? formatPhone(u.phone) : <span style={{ color: "#525252" }}>—</span>}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
@@ -175,11 +188,13 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {u.subscription_status === "active" ? (
-                        <span className="text-green-400 text-xs">Ativo</span>
+                      {u.subscription_status === "active" && u.last_payment_at ? (
+                        <span className="text-green-400 text-xs">Pagante</span>
+                      ) : u.subscription_status === "active" ? (
+                        <span className="text-yellow-400 text-xs">Cortesia</span>
                       ) : (
                         <span style={{ color: "#525252" }} className="text-xs">
-                          —
+                          Free
                         </span>
                       )}
                     </td>
@@ -193,7 +208,7 @@ export default function AdminUsersPage() {
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="text-center py-12" style={{ color: "#525252" }}>
+                    <td colSpan={9} className="text-center py-12" style={{ color: "#525252" }}>
                       Nenhum usuario encontrado
                     </td>
                   </tr>

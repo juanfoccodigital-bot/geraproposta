@@ -10,6 +10,8 @@ import {
   Link2,
   Globe,
   Loader2,
+  Gift,
+  BarChart3,
 } from "lucide-react";
 import {
   AreaChart,
@@ -24,7 +26,9 @@ import {
 interface Stats {
   totalUsers: number;
   activeSubscribers: number;
+  giftedUsers: number;
   mrr: number;
+  ticketMedio: number;
   planCounts: Record<string, number>;
   activePlanCounts: Record<string, number>;
   totalProposals: number;
@@ -42,11 +46,13 @@ const CARD_STYLE = {
 function MetricCard({
   label,
   value,
+  subtitle,
   icon: Icon,
   color = "#F97316",
 }: {
   label: string;
   value: string | number;
+  subtitle?: string;
   icon: React.ElementType;
   color?: string;
 }) {
@@ -66,6 +72,11 @@ function MetricCard({
           {label}
         </p>
         <p className="text-2xl font-bold text-white mt-0.5">{value}</p>
+        {subtitle && (
+          <p className="text-[10px] mt-0.5" style={{ color: "#525252" }}>
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -104,6 +115,11 @@ export default function AdminDashboard() {
     currency: "BRL",
   });
 
+  const ticketFormatted = (stats.ticketMedio / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
@@ -117,12 +133,25 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard label="Total de Usuarios" value={stats.totalUsers} icon={Users} />
         <MetricCard
-          label="Assinantes Ativos"
+          label="Assinantes Pagantes"
           value={stats.activeSubscribers}
           icon={CreditCard}
           color="#22C55E"
         />
+        <MetricCard
+          label="Cortesia"
+          value={stats.giftedUsers}
+          subtitle="acesso manual (nao pagaram)"
+          icon={Gift}
+          color="#EAB308"
+        />
         <MetricCard label="MRR" value={mrrFormatted} icon={DollarSign} color="#3B82F6" />
+        <MetricCard
+          label="Ticket Medio"
+          value={ticketFormatted}
+          icon={BarChart3}
+          color="#A855F7"
+        />
         <MetricCard label="Propostas" value={stats.totalProposals} icon={FileText} />
         <MetricCard label="Biolinks" value={stats.totalBiolinks} icon={Link2} />
         <MetricCard label="Sites" value={stats.totalSites} icon={Globe} />
@@ -140,7 +169,7 @@ export default function AdminDashboard() {
               <p className="text-xl font-bold text-white">{count}</p>
               {plan !== "free" && (
                 <p className="text-[10px]" style={{ color: "#525252" }}>
-                  {stats.activePlanCounts[plan] || 0} ativos
+                  {stats.activePlanCounts[plan] || 0} pagantes
                 </p>
               )}
             </div>
