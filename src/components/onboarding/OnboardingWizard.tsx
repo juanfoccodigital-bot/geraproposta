@@ -22,6 +22,7 @@ export default function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedArea, setSelectedArea] = useState("");
+  const [phone, setPhone] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<ProductChoice | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -46,6 +47,7 @@ export default function OnboardingWizard() {
       body: JSON.stringify({
         business_type: selectedTypes.join(","),
         service_area: selectedArea,
+        phone: phone.replace(/\D/g, ""),
         onboarding_complete: true,
         proposals_today: 0,
         proposals_month: 0,
@@ -181,8 +183,10 @@ export default function OnboardingWizard() {
               key="profile"
               selectedTypes={selectedTypes}
               selectedArea={selectedArea}
+              phone={phone}
               onToggleType={toggleType}
               onSelectArea={setSelectedArea}
+              onPhoneChange={setPhone}
             />
           )}
 

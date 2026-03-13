@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Instagram, Target, Palette, Globe, Code, Megaphone,
   Briefcase, Camera, Heart, GraduationCap, Zap, MoreHorizontal,
-  Check, User, Users, Building, Wrench,
+  Check, User, Users, Building, Wrench, Phone,
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 
@@ -33,15 +33,27 @@ const SERVICE_AREAS = [
 interface StepProfileProps {
   selectedTypes: string[];
   selectedArea: string;
+  phone: string;
   onToggleType: (id: string) => void;
   onSelectArea: (id: string) => void;
+  onPhoneChange: (value: string) => void;
+}
+
+/** Format phone as (XX) XXXXX-XXXX */
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
 export default function StepProfile({
   selectedTypes,
   selectedArea,
+  phone,
   onToggleType,
   onSelectArea,
+  onPhoneChange,
 }: StepProfileProps) {
   return (
     <motion.div
@@ -102,7 +114,7 @@ export default function StepProfile({
       </div>
 
       {/* Service area */}
-      <div>
+      <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Users size={16} style={{ color: "#F97316" }} />
           <h2 className="text-sm font-semibold text-white">Area de atuacao</h2>
@@ -134,6 +146,32 @@ export default function StepProfile({
             );
           })}
         </div>
+      </div>
+
+      {/* WhatsApp */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Phone size={16} style={{ color: "#F97316" }} />
+          <h2 className="text-sm font-semibold text-white">WhatsApp</h2>
+          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "#262626", color: "#737373" }}>
+            Para suporte e novidades
+          </span>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => onPhoneChange(formatPhone(e.target.value))}
+            placeholder="(41) 99999-9999"
+            className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-[#525252] outline-none transition-all focus:ring-1 focus:ring-[#F97316]"
+            style={{ background: "#111111", border: "1px solid #262626" }}
+          />
+        </motion.div>
       </div>
     </motion.div>
   );
